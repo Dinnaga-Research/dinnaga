@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week in Review — this week (since 2026-09-14)</title>
+<style>
+:root {
+  --bg:#f7f7f8; --card:#ffffff; --ink:#1c1c1f; --muted:#6b6b74;
+  --line:#e6e6ea; --accent:#5b5bd6; --accent2:#0e9f6e; --accent3:#d97706;
+  --chip:#efeff3;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#111114; --card:#1a1a1f; --ink:#ececf1; --muted:#9a9aa6;
+    --line:#2a2a32; --accent:#8b8bf0; --accent2:#34d399; --accent3:#fbbf24;
+    --chip:#25252d;
+  }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+.wrap { max-width:920px; margin:0 auto; padding:32px 20px 80px; }
+header.top { margin-bottom:28px; }
+header.top h1 { font-size:26px; margin:0 0 4px; letter-spacing:-.02em; }
+header.top .range { color:var(--muted); font-size:14px; }
+.summary { margin:14px 0 22px; font-size:16px; color:var(--ink); }
+.chips { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:26px; }
+.chip { background:var(--chip); border:1px solid var(--line); border-radius:10px;
+  padding:10px 14px; min-width:96px; }
+.chip .n { font-size:20px; font-weight:650; letter-spacing:-.01em; }
+.chip .l { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:20px 22px; margin-bottom:20px; }
+h2 { font-size:16px; margin:0 0 14px; letter-spacing:-.01em; }
+.area { border-top:1px solid var(--line); padding:16px 0; }
+.area:first-of-type { border-top:none; padding-top:2px; }
+.area h3 { font-size:17px; margin:0 0 6px; }
+.area .why { color:var(--muted); margin:0 0 10px; font-size:14px; }
+.learnings { margin:8px 0; padding-left:20px; }
+.learnings li { margin:5px 0; }
+.links { margin-top:10px; padding:10px 12px; background:var(--chip); border-radius:10px; }
+.links-h { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:6px; }
+.links ul { margin:0; padding-left:18px; }
+.links a { color:var(--accent); }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media (max-width:640px) { .grid2 { grid-template-columns:1fr; } }
+.bar-row { display:grid; grid-template-columns:130px 1fr 42px; align-items:center; gap:10px; margin:6px 0; }
+.bar-label { font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bar-track { background:var(--chip); border-radius:6px; height:14px; overflow:hidden; }
+.bar-fill { display:block; height:100%; border-radius:6px; }
+.bar-count { font-size:12px; color:var(--muted); text-align:right; font-variant-numeric:tabular-nums; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th, td { padding:7px 8px; text-align:left; border-bottom:1px solid var(--line); }
+th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+.mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
+.dim { color:var(--muted); }
+.empty { color:var(--muted); font-style:italic; font-size:13px; }
+.curios li { margin:6px 0; }
+footer { color:var(--muted); font-size:12px; text-align:center; margin-top:30px; }
+.note { font-size:12px; color:var(--muted); margin-top:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>📓 Your Week in Review</h1>
+    <div class="range">this week (since 2026-09-14) &middot; generated 2026-09-19 08:39</div>
+  </header>
+
+  <p class="summary">A mostly automation-driven week (nightly state-of-the-world reports, a weekly session-reflection pass, and daily arxiv triage running largely unattended), with a few substantive threads surfacing underneath: managing a multi-machine AI-harness research fleet, porting harness conventions to GitHub Copilot at work, and, via the week&#x27;s arxiv triage, Global Workspace Theory as a lens on multi-agent architecture plus efficiency techniques for LLM agent inference.</p>
+
+  <div class="chips">
+    <div class="chip"><div class="n">17</div><div class="l">Sessions</div></div>
+    <div class="chip"><div class="n">6</div><div class="l">Active days</div></div>
+    <div class="chip"><div class="n">2</div><div class="l">Projects</div></div>
+    <div class="chip"><div class="n">4.3M</div><div class="l">Output tokens</div></div>
+    <div class="chip"><div class="n">40.4M</div><div class="l">Input tokens</div></div>
+  </div>
+
+  <section class="card">
+    <h2>💡 What you explored &amp; learned</h2>
+    
+        <article class="area">
+          <h3>Managing a Multi-Machine AI Harness Research Fleet</h3>
+          <p class="why">The operator asked how to approach managing three tailnet-connected machines, each running a different slice of harness research, without the surface area becoming unmanageable.</p>
+          <ul class="learnings"><li>An &#x27;agent harness&#x27; (or scaffold) is the software layer around a model — tool dispatch, memory, sandboxing, context management — and swapping harnesses can change measured task performance more than swapping models does.</li><li>Tailscale scopes device-to-device access through a tailnet policy file using tags and grants; a default-deny policy is the recommended starting point rather than allowing all devices to reach all others.</li><li>Splitting experiments by machine role benefits from an explicit device-tagging scheme in the tailnet policy rather than informal machine nicknames alone.</li></ul>
+          <div class="links"><div class="links-h">Further reading</div><ul><li><a href="https://en.wikipedia.org/wiki/Agent_harness" target="_blank" rel="noopener">Agent harness - Wikipedia</a></li><li><a href="https://tailscale.com/docs/features/access-control/acls" target="_blank" rel="noopener">Manage permissions using ACLs · Tailscale Docs</a></li><li><a href="https://tailscale.com/kb/1196/security-hardening" target="_blank" rel="noopener">Best practices to secure your tailnet · Tailscale Docs</a></li></ul></div>
+        </article>
+
+        <article class="area">
+          <h3>Porting Claude Code Harness Conventions to GitHub Copilot</h3>
+          <p class="why">The operator wanted a migration reference mapping their existing Claude Code setup onto GitHub Copilot for use at work.</p>
+          <ul class="learnings"><li>GitHub Copilot&#x27;s closest analogue to a CLAUDE.md is a single repo-root copilot-instructions.md, plus path-scoped .instructions.md files that apply only to matching files via an &#x27;applyTo&#x27; field.</li><li>Instruction precedence is personal &gt; repository &gt; organization for Copilot — the opposite ordering from what might be assumed, and worth checking before relying on repo-level instructions to override a personal preference.</li><li>VS Code layers its own agent-mode custom-instructions mechanism on top of GitHub&#x27;s web-level personal/org instructions, so the two need to be configured separately.</li></ul>
+          <div class="links"><div class="links-h">Further reading</div><ul><li><a href="https://docs.github.com/copilot/customizing-copilot/adding-custom-instructions-for-github-copilot" target="_blank" rel="noopener">Adding repository custom instructions for GitHub Copilot - GitHub Docs</a></li><li><a href="https://code.visualstudio.com/docs/agent-customization/custom-instructions" target="_blank" rel="noopener">Use custom instructions in VS Code</a></li><li><a href="https://github.blog/ai-and-ml/github-copilot/5-tips-for-writing-better-custom-instructions-for-copilot/" target="_blank" rel="noopener">5 tips for writing better custom instructions for Copilot - The GitHub Blog</a></li></ul></div>
+        </article>
+
+        <article class="area">
+          <h3>Assessing Reproduction Fidelity Against a Paper&#x27;s Own Artifacts</h3>
+          <p class="why">The operator asked for a delta evaluation between an internal sealed reproduction and what the original paper&#x27;s authors actually produced and shipped.</p>
+          <ul class="learnings"><li>ACM&#x27;s artifact badging (Available / Functional / Reproduced) gives a standard vocabulary for how close a reproduction needs to be before it counts as validated, rather than a binary pass/fail.</li><li>Code availability doesn&#x27;t predict reproducibility: in one large check of published ML papers, whether the authors released code had no significant relationship with whether independent reproduction actually succeeded.</li><li>A paper shipping no runnable artifacts at all is common rather than exceptional — roughly 60% of security-focused ML papers in one study included no code to run their own experiments.</li></ul>
+          <div class="links"><div class="links-h">Further reading</div><ul><li><a href="https://arxiv.org/html/2407.10239v2" target="_blank" rel="noopener">What is Reproducibility in Artificial Intelligence and Machine Learning Research?</a></li><li><a href="https://sigsim.acm.org/conf/pads/2026/blog/artifact-evaluation/" target="_blank" rel="noopener">Reproducibility and Artifact Evaluation (PADS 2026)</a></li><li><a href="https://arxiv.org/pdf/2603.06862" target="_blank" rel="noopener">Supporting Artifact Evaluation with LLMs: A Study with Published Security Research Papers</a></li></ul></div>
+        </article>
+
+        <article class="area">
+          <h3>Global Workspace Theory as a Lens for Multi-Agent Architectures</h3>
+          <p class="why">The week&#x27;s automated arxiv triage scored several candidate papers specifically for Global Workspace Theory (GWT) resonance — broadcast mechanisms, central bottlenecks, coalition competition — as one of its scoring voices.</p>
+          <ul class="learnings"><li>GWT models cognition as specialist modules competing for a capacity-limited workspace, with the winning content broadcast to the whole system — that functional pattern (shared blackboard + broadcast step) is what to look for in multi-agent code, independent of whether Baars is ever cited.</li><li>Most current multi-agent LLM systems rely on message-passing loops rather than an always-on shared-awareness channel, which is the specific gap GWT-inspired architectures are being proposed to fill.</li><li>&#x27;GWT-implicit&#x27; is a useful triage category on its own: a system can exhibit broadcast/bottleneck/coalition behavior functionally without the paper naming Global Workspace Theory at all.</li></ul>
+          <div class="links"><div class="links-h">Further reading</div><ul><li><a href="https://arxiv.org/html/2604.08206v1" target="_blank" rel="noopener">&quot;Theater of Mind&quot; for LLMs: A Cognitive Architecture Based on Global Workspace Theory</a></li><li><a href="https://www.emergentmind.com/topics/global-workspace-theory-gwt" target="_blank" rel="noopener">Global Workspace Theory (topic overview)</a></li><li><a href="https://arxiv.org/pdf/2605.04097" target="_blank" rel="noopener">CTM-AI: A Blueprint for General AI Inspired by a Model of Consciousness</a></li></ul></div>
+        </article>
+
+        <article class="area">
+          <h3>Efficiency Techniques for LLM Agent Inference</h3>
+          <p class="why">The week&#x27;s arxiv triage included a dedicated &#x27;optimization/efficacy&#x27; scoring pass that flagged papers specifically for sampling-cost and decoding-efficiency gains in agent inference.</p>
+          <ul class="learnings"><li>Selective prediction — deferring or abstaining based on the model&#x27;s own uncertainty — is a recurring way to cut inference cost without giving up accuracy on the cases that actually matter.</li><li>Trajectory-reduction methods that trim accumulated context/input tokens across an agent&#x27;s run can meaningfully cut cost; one cited approach reports roughly 40-60% fewer input tokens and 20-35% lower total compute while holding performance steady.</li><li>Claims of &#x27;zero added inference cost&#x27; on agent-efficiency techniques deserve scrutiny — one flagged paper&#x27;s amortization story was noted as undercut by high run-to-run session variance.</li></ul>
+          <div class="links"><div class="links-h">Further reading</div><ul><li><a href="https://arxiv.org/pdf/2509.23586" target="_blank" rel="noopener">Reducing Cost of LLM Agents with Trajectory Reduction</a></li><li><a href="https://arxiv.org/pdf/2410.02173" target="_blank" rel="noopener">Efficiently Deploying LLMs with Controlled Risk</a></li><li><a href="https://arxiv.org/pdf/2603.19896" target="_blank" rel="noopener">Utility-Guided Agent Orchestration for Efficient LLM Tool Use</a></li></ul></div>
+        </article>
+  </section>
+
+  
+        <section class="card">
+          <h2>🧭 Flagged for a deeper dive later</h2>
+          <ul class="curios"><li>Publishing harness-research findings and experiments from the multi-machine fleet to a public research site as the setup matures.</li><li>Whether &#x27;harnesses will become the OS of AI agents&#x27; holds up as a framing as the space matures, or turns out to be one of several competing abstractions.</li><li>A council/orchestrator-evolution multi-agent search system surfaced in triage as an implicit shared-blackboard/broadcast architecture, flagged as worth a full read rather than just a triage pass.</li><li>Neuromorphic SNN-ANN hybrid edge inference, flagged as GWT-absent during triage but potentially interesting as its own efficiency thread.</li></ul>
+        </section>
+  
+
+  <section class="card">
+    <h2>📊 Token usage by model</h2>
+    <table>
+      <thead><tr><th>Model</th><th class="num">Output</th><th class="num">Input</th><th class="num">Cache write</th><th class="num">Cache read</th></tr></thead>
+      <tbody><tr><td class='mono'>claude-opus-4-8</td><td class='num'>2.6M</td><td class='num'>4.8K</td><td class='num'>26.4M</td><td class='num dim'>227.8M</td></tr>
+<tr><td class='mono'>claude-fable-5-1</td><td class='num'>806.4K</td><td class='num'>20.2K</td><td class='num'>8.8M</td><td class='num dim'>63.8M</td></tr>
+<tr><td class='mono'>claude-opus-5</td><td class='num'>728.7K</td><td class='num'>1.2K</td><td class='num'>3.3M</td><td class='num dim'>50.6M</td></tr>
+<tr><td class='mono'>claude-sonnet-5</td><td class='num'>165.4K</td><td class='num'>344</td><td class='num'>1.8M</td><td class='num dim'>4.6M</td></tr></tbody>
+    </table>
+    <p class="note">Output + Input are fresh generation/prompt tokens (the real work). Cache read is context re-served from prompt cache — large but cheap, shown dimmed.</p>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>⌨️ Slash commands</h2>
+      <div class="bar-row"><span class="bar-label">skill-doctor</span><span class="bar-track"><span class="bar-fill" style="width:100%;background:var(--accent)"></span></span><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">deliberation:deliberation</span><span class="bar-track"><span class="bar-fill" style="width:100%;background:var(--accent)"></span></span><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">model</span><span class="bar-track"><span class="bar-fill" style="width:100%;background:var(--accent)"></span></span><span class="bar-count">2</span></div>
+<div class="bar-row"><span class="bar-label">clear</span><span class="bar-track"><span class="bar-fill" style="width:50%;background:var(--accent)"></span></span><span class="bar-count">1</span></div>
+<div class="bar-row"><span class="bar-label">effort</span><span class="bar-track"><span class="bar-fill" style="width:50%;background:var(--accent)"></span></span><span class="bar-count">1</span></div>
+<div class="bar-row"><span class="bar-label">update-config</span><span class="bar-track"><span class="bar-fill" style="width:50%;background:var(--accent)"></span></span><span class="bar-count">1</span></div>
+<div class="bar-row"><span class="bar-label">doctor</span><span class="bar-track"><span class="bar-fill" style="width:50%;background:var(--accent)"></span></span><span class="bar-count">1</span></div>
+    </section>
+    <section class="card">
+      <h2>🧰 Skills invoked</h2>
+      <div class="bar-row"><span class="bar-label">arxiv-prospector</span><span class="bar-track"><span class="bar-fill" style="width:100%;background:var(--accent2)"></span></span><span class="bar-count">6</span></div>
+    </section>
+    <section class="card">
+      <h2>🗂️ ctx stack usage</h2>
+      <p class="empty">Nothing recorded this week.</p>
+    </section>
+    <section class="card">
+      <h2>🛠️ Top tools</h2>
+      <div class="bar-row"><span class="bar-label">Bash</span><span class="bar-track"><span class="bar-fill" style="width:100%;background:var(--accent)"></span></span><span class="bar-count">1075</span></div>
+<div class="bar-row"><span class="bar-label">Read</span><span class="bar-track"><span class="bar-fill" style="width:41%;background:var(--accent)"></span></span><span class="bar-count">436</span></div>
+<div class="bar-row"><span class="bar-label">Write</span><span class="bar-track"><span class="bar-fill" style="width:10%;background:var(--accent)"></span></span><span class="bar-count">108</span></div>
+<div class="bar-row"><span class="bar-label">Agent</span><span class="bar-track"><span class="bar-fill" style="width:8%;background:var(--accent)"></span></span><span class="bar-count">89</span></div>
+<div class="bar-row"><span class="bar-label">mcp__readwise__reader_add_tags_to_document</span><span class="bar-track"><span class="bar-fill" style="width:5%;background:var(--accent)"></span></span><span class="bar-count">57</span></div>
+<div class="bar-row"><span class="bar-label">mcp__readwise__reader_list_documents</span><span class="bar-track"><span class="bar-fill" style="width:4%;background:var(--accent)"></span></span><span class="bar-count">36</span></div>
+<div class="bar-row"><span class="bar-label">Edit</span><span class="bar-track"><span class="bar-fill" style="width:4%;background:var(--accent)"></span></span><span class="bar-count">26</span></div>
+<div class="bar-row"><span class="bar-label">ToolSearch</span><span class="bar-track"><span class="bar-fill" style="width:4%;background:var(--accent)"></span></span><span class="bar-count">22</span></div>
+<div class="bar-row"><span class="bar-label">mcp__readwise__reader_move_documents</span><span class="bar-track"><span class="bar-fill" style="width:4%;background:var(--accent)"></span></span><span class="bar-count">21</span></div>
+<div class="bar-row"><span class="bar-label">mcp__readwise__reader_bulk_edit_document_metadata</span><span class="bar-track"><span class="bar-fill" style="width:4%;background:var(--accent)"></span></span><span class="bar-count">12</span></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>📁 Projects touched</h2>
+    <div class="bar-row"><span class="bar-label">arxiv-prospector</span><span class="bar-track"><span class="bar-fill" style="width:100%;background:var(--accent2)"></span></span><span class="bar-count">5634</span></div>
+<div class="bar-row"><span class="bar-label">~</span><span class="bar-track"><span class="bar-fill" style="width:60%;background:var(--accent2)"></span></span><span class="bar-count">3388</span></div>
+  </section>
+
+  <footer>Generated by the <strong>week-in-review</strong> skill &middot; 20 prompts &middot; 770 transcripts scanned</footer>
+</div>
+</body>
+</html>
