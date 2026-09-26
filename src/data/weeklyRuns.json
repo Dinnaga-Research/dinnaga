@@ -48,6 +48,13 @@
       "windowLabel": "this week (since 2026-09-14)",
       "summary": "A mostly automation-driven week (nightly state-of-the-world reports, a weekly session-reflection pass, and daily arxiv triage running largely unattended), with a few substantive threads surfacing underneath: managing a multi-machine AI-harness research fleet, porting harness conventions to GitHub Copilot at work, and, via the week's arxiv triage, Global Workspace Theory as a lens on multi-agent architecture plus efficiency techniques for LLM agent inference.",
       "docPath": "/artifact-docs/weekly/2026-09-19.html"
+    },
+    {
+      "date": "2026-09-26",
+      "windowStart": "2026-09-21",
+      "windowLabel": "this week (since 2026-09-21)",
+      "summary": "The week's Claude Code activity was dominated by the daily arxiv-prospector triage pipeline running multi-voice committees over several hundred new papers across six sessions; the substantive learning was less about any single paper and more about recurring agent-harness design patterns (broadcast coordination, self-evolving skills, verification gates, cost cascades) and a sharpened eye for weak empirical rigor and deception-detection methods in AI research.",
+      "docPath": "/artifact-docs/weekly/2026-09-26.html"
     }
   ]
 }
