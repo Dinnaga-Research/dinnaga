@@ -202,15 +202,15 @@ P2, identical in Chromium, Firefox and WebKit:
 
 ### 11. What later Obsidian exports would need the viewer to tolerate
 
-The sibling ticket owns the facts about the exports. The viewer only needs to degrade predictably if an export contains:
+The sibling ticket (#9, Obsidian exports) owns the facts about the exports. Its research agent mounted real exports built from a synthetic vault (Quartz v5.0.0, and Webpage HTML Export 1.9.2 in its "Online" and "Raw HTML Documents" presets) in an open shadow root. It reports all three rendered correctly with no hand edits once these adaptations were in place:
 
-- `<script>`: strip it, or use the iframe fallback (§6).
-- `<link rel="stylesheet">`: fetch and inline in document order, since constructed sheets drop `@import` (§2).
-- `@font-face`: hoist it (§4).
-- Relative asset and link URLs: make them absolute (§5).
-- Theme classes on `<body>`: copy the body attributes onto `<doc-body>` (§1).
-- `html, body { height: 100% }` / `overflow: hidden` app shells, `position: fixed` sidebars, `100vh`: rewrite, or use the iframe fallback (§7).
-- A long tail of selectors beyond `:root`/`html`/`body`, such as `:root` inside `:is()`/`:not()`. This argues for a real selector parser over regex if exports are messy.
+- **`<base href>` does nothing inside a shadow root.** The document base URL only considers a `base` element that is a *descendant* of the document ([HTML §document base URL](https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url)), and a shadow tree isn't. Resolve every `href`/`src` against the export's `<base>` and the doc URL before mounting (§5).
+- **`@font-face` must be hoisted.** This covered Google Fonts, KaTeX CDN CSS and data-URI MathJax fonts (§4). Fetched `<link rel="stylesheet">` CSS must be inlined in document order, since constructed sheets drop `@import` (§2).
+- **Compound root selectors at scale.** For example `html[saved-theme="dark"] body .x` (600+ in Quartz's Obsidian-theme port) and `:root[saved-theme=dark]` must become `:host([saved-theme=dark]) doc-body .x`. At that volume, a real selector parser beats the regex used in these probes.
+- **The viewer must set the theme state that stripped scripts would have set.** Quartz puts a `saved-theme` attribute on `<html>`; map it to the host attribute. The plugin puts a `theme-light`/`theme-dark` class on `<body>`; put it on `<doc-body>` (§1, §3).
+- **`<script>`:** strip it, or use the iframe fallback (§6).
+
+Still to check against those samples: `html, body { height: 100% }` / `overflow: hidden` app shells, `position: fixed` sidebars and `100vh` (§7).
 
 ## Per-doc inventory
 
@@ -280,7 +280,7 @@ async function mountDoc(host: HTMLElement, docPath: string, signal: AbortSignal)
 
 ## Open questions for the operator
 
-1. **Which scheme do docs render in?** Always dark to match the dark-only site (today's behaviour in Chrome and Firefox), the OS preference (today's Safari behaviour), or a per-doc choice? The recommendation is forced dark on screen and light for print.
+1. **Which scheme do docs render in?** Always dark to match the dark-only site (today's behaviour in Chrome and Firefox), the OS preference (today's Safari behaviour), or a per-doc choice? The recommendation is forced dark on screen and light for print. The same decision sets the theme hook an Obsidian export expects (`saved-theme` attribute, `theme-dark` class; §11).
 2. **How should the doc's `<main>` and `<h1>` relate to the site's?** Options: rename the doc's `main` to a `div`/`doc-main` at load (with a matching selector rewrite); render the viewer route without the site's `<main>`; or keep two and change the landmark test. Similarly, should the strip title stop being an `h1`, or should the doc's headings drop one level?
 3. **Should in-doc site links stay full page loads (`_top`) or become SPA navigations** through the router?
 4. **When a doc needs scripts** (a likely Obsidian case), fall back to the iframe, or refuse to publish it?
