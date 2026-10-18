@@ -22,7 +22,7 @@ const VARIANTS = [
 export function CromulonPrototype() {
   const [params, setParams] = useSearchParams();
   const variant = params.get('variant') ?? 'P';
-  const opacity = Number(params.get('opacity') ?? '0.25');
+  const opacity = Number(params.get('opacity') ?? '0.3');
   const plasma = variant === 'P' || variant === 'F';
   const motion = params.get('motion') ?? (plasma ? 'settle' : 'static');
   const charset = (params.get('charset') ?? 'classic') as Charset;
