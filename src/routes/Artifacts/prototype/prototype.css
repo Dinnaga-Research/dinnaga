@@ -1,0 +1,82 @@
+/* ABOUTME: PROTOTYPE (throwaway) — layout for the three doc-viewer frames and the switcher bar. */
+/* ABOUTME: Uses site tokens; never styles .proto-doc-host's colour, background or font (the doc owns those). */
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+.proto-loading, .proto-doc-error { padding: var(--sp-6); font-family: var(--font-mono); color: var(--fg-3); }
+.proto-doc-error { color: var(--warn); }
+
+/* The host: layout only. */
+.proto-doc-host { width: 100%; }
+.artifact-viewer .proto-doc-host { border: 1px solid var(--seam-strong); }
+
+/* ── B: rail + outline ─────────────────────────────── */
+.proto-rail-layout {
+  display: grid; gap: var(--sp-6);
+  padding: 32px 24px 160px;
+}
+@media (min-width: 1024px) {
+  .proto-rail-layout { grid-template-columns: 280px minmax(0, 1fr); padding: 40px 48px 160px; }
+  .proto-rail { position: sticky; top: calc(var(--nav-h) + 24px); align-self: start; max-height: calc(100vh - var(--nav-h) - 48px); overflow-y: auto; }
+}
+.proto-rail { display: grid; gap: var(--sp-3); align-content: start; }
+.proto-back, .proto-standalone {
+  font-family: var(--font-mono); font-size: var(--t-detail-sm); letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase; color: var(--fg-3); text-decoration: none;
+}
+.proto-back:hover, .proto-standalone:hover { color: var(--signal); }
+.proto-rail-title {
+  font-family: var(--font-body); font-size: 22px; line-height: 1.2; font-weight: 600; margin: 0; color: var(--fg-1);
+}
+.proto-rail-meta { margin: 0; display: grid; gap: 2px; font-size: var(--t-detail); color: var(--fg-3); }
+.proto-rail-meta dt { font-family: var(--font-mono); font-size: var(--t-detail-sm); text-transform: uppercase; letter-spacing: var(--ls-eyebrow); color: var(--fg-4); margin-top: var(--sp-2); }
+.proto-rail-meta dd { margin: 0; line-height: 1.5; }
+.proto-toc { border-top: 1px solid var(--seam); padding-top: var(--sp-3); }
+.proto-toc-head { font-family: var(--font-mono); font-size: var(--t-detail-sm); text-transform: uppercase; letter-spacing: var(--ls-eyebrow); color: var(--fg-4); margin: 0 0 var(--sp-2); }
+.proto-toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.proto-toc li.is-sub { padding-left: 14px; }
+.proto-toc button {
+  all: unset; cursor: pointer; font-family: var(--font-body); font-size: 14px; line-height: 1.4; color: var(--fg-2);
+}
+.proto-toc button:hover, .proto-toc button:focus-visible { color: var(--signal); }
+.proto-rail-doc { min-width: 0; }
+
+/* ── C: reader ─────────────────────────────────────── */
+.proto-reader { padding: 0 0 160px; }
+.proto-reader-bar {
+  position: sticky; top: var(--nav-h); z-index: 5;
+  display: flex; gap: var(--sp-4); align-items: center; justify-content: space-between;
+  padding: 10px 24px; background: color-mix(in srgb, var(--bg-0) 88%, transparent);
+  backdrop-filter: blur(6px); border-bottom: 1px solid var(--seam);
+  font-family: var(--font-mono); font-size: var(--t-detail-sm); letter-spacing: var(--ls-eyebrow); text-transform: uppercase;
+}
+.proto-reader-bar a { color: var(--fg-3); text-decoration: none; }
+.proto-reader-bar a:hover { color: var(--signal); }
+.proto-reader-kind { color: var(--fg-4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proto-reader-doc { max-width: 1280px; margin: 0 auto; }
+.proto-colophon {
+  max-width: 760px; margin: var(--sp-8) auto 0; padding: var(--sp-5) 24px; border-top: 1px solid var(--seam);
+  display: grid; gap: var(--sp-2); color: var(--fg-3); font-size: var(--t-detail);
+}
+.proto-colophon p { margin: 0; }
+.proto-colophon strong { color: var(--fg-1); }
+
+/* ── Switcher bar: deliberately not part of the design ─ */
+.proto-switcher {
+  position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 1000;
+  width: min(960px, calc(100vw - 24px));
+  background: #fff; color: #111; border-radius: 14px; box-shadow: 0 8px 32px rgb(0 0 0 / 0.45);
+  font: 13px/1.4 system-ui, -apple-system, sans-serif; padding: 8px 12px;
+}
+.proto-switcher-row { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.proto-switcher button { font: inherit; border: 1px solid #ccc; background: #f4f4f4; border-radius: 8px; padding: 2px 10px; cursor: pointer; color: #111; }
+.proto-switcher-label { font-weight: 600; min-width: 220px; text-align: center; }
+.proto-knobs { margin-top: 6px; }
+.proto-knobs label { display: inline-flex; gap: 6px; align-items: center; }
+.proto-knobs select { font: inherit; max-width: 240px; color: #111; background: #fff; }
+.proto-stats {
+  margin: 8px 0 0; padding: 8px; background: #f4f4f4; border-radius: 8px;
+  font: 11px/1.45 ui-monospace, Menlo, monospace; white-space: pre-wrap; max-height: 140px; overflow: auto; color: #222;
+}
