@@ -9,8 +9,13 @@ import { AsciiArt } from '../../components/AsciiArt';
 import { CautionDivider } from '../../components/CautionDivider';
 import { Transmission } from '../../components/Transmission';
 import { TICKER_ITEMS } from '../../data/tickerItems';
+import { HomePrototype } from './prototype/HomePrototype';
 
 export function Home() {
+  return <HomePrototype today={<Today />} />;
+}
+
+function Today() {
   return (
     <>
       <Hero />
