@@ -1,6 +1,6 @@
 // ABOUTME: Terminal — the interactive boot terminal shown in the home hero's art column.
 // ABOUTME: Types its boot sequence, invites a question, and unlocks /artifacts on the passphrase.
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTyped } from '../hooks/useTyped';
 import { BOOT_LINES } from '../data/bootLines';
@@ -19,6 +19,8 @@ interface TerminalProps {
   media?: TerminalMedia;
   bootLines?: BootLine[];
   unlockLines?: BootLine[];
+  // PROTOTYPE (branch prototype/cromulon): art layer drawn behind the text, under the scanlines.
+  backdrop?: React.ReactNode;
 }
 
 interface HistoryEntry {
@@ -59,6 +61,7 @@ export function Terminal({
   media,
   bootLines = BOOT_LINES,
   unlockLines = UNLOCK_LINES,
+  backdrop,
 }: TerminalProps) {
   const navigate = useNavigate();
   const { rendered, done } = useTyped(bootLines);
@@ -67,6 +70,15 @@ export function Terminal({
   const [sent, setSent] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  // PROTOTYPE (branch prototype/cromulon): one block cursor — follows the boot typing, then the insertion point.
+  const mirrorRef = useRef<HTMLSpanElement>(null);
+  const [caret, setCaret] = useState(0);
+  const [cursorX, setCursorX] = useState(0);
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    setCursorX((mirrorRef.current?.offsetWidth ?? 0) - (input?.scrollLeft ?? 0));
+  }, [caret, input]);
+  const typingLine = Math.max(0, rendered.reduce((last, t, i) => (t ? i : last), 0));
   const navigatedRef = useRef(false);
 
   useEffect(() => {
@@ -132,11 +144,13 @@ export function Terminal({
         <div className="terminal-curvature" aria-hidden="true" />
         <div className="terminal-scanlines" aria-hidden="true" />
         <div className="terminal-flicker" aria-hidden="true" />
+        {backdrop}
 
         <div className="terminal-body">
           {rendered.map((t, i) => (
             <div className="t-line" key={i}>
               {t || ' '}
+              {!done && i === typingLine && <span className="t-cursor-inline" aria-hidden="true" />}
             </div>
           ))}
 
@@ -151,18 +165,29 @@ export function Terminal({
           {done && !sent && !unlocked && (
             <form className="t-prompt" onSubmit={onSubmit}>
               <span className="t-caret">&gt;</span>
-              <input
-                ref={inputRef}
-                className="t-input"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="ASK A QUESTION_"
-                spellCheck={false}
-                autoComplete="off"
-                aria-label="Ask Dinnaga a question"
-              />
-              <span className="t-cursor" aria-hidden="true">
-                ▮
+              <span className="t-field">
+                <input
+                  ref={inputRef}
+                  className="t-input"
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    setCaret(e.target.selectionStart ?? e.target.value.length);
+                  }}
+                  onSelect={(e) => setCaret(e.currentTarget.selectionStart ?? 0)}
+                  spellCheck={false}
+                  autoComplete="off"
+                  aria-label="Ask Dinnaga a question"
+                />
+                {input === '' && (
+                  <span className="t-ph" aria-hidden="true">
+                    ask a question
+                  </span>
+                )}
+                <span ref={mirrorRef} className="t-mirror" aria-hidden="true">
+                  {input.slice(0, caret)}
+                </span>
+                <span className="t-cursor" aria-hidden="true" style={{ left: cursorX }} />
               </span>
             </form>
           )}

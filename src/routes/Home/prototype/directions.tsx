@@ -1,5 +1,6 @@
 // ABOUTME: PROTOTYPE (throwaway) — three structurally different homepage directions for the refresh:
 // ABOUTME: A Register (type set A), B Reading room (set C, amber), C Console (set B, pixel terminal).
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { BrandMark } from '../../../components/BrandMark';
 import { Terminal } from '../../../components/Terminal';
@@ -13,10 +14,10 @@ const fmt = (d: string) =>
   new Date(`${d}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
 /* ── A: Register ─────────────────────────────────────────────── */
-export function DirectionA() {
+export function DirectionA({ backdrop, className = '' }: { backdrop?: ReactNode; className?: string } = {}) {
   const docs = useDocs();
   return (
-    <div className="dir dir-a">
+    <div className={`dir dir-a ${className}`}>
       <header className="a-head">
         <Link to="/" className="a-brand">
           <BrandMark size={28} />
@@ -40,7 +41,7 @@ export function DirectionA() {
             </Link>
           </div>
           <div className="a-hero-term">
-            <Terminal bootLines={BOOT_LINES} />
+            <Terminal bootLines={BOOT_LINES} backdrop={backdrop} />
           </div>
         </section>
         <section className="a-library" aria-labelledby="a-lib">

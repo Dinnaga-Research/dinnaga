@@ -1,0 +1,47 @@
+/* ABOUTME: PROTOTYPE (throwaway) — the chosen terminal (Departure Mono, lifted dim text), the Cromulon art
+/* ABOUTME: layer under the scanlines, line-box knockouts that keep text at full contrast, and phone layouts. */
+
+.dir-a.crom .terminal { --font-terminal: 'Departure Mono', monospace; --term-green-dim: #91c319; }
+.dir-a.crom .terminal-body, .dir-a.crom .t-input { font-size: 22px; line-height: 1.273; }
+.dir-a.crom .t-input::placeholder { color: #91c319; opacity: 1; }
+@media (max-width: 700px) { .dir-a.crom .terminal-body, .dir-a.crom .t-input { font-size: 16.5px; } }
+
+/* Art layer: inside .terminal-screen at z-index 1, below the text (2) and the scanlines (4+). */
+.crom-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.crom-halftone { filter: blur(0.35px); }
+.crom-lineart { color: var(--term-green); font-family: 'JetBrains Mono', monospace; line-height: 1.12; }
+.crom-lineart pre { position: absolute; margin: 0; font: inherit; white-space: pre; }
+.crom-head { right: 3%; bottom: 3%; }
+.crom-planet { left: 4%; bottom: 5%; }
+
+/* Line-box knockout: opaque backing under each text run, so the art shows only between and past lines. */
+.dir-a.crom .t-line { width: fit-content; background: var(--term-bg); box-shadow: 0 0 0 3px var(--term-bg); }
+.dir-a.crom .t-prompt { background: var(--term-bg); box-shadow: 0 0 0 3px var(--term-bg); }
+
+/* Accessibility: no art for forced colours or a request for more contrast. */
+@media (forced-colors: active), (prefers-contrast: more) { .crom-layer { display: none; } }
+
+/* Phone layouts (the merged mobile-layout question). */
+@media (max-width: 700px) {
+  .crom-mobile-tall .a-hero-term .terminal { aspect-ratio: auto; height: auto; min-height: 500px; }
+  .crom-mobile-short .a-hero-term .terminal,
+  .crom-mobile-hide .a-hero-term .terminal { aspect-ratio: 16 / 10; height: auto; min-height: 0; }
+  .crom-mobile-hide .crom-layer { display: none; }
+}
+
+/* Desktop: the terminal sits beside a tall headline, so give it room for the face below the boot text. */
+@media (min-width: 1024px) { .dir-a.crom .a-hero-term .terminal { min-height: 600px; } }
+
+/* One block cursor: drawn as a box (no glyph dependency), following boot typing, then the insertion point. */
+.dir-a.crom .t-field { position: relative; flex: 1; display: flex; min-width: 0; }
+.dir-a.crom .t-input { width: 100%; }
+.dir-a.crom .t-ph { position: absolute; left: 0.7em; top: 0; color: #91c319; pointer-events: none; white-space: pre; }
+.dir-a.crom .t-mirror { position: absolute; visibility: hidden; white-space: pre; font: inherit; }
+.dir-a.crom .t-cursor, .dir-a.crom .t-cursor-inline {
+  width: 0.6em; height: 1.05em; background: var(--signal); box-shadow: 0 0 8px rgba(192, 254, 4, 0.55);
+  animation: term-cursor 1s steps(1, end) infinite; margin: 0; font-size: inherit;
+}
+.dir-a.crom .t-cursor { position: absolute; top: 50%; transform: translateY(-50%); }
+.dir-a.crom .t-cursor-inline { display: inline-block; vertical-align: -0.15em; margin-left: 0.05em; }
+.dir-a.crom .t-input, .dir-a.crom .t-field { font-size: inherit; }
+@media (prefers-reduced-motion: reduce) { .dir-a.crom .t-cursor, .dir-a.crom .t-cursor-inline { animation: none; } }

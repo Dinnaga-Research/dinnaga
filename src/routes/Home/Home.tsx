@@ -9,10 +9,13 @@ import { AsciiArt } from '../../components/AsciiArt';
 import { CautionDivider } from '../../components/CautionDivider';
 import { Transmission } from '../../components/Transmission';
 import { TICKER_ITEMS } from '../../data/tickerItems';
+import { CromulonPrototype } from './prototype/cromulon/CromulonPrototype';
 import { HomePrototype } from './prototype/HomePrototype';
 
 export function Home() {
-  return <HomePrototype today={<Today />} />;
+  // PROTOTYPE (branch prototype/cromulon): the chosen direction with Cromulon variants; ?dirs=1 shows the old directions.
+  if (new URLSearchParams(window.location.search).get('dirs') === '1') return <HomePrototype today={<Today />} />;
+  return <CromulonPrototype />;
 }
 
 function Today() {
