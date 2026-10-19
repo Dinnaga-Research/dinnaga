@@ -19,4 +19,9 @@ describe('SiteNav', () => {
     render(<MemoryRouter><SiteNav /></MemoryRouter>);
     expect(screen.queryByRole('link', { name: 'ARTIFACTS' })).not.toBeInTheDocument();
   });
+
+  it('renders no LIVE text', () => {
+    render(<MemoryRouter><SiteNav /></MemoryRouter>);
+    expect(screen.queryByText('LIVE')).not.toBeInTheDocument();
+  });
 });

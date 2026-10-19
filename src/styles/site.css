@@ -160,63 +160,6 @@
   .ascii-stack { font-size: 14px; }
 }
 
-/* ── Cookie banner ──────────────────────────────────────────── */
-.cookie {
-  position: relative;
-  z-index: 60;
-  background: var(--signal);
-  color: var(--bg-1);
-  border-bottom: 1px solid var(--bg-1);
-  transition: max-height 320ms var(--ease-out), opacity 200ms var(--ease-out);
-  max-height: 80px;
-  overflow: hidden;
-}
-.cookie.is-dismissed { max-height: 0; opacity: 0; border-bottom-width: 0; }
-.cookie-inner {
-  max-width: var(--container);
-  margin: 0 auto;
-  padding: 10px 20px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 16px;
-}
-.cookie-tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  font-weight: 500;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.cookie-text {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  margin: 0;
-  letter-spacing: 0.02em;
-}
-.cookie-actions { display: flex; gap: 8px; }
-.cookie .btn-mini {
-  appearance: none;
-  background: var(--bg-1);
-  color: var(--signal);
-  border: 1px solid var(--bg-1);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 6px 12px;
-  cursor: pointer;
-}
-.cookie .btn-mini.alt { background: transparent; color: var(--bg-1); }
-/* On narrow viewports the three-column row would push the action buttons
-   off-screen (clipped by overflow:hidden). Stack into a single column and
-   let the bar grow so Accept/Decline stay on-screen and tappable. */
-@media (max-width: 720px) {
-  .cookie { max-height: 240px; }
-  .cookie-inner { grid-template-columns: 1fr; gap: 8px; }
-  .cookie-actions { flex-wrap: wrap; }
-}
 
 /* ── Nav ────────────────────────────────────────────────────── */
 .nav {

@@ -1,7 +1,6 @@
-// ABOUTME: Shared site chrome around routed pages — nav, footer, cookie banner, CRT overlay.
+// ABOUTME: Shared site chrome around routed pages — nav, footer, CRT overlay.
 // ABOUTME: Renders the matched route via <Outlet/>.
 import { Outlet } from 'react-router-dom';
-import { CookieBanner } from './CookieBanner';
 import { SiteNav } from './SiteNav';
 import { SiteFooter } from './SiteFooter';
 
@@ -11,7 +10,6 @@ export function Layout() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <CookieBanner />
       <SiteNav />
       <main id="main">
         <Outlet />
