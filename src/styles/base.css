@@ -1,0 +1,148 @@
+/* Dinnaga Visual System — Base Styles
+   Spec: docs/superpowers/specs/2026-10-18-visual-system.md §6, §7, §15 */
+
+/* ── Global box model ───────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ── HTML and body defaults ────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  background: var(--dn-bg);
+  color-scheme: dark;
+  font-synthesis: none;
+}
+
+body {
+  margin: 0;
+  background: var(--dn-bg);
+  color: var(--dn-text);
+  font-family: var(--dn-font-body);
+  font-size: var(--dn-t-body);
+  line-height: var(--dn-lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Headings (§6) ────────────────────────────────────────────────── */
+h1, .h1 {
+  font-family: var(--dn-font-display);
+  font-size: var(--dn-t-display);
+  font-weight: 800;
+  line-height: var(--dn-lh-display);
+  letter-spacing: var(--dn-ls-display);
+  text-transform: none;
+  text-wrap: balance;
+  margin: 0;
+  color: var(--dn-text);
+}
+
+h2, .h2 {
+  font-family: var(--dn-font-display);
+  font-size: var(--dn-t-h2);
+  font-weight: 800;
+  line-height: var(--dn-lh-heading);
+  letter-spacing: var(--dn-ls-tight);
+  text-transform: none;
+  margin: 0;
+  color: var(--dn-text);
+}
+
+h3, .h3 {
+  font-family: var(--dn-font-display);
+  font-size: var(--dn-t-h3);
+  font-weight: 800;
+  line-height: var(--dn-lh-heading);
+  letter-spacing: var(--dn-ls-tight);
+  text-transform: none;
+  margin: 0;
+  color: var(--dn-text);
+}
+
+/* ── Paragraph and text elements ────────────────────────────────────── */
+p, .body {
+  font-family: var(--dn-font-body);
+  font-size: var(--dn-t-body);
+  line-height: var(--dn-lh-body);
+  margin: 0;
+}
+
+strong, b {
+  font-weight: 500;
+}
+
+/* ── Code and monospace ────────────────────────────────────────────── */
+code, kbd, samp, pre {
+  font-family: var(--dn-font-mono);
+  font-size: 0.9em;
+}
+
+/* ── Links (§7 rule 8) ────────────────────────────────────────────── */
+a {
+  color: var(--dn-text);
+  text-decoration: underline;
+  text-decoration-color: var(--dn-text-label);
+  text-underline-offset: 3px;
+  transition: color var(--dn-dur-fast) var(--dn-ease-out);
+}
+
+a:hover {
+  color: var(--dn-text);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--dn-focus);
+  outline-offset: 3px;
+}
+
+/* ── Selection (§6, §15) ───────────────────────────────────────────── */
+::selection {
+  background: var(--dn-selection-bg);
+  color: var(--dn-selection-text);
+}
+
+/* ── Accessibility — Skip link (§15) ───────────────────────────────– */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  font-family: var(--dn-font-mono);
+  font-size: var(--dn-t-label);
+  line-height: var(--dn-lh-label);
+  letter-spacing: var(--dn-ls-label);
+  text-transform: none;
+  background: var(--dn-text);
+  color: var(--dn-bg);
+  padding: 8px 14px;
+  text-decoration: none;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+/* ── Accessibility — Focus visible (§15) ──────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--dn-focus);
+  outline-offset: 2px;
+}
+
+/* ── Accessibility — Reduced motion (§15) ─────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Forced colours (§15) ──────────────────────────────────────────── */
+@media (forced-colors: active) {
+  .tested-mark {
+    background: CanvasText;
+  }
+}
