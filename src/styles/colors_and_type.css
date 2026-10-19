@@ -5,71 +5,7 @@
    thoughtful 1px seams, easter-egg cursors). Dark-only by design.
    ===================================================================== */
 
-/* ── Fonts ──────────────────────────────────────────────────────────── */
-
-@font-face {
-  font-family: "Marathon Shapiro";
-  src: url("/fonts/MarathonShapiroWide65.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Shapiro";
-  src: url("/fonts/Shapiro55Middle.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "KH Interference";
-  src: url("/fonts/KHInterference-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "PP Fraktion Mono";
-  src: url("/fonts/PPFraktionMono-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "PP Fraktion Mono";
-  src: url("/fonts/PPFraktionMono-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "TT Interphases Pro";
-  src: url("/fonts/TTInterphasesPro-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "TT Interphases Pro";
-  src: url("/fonts/TTInterphasesPro-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Sevastopol Interface";
-  src: url("/fonts/Sevastopol-Interface.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+/* Font faces imported from fonts.css (must be imported before this stylesheet) */
 
 /* ── Tokens — root ──────────────────────────────────────────────────── */
 
@@ -101,12 +37,12 @@
   --seam-soft: rgba(255, 255, 255, 0.06);
 
   /* — Type — families */
-  --font-display: "Marathon Shapiro", "Shapiro", Impact, Haettenschweiler, sans-serif;
-  --font-display-alt: "Shapiro", "Marathon Shapiro", Impact, sans-serif;
-  --font-decorative: "KH Interference", "PP Fraktion Mono", monospace; /* glitchy stylized for accents */
-  --font-mono: "PP Fraktion Mono", ui-monospace, "JetBrains Mono", "Menlo", monospace;
-  --font-terminal: "Sevastopol Interface", "PP Fraktion Mono", ui-monospace, monospace;
-  --font-body: "TT Interphases Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Archivo Expanded", "Arial Black", system-ui, sans-serif;
+  --font-display-alt: "Archivo Expanded", "Arial Black", system-ui, sans-serif;
+  --font-decorative: "Archivo Expanded", "Arial Black", system-ui, sans-serif; /* display face for accents */
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --font-terminal: "Departure Mono", "JetBrains Mono", ui-monospace, monospace;
+  --font-body: "Atkinson Hyperlegible Next", "Noto Sans", "JetBrains Mono", system-ui, sans-serif;
 
   /* — Type — sizes (mobile-first; overridden below) */
   --t-detail-sm: 0.6875rem;   /* 11px — micro labels, tags */
@@ -208,6 +144,7 @@ html {
   scroll-behavior: smooth;
   background: var(--bg-1);
   color-scheme: dark;
+  font-synthesis: none;
 }
 
 body {
@@ -226,7 +163,7 @@ body {
 h1, .h1 {
   font-family: var(--font-display);
   font-size: var(--t-h1);
-  font-weight: 700;
+  font-weight: 800;
   line-height: var(--lh-heading);
   letter-spacing: var(--ls-display);
   margin: 0;
@@ -236,7 +173,7 @@ h1, .h1 {
 h2, .h2 {
   font-family: var(--font-display);
   font-size: var(--t-h2);
-  font-weight: 700;
+  font-weight: 800;
   line-height: var(--lh-heading);
   letter-spacing: var(--ls-tight);
   margin: 0;
@@ -246,7 +183,7 @@ h2, .h2 {
 h3, .h3 {
   font-family: var(--font-display);
   font-size: var(--t-h3);
-  font-weight: 700;
+  font-weight: 800;
   line-height: var(--lh-heading3);
   letter-spacing: var(--ls-tight);
   margin: 0;
@@ -256,11 +193,15 @@ h3, .h3 {
 .super-type {
   font-family: var(--font-display);
   font-size: var(--t-super);
-  font-weight: 700;
+  font-weight: 800;
   line-height: var(--lh-super);
   letter-spacing: var(--ls-display);
   text-transform: uppercase;
   margin: 0;
+}
+
+strong, b {
+  font-weight: 500;
 }
 
 p, .body {
