@@ -37,7 +37,7 @@
   line-height: var(--dn-lh-heading);
   letter-spacing: var(--dn-ls-tight);
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: none;
   margin: 0;
 }
 .artifact-title a { color: inherit; text-decoration: none; }
@@ -75,7 +75,7 @@
   line-height: 0.95;
   letter-spacing: -0.02em;
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: none;
   margin: 0;
 }
 .artifact-note {
