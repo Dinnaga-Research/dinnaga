@@ -18,6 +18,7 @@ _Last updated 2026-10-18._
 
 ## Notes
 - The **Atisha Initiative** is a GitHub **Project** (`https://github.com/orgs/Dinnaga-Research/projects/1`), not a repo — it must stay **Public** or the site's Atisha link 404s.
-- `public/og.png` uses the real `logo-mark.svg` mark (the hexagon-gate D). The favicon and nav `BrandMark` are the original logo — unchanged.
+- `public/og.png` was regenerated on 2026-10-18 (resolves #27). The card now shows only the hexagon-D logo mark, the DINNAGA wordmark, and the domain. Regenerate with `npx tsx scripts/generate-og.ts` after installing Playwright's Chromium. The visual redesign belongs to the Pages milestone.
+- The favicon and nav `BrandMark` are the original logo — unchanged.
 - Phase-2 backlog (not built; spec §8): GRAVEDIGGER / DSPy harnesses / memory-architecture as future Atisha entries, field notes, a `/notes` expansion, route code-splitting.
 - Anonymity was dropped on 2026-10-18 (#27); the site names David Ryan as the founder.
