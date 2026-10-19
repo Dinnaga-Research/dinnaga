@@ -20,7 +20,7 @@ describe('WeeklyViewer', () => {
     renderViewer('2026-08-08');
     expect(screen.getByText('// WEEK IN REVIEW')).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: 'this week (since 2026-08-03)' }),
+      screen.getByRole('heading', { name: '3–8 Aug 2026' }),
     ).toBeInTheDocument();
     expect(screen.getByText(/run 2026-08-08/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /open standalone/i })).toHaveAttribute(
@@ -29,9 +29,9 @@ describe('WeeklyViewer', () => {
     );
   });
 
-  it('renders the report iframe with the window label title and docPath src', () => {
+  it('renders the report iframe with the date range title and docPath src', () => {
     renderViewer('2026-08-08');
-    const frame = screen.getByTitle('this week (since 2026-08-03)');
+    const frame = screen.getByTitle('3–8 Aug 2026');
     expect(frame.tagName).toBe('IFRAME');
     expect(frame).toHaveAttribute('src', '/artifact-docs/weekly/2026-08-08.html');
   });

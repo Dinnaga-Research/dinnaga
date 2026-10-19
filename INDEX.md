@@ -14,9 +14,9 @@ enforced by `src/test/dirDocs.test.ts`.
   outside the route namespace so extensionless static hosts can't shadow the viewer).
   **Unlisted**: no nav link — unlocked by typing "show me what you got" into the home
   terminal (`src/lib/unlock.ts` matcher, `src/data/unlockLines.ts` reveal), or direct URL.
-- `/weekly`, `/weekly/:date` — `Weekly/` — Saturday week-in-review run log + report
-  viewer (data: `src/data/weeklyRuns.ts`; reports served from
-  `public/artifact-docs/weekly/`, outside the route namespace).
+- `/weekly`, `/weekly/:date` — `Weekly/` — Saturday week-in-review run log (paused
+  2026-09-26, rendered as a dated archive) + report viewer (data: `src/data/weeklyRuns.ts`;
+  reports served from `public/artifact-docs/weekly/`, outside the route namespace).
 - `/colophon` — `Colophon/` — colophon page.
 - 404 — `NotFound/` — SPA fallback (`public/404.html` redirect trick).
 
