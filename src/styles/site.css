@@ -195,18 +195,13 @@
    Per-element CRT: scanlines + curvature shadow + slow flicker.
    The user can type into a real <input> and "send" a question. */
 .terminal {
-  --term-green: #b8f720;
-  --term-green-dim: #5e8a00;
-  --term-bg: #050b03;
-  --term-edge: #0a1605;
-
   position: relative;
   width: 100%;
   aspect-ratio: 16/10;
   max-width: 620px;
   margin: 0 auto;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   background: var(--dn-term-bg);
   border: 1px solid var(--dn-term-frame);
   box-shadow:
@@ -217,7 +212,6 @@
   isolation: isolate;
   font-family: var(--dn-font-terminal);
   color: var(--dn-term-text);
-  text-shadow: 0 0 6px rgba(184, 247, 32, 0.35);
 }
 @media (min-width: 1024px) {
   .terminal {
@@ -243,31 +237,23 @@
 /* ── Chrome ────────────────────────────────────────────── */
 .terminal-chrome {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr;
   align-items: center;
-  gap: 12px;
   padding: 8px 14px;
-  background: linear-gradient(180deg, #0e1907 0%, #07100a 100%);
-  border-bottom: 1px solid rgba(184, 247, 32, 0.25);
-  font-family: var(--dn-font-terminal);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--dn-term-text);
+  background: var(--dn-term-bar);
+  border-bottom: 1px solid var(--dn-term-frame);
+  font-family: var(--dn-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--dn-term-dim);
   position: relative;
   z-index: 2;
 }
-.terminal-chrome-tag { font-weight: 400; }
-.terminal-chrome-meta { color: var(--dn-term-dim); justify-self: end; font-size: 10px; }
-.terminal-chrome-dots { display: flex; gap: 6px; }
-.terminal-chrome-dots i {
-  width: 7px; height: 7px;
-  background: var(--dn-term-dim);
-  display: block;
-  border-radius: 50%;
-  box-shadow: inset 0 0 2px rgba(0,0,0,0.6);
-}
-.terminal-chrome-dots i:first-child { background: var(--dn-term-text); box-shadow: 0 0 8px rgba(184, 247, 32, 0.35); }
+.terminal-chrome-tag { font-weight: 500; }
+.terminal-chrome-meta { color: var(--dn-term-dim); justify-self: end; font-size: 12px; }
+.terminal-chrome-dots { display: none; }
 
 /* ── Screen ────────────────────────────────────────────── */
 .terminal-screen {
@@ -275,6 +261,9 @@
   overflow: hidden;
   padding: 18px 20px;
   z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .terminal-curvature {
   /* Soft inner vignette to fake CRT curvature */
@@ -303,19 +292,32 @@
   97%           { opacity: 0.85; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .terminal-flicker { animation: none; }
+  .terminal-flicker { animation-name: none; }
+}
+@media (forced-colors: active), (prefers-contrast: more) {
+  .terminal-curvature, .terminal-scanlines, .terminal-flicker { display: none; }
+  .terminal-body { text-shadow: none; }
 }
 
 .terminal-body {
   position: relative;
   z-index: 2;
   font-family: var(--dn-font-terminal);
-  font-size: 14px;
-  line-height: 1.45;
-  letter-spacing: 0.02em;
+  font-size: 22px;
+  line-height: 28px;
+  line-height: var(--dn-lh-term);
+  letter-spacing: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+@media (max-width: 700px) {
+  .terminal-body {
+    font-size: 16.5px;
+    line-height: 21px;
+  }
 }
 .t-line { white-space: pre-wrap; word-break: break-word; }
-.t-in   { color: var(--dn-term-text); text-shadow: 0 0 8px rgba(184, 247, 32, 0.35); }
+.t-in   { color: var(--dn-term-text); text-shadow: var(--dn-term-glow); }
 .t-out  { color: var(--dn-term-dim); }
 
 .t-prompt {
@@ -334,23 +336,36 @@
   outline: none;
   color: var(--dn-term-text);
   font-family: var(--dn-font-terminal);
-  font-size: 14px;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(184, 247, 32, 0.35);
+  font-size: 22px;
+  line-height: 28px;
+  line-height: var(--dn-lh-term);
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: var(--dn-term-glow);
   caret-color: transparent; /* we'll draw our own */
   padding: 0;
 }
+@media (max-width: 700px) {
+  .t-input {
+    font-size: 16.5px;
+    line-height: 21px;
+  }
+}
 .t-input::placeholder {
   color: var(--dn-term-dim);
-  opacity: 0.7;
+  opacity: 1;
 }
 .t-cursor {
   color: var(--dn-term-text);
   animation: term-cursor 1s steps(1, end) infinite;
-  font-size: 14px;
-  line-height: 1;
+  font-size: 22px;
+  line-height: var(--dn-lh-term);
   margin-left: -4px;
+}
+@media (max-width: 700px) {
+  .t-cursor {
+    font-size: 16.5px;
+  }
 }
 @keyframes term-cursor {
   0%, 49%   { opacity: 1; }
@@ -361,15 +376,17 @@
   background: transparent;
   border: 1px solid var(--dn-term-dim);
   color: var(--dn-term-text);
-  font-family: var(--dn-font-terminal);
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-family: var(--dn-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   padding: 2px 8px;
   cursor: pointer;
   margin-left: 8px;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .t-reset:hover { border-color: var(--dn-term-text); color: var(--dn-term-text); }
+.t-reset:focus-visible { outline: 2px solid var(--dn-term-text); outline-offset: 2px; }
 
 /* ── Footer status strip ───────────────────────────────── */
 .terminal-foot {
