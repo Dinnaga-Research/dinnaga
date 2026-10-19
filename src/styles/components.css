@@ -192,34 +192,7 @@
   border-bottom: 1px solid var(--bg-1);
 }
 
-/* ── HUD plate (decorative content frame) ──────────────────────────── */
-
-.hud-plate {
-  position: relative;
-  background:
-    radial-gradient(circle at 30% 40%, #102a05, #050505 65%),
-    linear-gradient(180deg, #080808, #121212);
-  border: 1px solid var(--signal);
-  overflow: hidden;
-}
-.hud-plate::before {
-  content: "";
-  position: absolute; inset: 0;
-  background:
-    linear-gradient(rgba(192, 254, 4, 0.06) 1px, transparent 1px) 0 0 / 100% 40px,
-    linear-gradient(90deg, rgba(192, 254, 4, 0.06) 1px, transparent 1px) 0 0 / 40px 100%;
-  pointer-events: none;
-}
-
-/* Scanline overlay (apply to a child) */
-.scanlines {
-  position: absolute; inset: 0; pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(192,254,4,0.06) 0 2px,
-    transparent 2px 4px
-  );
-}
+/* Removed .hud-plate and .scanlines utilities (page-level CRT effects) per spec §11 */
 
 /* ── Status dot ────────────────────────────────────────────────────── */
 

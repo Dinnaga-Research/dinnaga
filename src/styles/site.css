@@ -54,44 +54,7 @@
   cursor: text;
 }
 
-/* ── CRT overlay ────────────────────────────────────────────
-   Fixed full-screen pass over the page: scanlines + faint
-   vignette + slow flicker. Pointer-events disabled. */
-.crt-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 80;
-  mix-blend-mode: overlay;
-}
-.crt-overlay::before {
-  /* horizontal scanlines */
-  content: "";
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.04) 0 1px,
-    transparent 1px 3px
-  );
-}
-.crt-overlay::after {
-  /* vignette + slight green-channel cast */
-  content: "";
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%),
-    linear-gradient(rgba(192,254,4,0.012), rgba(192,254,4,0.012));
-  animation: crt-flicker 5.4s steps(1, end) infinite;
-}
-@keyframes crt-flicker {
-  0%, 96%, 100% { opacity: 1; }
-  97%           { opacity: 0.92; }
-  98%           { opacity: 1.0; }
-  99%           { opacity: 0.88; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .crt-overlay::after { animation: none; }
-}
+/* Removed page-wide CRT overlay (scanlines, vignette, flicker) per spec §11 */
 
 /* ── ASCII art section ──────────────────────────────────────
    3D extrusion via stacked layers of the same glyphs at
