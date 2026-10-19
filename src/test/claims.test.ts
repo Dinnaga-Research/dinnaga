@@ -33,6 +33,11 @@ const BANNED_CLAIMS: ClaimEntry[] = [
   { pattern: /Initiative is open/i, scope: 'site', bugId: 'H7' },
   { pattern: /grows as we validate/i, scope: 'site', bugId: 'H7' },
   { pattern: /Initiatives live/i, scope: 'site', bugId: 'H7' },
+  { pattern: /anonymous/i, scope: 'site+docs', bugId: 'H13' },
+  { pattern: /open[- ]source/i, scope: 'site+docs', bugId: 'H3' },
+  { pattern: /by ethos/i, scope: 'site', bugId: 'H3' },
+  { pattern: /\bLIVE\b/, scope: 'site', bugId: 'H5' },
+  { pattern: /dot-live/, scope: 'site', bugId: 'H5' },
 ];
 
 function getSiteFiles(): string[] {

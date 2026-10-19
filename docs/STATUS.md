@@ -3,6 +3,7 @@
 _Last updated 2026-10-18._
 
 ## Recent changes
+- Anonymity dropped: site now names David Ryan as founder (2026-10-18, #27).
 - Consent banner and nav live badge deleted (2026-10-18, #27).
 - The megazord bench deleted (2026-10-18, #27).
 
@@ -19,4 +20,4 @@ _Last updated 2026-10-18._
 - The **Atisha Initiative** is a GitHub **Project** (`https://github.com/orgs/Dinnaga-Research/projects/1`), not a repo — it must stay **Public** or the site's Atisha link 404s.
 - `public/og.png` uses the real `logo-mark.svg` mark (the hexagon-gate D). The favicon and nav `BrandMark` are the original logo — unchanged.
 - Phase-2 backlog (not built; spec §8): GRAVEDIGGER / DSPy harnesses / memory-architecture as future Atisha entries, field notes, a `/notes` expansion, route code-splitting.
-- "Phylon" was scrubbed everywhere; the lab is presented anonymously as **Dinnaga**.
+- Anonymity was dropped on 2026-10-18 (#27); the site names David Ryan as the founder.

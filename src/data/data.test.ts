@@ -13,8 +13,10 @@ describe('content data files', () => {
     expect(PRACTICES.map((p) => p.icon)).toEqual(['ethos', 'method', 'atisha']);
   });
 
-  it('ships five surface-data rows', () => {
-    expect(SURFACE_DATA).toHaveLength(5);
+  it('ships three surface-data rows', () => {
+    expect(SURFACE_DATA).toHaveLength(3);
+    expect(SURFACE_DATA.map((r) => r.idx)).toEqual(['01', '02', '03']);
+    expect(SURFACE_DATA.map((r) => r.label)).toEqual(['Mission', 'Method', 'Validation bar']);
   });
 
   it('ships ticker items, boot lines, and nav links', () => {
@@ -28,7 +30,7 @@ describe('content data files', () => {
     ]);
   });
 
-  it('ships exactly five ticker items', () => {
-    expect(TICKER_ITEMS).toHaveLength(5);
+  it('ships exactly four ticker items', () => {
+    expect(TICKER_ITEMS).toHaveLength(4);
   });
 });

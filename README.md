@@ -3,7 +3,7 @@
 
 # DINNAGA // dinnaga.ai
 
-An anonymous AI research lab site. We validate what is genuinely useful, then share it openly — the site is the transmission surface: **[dinnaga.ai](https://dinnaga.ai)**.
+The website of Dinnaga Research, run by David Ryan: **[dinnaga.ai](https://dinnaga.ai)**.
 
 React 19 · Vite · TypeScript (strict) · react-router 7 · plain CSS tokens · Bun. Hosted on Vercel. **Deploys are manual** — `vercel deploy --prod` from the repo root; there is **no Vercel Git integration**, pushing `main` does NOT deploy. `.github/workflows/ci.yml` runs lint → unit tests → build as a PR/push quality gate only. SPA deep links ride the `vercel.json` `/(.*)` → `/index.html` rewrite (the `public/404.html` trick is a leftover from the retired GitHub Pages host). Vercel bot protection challenges non-browser clients: `curl` and CDP-driven Chrome get 403 + a security checkpoint — verify deploys with `vercel inspect`, not an HTTPS probe.
 

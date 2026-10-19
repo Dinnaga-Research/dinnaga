@@ -5,20 +5,15 @@ const ASCII_ART = String.raw`
         ██▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██
         ██▓▒░                                                  ░▒▓██
         ██▓▒░     ╔═══════════════════════════════════════╗    ░▒▓██
-        ██▓▒░     ║   D  I  N  N  A  G  A   //  OPEN      ║    ░▒▓██
-        ██▓▒░     ╚═══════════════════════════════════════╝    ░▒▓██
-        ██▓▒░                                                  ░▒▓██
-        ██▓▒░       /\          ▸ ETHOS  : OPEN SOURCE         ░▒▓██
-        ██▓▒░      /  \         ▸ METHOD : READ → SHIP         ░▒▓██
-        ██▓▒░     /    \        ▸ BAR    : VALIDATED           ░▒▓██
-        ██▓▒░    /  ██  \       ▸ MOCKS  : NONE                ░▒▓██
-        ██▓▒░   /  ████  \      ▸ STATUS : LIVE · OPEN         ░▒▓██
+        ██▓▒░     ║   D  I  N  N  A  G  A                 ║    ░▒▓██
+        ██▓▒░       /\          ▸ SOURCE : PUBLIC              ░▒▓██
+        ██▓▒░   /  ████  \      ▸ HOST   : VERCEL              ░▒▓██
         ██▓▒░  /  ██████  \                                    ░▒▓██
-        ██▓▒░ /____________\    ┌─[ TRANSMISSION ]──────┐      ░▒▓██
-        ██▓▒░ |    [   ]   |    │project planning / open│      ░▒▓██
-        ██▓▒░ |    [ D ]   |    │atisha           / open│      ░▒▓██
-        ██▓▒░ |    [   ]   |    │source           / open│      ░▒▓██
-        ██▓▒░ |____________|    └───────────────────────┘      ░▒▓██
+        ██▓▒░ /____________\                                    ░▒▓██
+        ██▓▒░ |    [   ]   |    │planning     : private │      ░▒▓██
+        ██▓▒░ |    [ D ]   |    │atisha board : public  │      ░▒▓██
+        ██▓▒░ |    [   ]   |    │site source  : public  │      ░▒▓██
+        ██▓▒░ |____________|                                    ░▒▓██
         ██▓▒░                                                  ░▒▓██
         ██▓▒░  ░▒▓█  VALIDATE · THEN SHARE                     ░▒▓██
         ██▓▒░                                                  ░▒▓██
@@ -36,7 +31,6 @@ export function AsciiArt() {
         <pre>{ASCII_ART}</pre>
       </div>
       <div className="ascii-caption">
-        <span className="dot dot-live" />
         <span>▸ EXTRUDED IN EIGHT TINTS OF #C0FE04 · BREATHING ENABLED</span>
       </div>
     </section>
