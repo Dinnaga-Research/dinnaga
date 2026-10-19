@@ -15,8 +15,8 @@ export function Hero({ media }: HeroProps) {
         <span className="hero-eyebrow">// 01 · DINNAGA</span>
         <h1 className="hero-title">Validated, then shared.</h1>
         <p className="hero-lede">
-          An anonymous research lab at the consumer-AI frontier. We try things, validate what's
-          genuinely useful, and publish it openly — to make adoption faster for everyone.
+          Dinnaga Research reads the papers, podcasts and vendor docs, tests what they claim, and
+          publishes what holds up.
         </p>
         <div className="hero-ctas">
           <button className="btn btn-primary" onClick={() => navigate('/atisha')}>

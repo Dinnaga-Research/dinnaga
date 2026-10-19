@@ -181,13 +181,6 @@
   --container: 1440px;
   --gutter: 20px;
   --gutter-lg: 48px;
-
-  /* Cyberware tier colors (loadout page) — CP2077 rarity conventions on our black */
-  --tier-common: #9a9a9a;
-  --tier-uncommon: #62d96b;
-  --tier-rare: #41a6f6;
-  --tier-epic: #b16cea;
-  --tier-legendary: #ff8a1e;
 }
 
 /* — Larger viewports re-scale super-type */

@@ -94,7 +94,7 @@ export function Terminal({
       { kind: 'in', text: q },
       {
         kind: 'out',
-        text: '▸ TRANSMISSION RECEIVED. NO OPERATOR ON THE LINE — WHAT WE VALIDATE SHIPS TO ATISHA.',
+        text: 'nothing was sent. this terminal only listens for one phrase.',
       },
     ]);
     setInput('');
@@ -118,15 +118,6 @@ export function Terminal({
         <img className="terminal-media" src={media.src} alt={media.alt ?? ''} />
       )}
 
-      <div className="terminal-chrome">
-        <span className="terminal-chrome-tag">SIGNAL // 042</span>
-        <span className="terminal-chrome-meta">DINNAGA-OS · ENCRYPTED · 18:42Z</span>
-        <span className="terminal-chrome-dots" aria-hidden="true">
-          <i></i>
-          <i></i>
-          <i></i>
-        </span>
-      </div>
 
       <div className="terminal-screen">
         <div className="terminal-curvature" aria-hidden="true" />
@@ -170,9 +161,6 @@ export function Terminal({
           {done && sent && (
             <div className="t-prompt is-done">
               <span className="t-caret">&gt;</span>
-              <span style={{ color: 'var(--signal)' }}>
-                NEW TRANSMISSION CLOSED. NO REPLY — WE PUBLISH, WE DO NOT CORRESPOND.
-              </span>
               <button
                 type="button"
                 className="t-reset"
@@ -188,14 +176,6 @@ export function Terminal({
         </div>
       </div>
 
-      <div className="terminal-foot">
-        <span>
-          <span className="dot dot-live" /> UPLINK STABLE
-        </span>
-        <span>PING 42ms</span>
-        <span>FIDELITY 87%</span>
-        <span>OP · DINNAGA</span>
-      </div>
     </div>
   );
 }

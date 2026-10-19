@@ -234,12 +234,6 @@
 .dot-error { background: var(--error); box-shadow: 0 0 0 2px rgba(242,71,35,0.18); }
 .dot-idle  { background: var(--fg-4);  box-shadow: 0 0 0 2px rgba(113,113,113,0.18); }
 
-/* Pulsing variant for live signals */
-.dot-live { animation: dot-pulse 1.6s var(--ease-in-out) infinite; }
-@keyframes dot-pulse {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(192,254,4,0.18); }
-  50%      { box-shadow: 0 0 0 6px rgba(192,254,4,0.04); }
-}
 
 /* ── Marquee ticker ────────────────────────────────────────────────── */
 

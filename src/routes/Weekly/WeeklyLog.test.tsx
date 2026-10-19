@@ -13,9 +13,15 @@ describe('WeeklyLog', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 
-  it('renders the seed run with window label, run date, and summary', () => {
+  it('shows date range and paused message', () => {
     render(<MemoryRouter><WeeklyLog /></MemoryRouter>);
-    expect(screen.getByText('this week (since 2026-08-03)')).toBeInTheDocument();
+    expect(screen.getByText('3–8 Aug 2026')).toBeInTheDocument();
+    expect(screen.getByText('Paused since 26 Sep 2026.')).toBeInTheDocument();
+  });
+
+  it('renders the seed run with date range, run date, and summary', () => {
+    render(<MemoryRouter><WeeklyLog /></MemoryRouter>);
+    expect(screen.getByText('3–8 Aug 2026')).toBeInTheDocument();
     expect(screen.getByText(/run 2026-08-08/)).toBeInTheDocument();
     expect(screen.getByText(/scout\/cook\/judge design-portfolio pipeline/)).toBeInTheDocument();
   });

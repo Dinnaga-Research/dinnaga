@@ -1,4 +1,4 @@
-// ABOUTME: Sticky primary navigation — brand mark + route links + live-status corner.
+// ABOUTME: Sticky primary navigation — brand mark + route links.
 // ABOUTME: Signature motion: a green square races L→R behind the clip-reveal on mount.
 import { Fragment, useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
@@ -32,10 +32,6 @@ export function SiteNav() {
               {l.label.toUpperCase()}
             </NavLink>
           ))}
-        </div>
-        <div className="nav-right">
-          <span className="dot dot-live" />
-          <span>LIVE</span>
         </div>
       </nav>
     </Fragment>

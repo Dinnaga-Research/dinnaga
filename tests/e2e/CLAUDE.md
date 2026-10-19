@@ -4,8 +4,6 @@ Playwright end-to-end specs, run against a live Vite dev server
 `bun run test` (that's vitest unit/integration only).
 
 - `homepage.spec.ts` / `routing.spec.ts` — core page render + route coverage.
-- `loadout.spec.ts` — the ripperdoc bench end-to-end: equip → conflict →
-  resolve → share-URL restores the build.
 - `responsive.spec.ts` — mobile viewport (375×812) has no horizontal overflow.
 - `a11y.spec.ts` — accessibility landmarks (e.g. skip-to-content link).
 - `artifacts.spec.ts` — /artifacts shelf → viewer navigation, the doc iframe

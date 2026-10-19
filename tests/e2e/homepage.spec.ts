@@ -7,12 +7,11 @@ test('renders the homepage hero and lab sections', async ({ page }) => {
   await expect(page.getByText(/© 2026 DINNAGA/)).toBeVisible();
 });
 
-test('dismisses the cookie banner', async ({ page }) => {
+test('has no analytics banner', async ({ page }) => {
   await page.goto('/');
-  const banner = page.locator('.cookie');
-  await expect(banner).not.toHaveClass(/is-dismissed/);
-  await page.getByRole('button', { name: 'Accept' }).click();
-  await expect(banner).toHaveClass(/is-dismissed/);
+  await expect(page.getByRole('button', { name: 'Accept' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Decline' })).toHaveCount(0);
+  await expect(page.getByText(/analytics/i)).toHaveCount(0);
 });
 
 test('removes the travelling green square after the mount animation', async ({ page }) => {

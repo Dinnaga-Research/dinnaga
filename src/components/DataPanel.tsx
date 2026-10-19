@@ -1,6 +1,7 @@
 // ABOUTME: Two-column dossier panel — tabular surface data plus an "about" prose panel.
 // ABOUTME: The tabular rows come from src/data/surfaceData.ts; the prose is static copy.
 import { SURFACE_DATA } from '../data/surfaceData';
+import { SITE_SOURCE_URL } from '../data/links';
 
 export function DataPanel() {
   return (
@@ -35,11 +36,7 @@ export function DataPanel() {
             <span className="panel-idx">// 05</span>
             <h3 className="panel-title">WHO WE ARE</h3>
           </header>
-          <p className="panel-body">
-            Dinnaga is an anonymous research lab working at the consumer-AI frontier. We are open by
-            default: we validate things ourselves, then publish what is genuinely useful so adoption
-            gets faster for everyone.
-          </p>
+          <p className="panel-body">Dinnaga Research is run by David Ryan.</p>
           <p className="panel-body">
             Named for Dignāga — a philosopher of perception and valid cognition (pramāṇa) who held
             that knowledge belongs to whoever takes the trouble to examine it. That is the bar for
@@ -50,7 +47,11 @@ export function DataPanel() {
               <span className="panel-bullet">▸</span> Validated before it ships.
             </li>
             <li>
-              <span className="panel-bullet">▸</span> Open source by default.
+              <span className="panel-bullet">▸</span>
+              <span>
+                {' '}
+                <a href={SITE_SOURCE_URL}>This site's source is public on GitHub</a>.
+              </span>
             </li>
             <li>
               <span className="panel-bullet">▸</span> Third-party tools we rely on are credited,

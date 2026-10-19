@@ -18,7 +18,6 @@ for (const path of [
   '/atisha',
   '/method',
   '/colophon',
-  '/loadout',
   '/artifacts',
   '/artifacts/slamwich-tasting-report',
   '/weekly',

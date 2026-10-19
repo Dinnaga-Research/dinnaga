@@ -6,6 +6,5 @@ export const NAV_LINKS: NavLink[] = [
   { label: 'Atisha', to: '/atisha' },
   { label: 'How We Work', to: '/method' },
   { label: 'Colophon', to: '/colophon' },
-  { label: 'Loadout', to: '/loadout' },
   { label: 'Weekly', to: '/weekly' },
 ];

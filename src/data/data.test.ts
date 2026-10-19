@@ -13,11 +13,10 @@ describe('content data files', () => {
     expect(PRACTICES.map((p) => p.icon)).toEqual(['ethos', 'method', 'atisha']);
   });
 
-  it('ships seven surface-data rows, including the registry row', () => {
-    expect(SURFACE_DATA).toHaveLength(7);
-    const registry = SURFACE_DATA.find((r) => r.idx === '07');
-    expect(registry?.label).toBe('Registry');
-    expect(registry?.value).toBe('22 implants · 21 papers reproduced · nothing wired live');
+  it('ships three surface-data rows', () => {
+    expect(SURFACE_DATA).toHaveLength(3);
+    expect(SURFACE_DATA.map((r) => r.idx)).toEqual(['01', '02', '03']);
+    expect(SURFACE_DATA.map((r) => r.label)).toEqual(['Mission', 'Method', 'Validation bar']);
   });
 
   it('ships ticker items, boot lines, and nav links', () => {
@@ -27,19 +26,11 @@ describe('content data files', () => {
       '/atisha',
       '/method',
       '/colophon',
-      '/loadout',
       '/weekly',
     ]);
   });
 
-  it('ships exactly eight ticker items, with the bench line present', () => {
-    expect(TICKER_ITEMS).toHaveLength(8);
-    expect(TICKER_ITEMS).toContain('▸ RIPPERDOC BENCH — OPEN FOR BUSINESS');
-  });
-
-  it('mounts the ripperdoc bench right after the Atisha index boot line', () => {
-    const atishaIdx = BOOT_LINES.findIndex((l) => l.text.startsWith('LOADING ATISHA INDEX'));
-    expect(atishaIdx).toBeGreaterThanOrEqual(0);
-    expect(BOOT_LINES[atishaIdx + 1]?.text).toBe('MOUNTING RIPPERDOC BENCH ....  OK');
+  it('ships exactly four ticker items', () => {
+    expect(TICKER_ITEMS).toHaveLength(4);
   });
 });
