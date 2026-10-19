@@ -5,7 +5,7 @@
 
 The website of Dinnaga Research, run by David Ryan: **[dinnaga.ai](https://dinnaga.ai)**.
 
-React 19 · Vite · TypeScript (strict) · react-router 7 · plain CSS tokens · Bun. Hosted on Vercel. **Deploys are manual** — `vercel deploy --prod` from the repo root; there is **no Vercel Git integration**, pushing `main` does NOT deploy. `.github/workflows/ci.yml` runs lint → unit tests → build as a PR/push quality gate only. SPA deep links ride the `vercel.json` `/(.*)` → `/index.html` rewrite. Vercel bot protection challenges non-browser clients: `curl` and CDP-driven Chrome get 403 + a security checkpoint — verify deploys with `vercel inspect`, not an HTTPS probe.
+React 19 · Vite · TypeScript (strict) · react-router 7 · plain CSS tokens · Bun. Hosted on Vercel. **Deploys are manual** — `vercel deploy --prod` from the repo root; there is **no Vercel Git integration**, pushing `main` does NOT deploy. `.github/workflows/ci.yml` runs lint → unit tests → build → e2e tests as a PR/push quality gate (Playwright browsers are cached keyed on the lockfile). SPA deep links ride the `vercel.json` `/(.*)` → `/index.html` rewrite. Vercel bot protection challenges non-browser clients: `curl` and CDP-driven Chrome get 403 + a security checkpoint — verify deploys with `vercel inspect`, not an HTTPS probe.
 
 **Routes:** `/` · `/atisha` · `/method` · `/colophon` · `/artifacts` · `/artifacts/:slug` · `/weekly` · `/weekly/:date` — the artifact shelf is **unlisted**: no nav link; type `show me what you got` into the home terminal, or hit the URL directly.
 
