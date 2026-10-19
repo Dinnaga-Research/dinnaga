@@ -16,7 +16,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ hashFiles('**/bun.lockb') }}
+          key: playwright-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             playwright-
       - run: bun run lint
