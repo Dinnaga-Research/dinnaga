@@ -29,7 +29,6 @@ export function SiteFooter() {
       </div>
       <div className="foot-meta">
         <span>© 2026 Dinnaga Research</span>
-        <span>Validate, then share</span>
       </div>
     </footer>
   );
