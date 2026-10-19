@@ -6,7 +6,6 @@ export const BOOT_LINES: BootLine[] = [
   { text: 'DINNAGA-OS  v0.4.1   //   TERMINAL', delay: 60 },
   { text: 'ESTABLISHING UPLINK  ........  OK', delay: 70 },
   { text: 'LOADING ATISHA INDEX ........  OK', delay: 70 },
-  { text: 'MOUNTING RIPPERDOC BENCH ....  OK', delay: 70 },
   { text: 'OPERATOR  : VISITOR', delay: 60 },
   { text: 'ETHOS     : OPEN SOURCE', delay: 60 },
   { text: 'VALIDATION BAR : ENGAGED', delay: 60 },

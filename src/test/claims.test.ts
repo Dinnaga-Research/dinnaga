@@ -16,6 +16,9 @@ interface ClaimEntry {
 const BANNED_CLAIMS: ClaimEntry[] = [
   { pattern: /analytics/i, scope: 'site', bugId: 'H1' },
   { pattern: /TRANSMISSION ADVISORY/, scope: 'site', bugId: 'H1' },
+  { pattern: /loadout|ripperdoc/i, scope: 'site+docs', bugId: 'H2' },
+  { pattern: /megazord|\bzords?\b|implants?\b/i, scope: 'site', bugId: 'H2' },
+  { pattern: /TESTS GREEN|PAPERS REPRODUCED/, scope: 'site', bugId: 'H11' },
 ];
 
 function getSiteFiles(): string[] {

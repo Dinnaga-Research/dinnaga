@@ -8,14 +8,4 @@ export const SURFACE_DATA: DataRow[] = [
   { idx: '03', label: 'Mission', value: 'Accelerate AI adoption with what is genuinely useful' },
   { idx: '04', label: 'Method', value: 'Read → Digest → Ideate → Experiment → Ship' },
   { idx: '05', label: 'Validation bar', value: 'Veracity-first · real APIs · no mocks' },
-  {
-    idx: '06',
-    label: 'Initiatives live',
-    value: '3 — Project Planning · Atisha · Ripperdoc bench',
-  },
-  {
-    idx: '07',
-    label: 'Registry',
-    value: '22 implants · 21 papers reproduced · nothing wired live',
-  },
 ];

@@ -1,9 +1,8 @@
 // ABOUTME: Home route (/) — composes the long-scroll dinnaga.ai homepage sections.
-// ABOUTME: Shared chrome (nav, footer, cookie banner, CRT overlay) lives in Layout.
+// ABOUTME: Shared chrome (nav, footer, CRT overlay) lives in Layout.
 import { Hero } from '../../components/Hero';
 import { Ticker } from '../../components/Ticker';
 import { Practices } from '../../components/Practices';
-import { Instruments } from '../../components/Instruments';
 import { DataPanel } from '../../components/DataPanel';
 import { AsciiArt } from '../../components/AsciiArt';
 import { CautionDivider } from '../../components/CautionDivider';
@@ -16,7 +15,6 @@ export function Home() {
       <Hero />
       <Ticker items={TICKER_ITEMS} />
       <Practices />
-      <Instruments />
       <DataPanel />
       <AsciiArt />
       <CautionDivider />

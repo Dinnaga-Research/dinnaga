@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 const ROOT = join(__dirname, '..', '..');
-const DOC_DIRS = ['src/data', 'src/lib', 'src/components/loadout', 'docs', 'tests/e2e'];
+const DOC_DIRS = ['src/data', 'src/lib', 'docs', 'tests/e2e'];
 describe.each(DOC_DIRS)('dir docs: %s', (dir) => {
   it('has a non-empty CLAUDE.md under 40 lines', () => {
     const text = readFileSync(join(ROOT, dir, 'CLAUDE.md'), 'utf8');

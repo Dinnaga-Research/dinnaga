@@ -4,7 +4,6 @@ const ROUTES = [
   { path: '/atisha', heading: /Atisha Initiative/i },
   { path: '/method', heading: /From read to ship/i },
   { path: '/colophon', heading: /Colophon/i },
-  { path: '/loadout', heading: 'Loadout.' },
 ];
 
 for (const r of ROUTES) {
@@ -14,6 +13,12 @@ for (const r of ROUTES) {
     await expect(page.getByRole('heading', { name: r.heading }).first()).toBeVisible();
   });
 }
+
+test('loading /loadout shows the 404 page', async ({ page }) => {
+  await page.goto('/loadout');
+  await expect(page).toHaveURL('/loadout');
+  await expect(page.getByRole('heading', { name: /No transmission here/i })).toBeVisible();
+});
 
 test('an unknown deep link renders the 404 page', async ({ page }) => {
   await page.goto('/no-such-page');

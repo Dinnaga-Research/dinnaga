@@ -6,7 +6,6 @@ import { Home } from './routes/Home/Home';
 import { Atisha } from './routes/Atisha/Atisha';
 import { Method } from './routes/Method/Method';
 import { Colophon } from './routes/Colophon/Colophon';
-import { Loadout } from './routes/Loadout/Loadout';
 import { Artifacts } from './routes/Artifacts/Artifacts';
 import { ArtifactViewer } from './routes/Artifacts/ArtifactViewer';
 import { WeeklyLog } from './routes/Weekly/WeeklyLog';
@@ -22,7 +21,6 @@ const router = createBrowserRouter([
       { path: 'atisha', element: <Atisha /> },
       { path: 'method', element: <Method /> },
       { path: 'colophon', element: <Colophon /> },
-      { path: 'loadout', element: <Loadout /> },
       { path: 'artifacts', element: <Artifacts /> },
       { path: 'artifacts/:slug', element: <ArtifactViewer /> },
       { path: 'weekly', element: <WeeklyLog /> },
