@@ -159,7 +159,7 @@
 .card:hover { background: var(--surface); border-color: var(--seam-strong); }
 
 .card-flat {
-  /* Marathon's seam-grid card — uses 1px gaps between cards rather than
+  /* Seam-grid card — uses 1px gaps between cards rather than
      padding/shadow. Place inside a grid with gap:1px and background:var(--seam). */
   background: var(--bg-1);
   padding: var(--sp-6);

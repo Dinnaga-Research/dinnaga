@@ -239,7 +239,7 @@ p, .body {
 }
 
 .deco {
-  /* KH Interference — for stylized one-offs, transmission headers */
+  /* Mono decorative role: stylized one-offs */
   font-family: var(--font-decorative);
   letter-spacing: 0.02em;
 }

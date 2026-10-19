@@ -225,7 +225,7 @@
 }
 
 /* ── Terminal (replaces the HUD plate) ──────────────────────
-   A working in-page terminal in the Sevastopol Interface face.
+   A working in-page terminal in the terminal face (Departure Mono).
    Per-element CRT: scanlines + curvature shadow + slow flicker.
    The user can type into a real <input> and "send" a question. */
 .terminal {
