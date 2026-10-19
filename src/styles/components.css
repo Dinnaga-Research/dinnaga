@@ -25,11 +25,11 @@
   color: var(--btn-fg);
   border: 1px solid var(--btn-border);
   border-radius: 0;
-  font-family: var(--dn-font-mono);
+  font-family: var(--dn-font-body);
   font-weight: 500;
   font-size: var(--dn-t-meta);
-  letter-spacing: var(--dn-ls-label);
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   text-decoration: none;
   cursor: pointer;
   transition: background var(--dn-dur-fast) var(--dn-ease-out),
@@ -100,8 +100,10 @@
   border-radius: 2px;
   font-family: var(--dn-font-mono);
   font-size: var(--dn-t-label);
-  letter-spacing: var(--dn-ls-label);
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  line-height: 1.4;
 }
 .chip-signal { background: var(--dn-text); color: var(--dn-bg); border-color: var(--dn-text); }
 .chip-warn   { background: transparent; color: var(--dn-text);  border-color: var(--dn-text); }
@@ -137,8 +139,10 @@
 .field-label {
   font-family: var(--dn-font-mono);
   font-size: var(--dn-t-label);
-  letter-spacing: var(--dn-ls-label);
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: none;
   color: var(--dn-text-label);
 }
 .field-hint { font-family: var(--dn-font-mono); font-size: var(--dn-t-label); color: var(--dn-text-label); }
@@ -199,7 +203,7 @@
   width: 8px; height: 8px;
   background: var(--dn-text);
   border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(192,254,4,0.18);
+  box-shadow: 0 0 0 2px rgba(232,232,232,0.18);
 }
 .dot-warn  { background: var(--dn-text);  box-shadow: 0 0 0 2px rgba(255,176,32,0.18); }
 .dot-error { background: var(--dn-text); box-shadow: 0 0 0 2px rgba(242,71,35,0.18); }
@@ -224,9 +228,11 @@
 .ticker-text {
   font-family: var(--dn-font-mono);
   font-size: var(--dn-t-label);
-  letter-spacing: var(--dn-ls-label);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
   color: var(--dn-text);
-  text-transform: uppercase;
+  text-transform: none;
 }
 @keyframes ticker-scroll {
   from { transform: translateX(0); }
@@ -306,7 +312,7 @@
   line-height: var(--dn-lh-heading);
   letter-spacing: var(--dn-ls-tight);
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: none;
   margin: 0;
 }
 .method-detail {
@@ -360,8 +366,9 @@
   font-family: var(--dn-font-mono);
   font-size: var(--dn-t-label);
   font-weight: 500;
-  letter-spacing: var(--dn-ls-label);
-  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: none;
 }
 .atisha-title {
   font-family: var(--dn-font-display);
@@ -369,7 +376,7 @@
   line-height: var(--dn-lh-heading);
   letter-spacing: var(--dn-ls-tight);
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: none;
   margin: 0;
 }
 .atisha-oneliner {
@@ -395,9 +402,35 @@
   margin-top: var(--dn-sp-2);
   font-family: var(--dn-font-mono);
   font-size: var(--dn-t-label);
-  letter-spacing: var(--dn-ls-label);
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: none;
   color: var(--dn-text-label);
 }
 .atisha-attr { color: var(--dn-text-2); }
 .atisha-date { color: var(--dn-text); }
+
+/* ── Tested mark (spec §9) ─────────────────────────────────────────── */
+.tested-mark {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  background-color: var(--dn-tested);
+  border-radius: 0;
+  vertical-align: 1px;
+  margin-right: 10px;
+}
+@media (forced-colors: active) {
+  .tested-mark {
+    background-color: CanvasText;
+  }
+}
+
+.tested-line {
+  font-family: var(--dn-font-body);
+  font-size: var(--dn-t-meta);
+  line-height: 1.5;
+  color: var(--dn-text);
+  margin: 0;
+}

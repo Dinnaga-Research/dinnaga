@@ -6,15 +6,10 @@
   color: var(--dn-text);
   min-height: 100vh;
   overflow-x: hidden;
-  /* Custom crosshair cursor — a tiny signal-green reticle.
-     Falls back to crosshair on older browsers. */
-  cursor:
-    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="none" stroke="%23c0fe04" stroke-width="1.2"/><line x1="0" y1="12" x2="6" y2="12" stroke="%23c0fe04" stroke-width="1"/><line x1="18" y1="12" x2="24" y2="12" stroke="%23c0fe04" stroke-width="1"/><line x1="12" y1="0" x2="12" y2="6" stroke="%23c0fe04" stroke-width="1"/><line x1="12" y1="18" x2="12" y2="24" stroke="%23c0fe04" stroke-width="1"/><circle cx="12" cy="12" r="1" fill="%23c0fe04"/></svg>') 12 12, crosshair;
+  cursor: auto;
 }
-/* Pointer cursor — a solid signal dot for clickable elements */
 .site a, .site button, .site [role="button"], .site .practice, .site .note, .site .filter-chip {
-  cursor:
-    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="7" fill="none" stroke="%23c0fe04" stroke-width="1.5"/><circle cx="11" cy="11" r="3" fill="%23c0fe04"/></svg>') 11 11, pointer;
+  cursor: pointer;
 }
 .site input, .site textarea {
   cursor: text;
@@ -47,29 +42,8 @@
   margin: 0;
   white-space: pre;
   font-family: var(--dn-font-mono);
-  /* Multi-layer text-shadow extrusion. Each shadow is a step deeper
-     and a step darker green. Stops at 8 layers — any more reads as blur. */
-  color: var(--dn-term-text);
-  text-shadow:
-    1px 1px 0 #8acd00,
-    2px 2px 0 #5e8d00,
-    3px 3px 0 #3d6300,
-    4px 4px 0 #244200,
-    5px 5px 0 #152a00,
-    6px 6px 0 #0d1c00,
-    7px 7px 0 #061100,
-    8px 8px 0 #030700;
-  animation: ascii-breathe 6s ease-in-out infinite;
-}
-@keyframes ascii-breathe {
-  0%, 100% { text-shadow:
-      1px 1px 0 #8acd00, 2px 2px 0 #5e8d00, 3px 3px 0 #3d6300,
-      4px 4px 0 #244200, 5px 5px 0 #152a00, 6px 6px 0 #0d1c00,
-      7px 7px 0 #061100, 8px 8px 0 #030700; }
-  50%      { text-shadow:
-      1px 1px 0 #9adf00, 2px 2px 0 #6da300, 3px 3px 0 #4a7700,
-      4px 4px 0 #2d5300, 5px 5px 0 #1c3700, 6px 6px 0 #112400,
-      7px 7px 0 #091500, 8px 8px 0 #040a00; }
+  color: var(--dn-text-2);
+  text-shadow: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .ascii-stack pre { animation: none; }
@@ -122,23 +96,7 @@
   display: contents;
   animation: nav-reveal 800ms var(--dn-ease-reveal) forwards;
 }
-.green-square {
-  position: fixed;
-  left: 24px;
-  top: 20px;
-  width: 20px;
-  height: 20px;
-  background: var(--signal);
-  z-index: 51;
-  pointer-events: none;
-  animation: green-square 900ms var(--dn-ease-reveal) 200ms both;
-  opacity: 0;
-}
-@keyframes green-square {
-  0%   { transform: translateX(0); opacity: 1; }
-  90%  { transform: translateX(calc(100vw - 80px)); opacity: 1; }
-  100% { transform: translateX(calc(100vw - 80px)); opacity: 0; }
-}
+/* green-square removed per spec §11: lime and ambient motion */
 
 /* ── Hero ───────────────────────────────────────────────────── */
 .hero {
@@ -415,10 +373,7 @@
 .hero-plate .hud.tr { top: 16px; right: 16px; }
 .hero-plate .hud.br { bottom: 16px; right: 16px; color: var(--dn-text-2); }
 .hero-plate .hud.bl { bottom: 16px; left: 16px; color: var(--dn-text-2); }
-.hero-plate .crosshair { position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; border: 1px solid var(--signal); border-radius: 50%; transform: translate(-50%, -50%); }
-.hero-plate .crosshair::before, .hero-plate .crosshair::after { content: ""; position: absolute; background: var(--signal); }
-.hero-plate .crosshair::before { top: 50%; left: -10px; width: 64px; height: 1px; transform: translateY(-50%); }
-.hero-plate .crosshair::after  { top: -10px; left: 50%; width: 1px; height: 64px; transform: translateX(-50%); }
+/* hero-plate crosshair removed per spec §11: lime decoration */
 
 /* ── Practices ─────────────────────────────────────────────── */
 .section { padding: 80px 24px; border-bottom: 1px solid var(--dn-rule-strong); }

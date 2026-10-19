@@ -22,9 +22,6 @@
   --dn-selection-bg: #e8e8e8; /* ::selection background */
   --dn-selection-text: #0a0a0a; /* ::selection text */
 
-  /* ── Legacy —signal alias for lime decoration rules left for ticket 6 ──── */
-  --signal: var(--dn-tested); /* Alias for backward compat with lime-only rules */
-
   /* ── §4.4 Terminal palette ─────────────────────────────────────────── */
   --dn-term-bg: #050b03;      /* Screen ground */
   --dn-term-bar: #0e1907;     /* Chrome bar ground */
