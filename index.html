@@ -22,18 +22,6 @@
     <meta name="twitter:image" content="https://dinnaga.ai/og.png" />
     <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" type="image/svg+xml" href="/assets/logo-mark.svg" />
-    <script>
-      // Restores the path encoded by 404.html (SPA fallback for GitHub Pages).
-      (function () {
-        var l = window.location;
-        if (l.search[1] === '/') {
-          var decoded = l.search.slice(1).split('&').map(function (s) {
-            return s.replace(/~and~/g, '&');
-          }).join('?');
-          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
-        }
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>

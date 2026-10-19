@@ -38,6 +38,8 @@ const BANNED_CLAIMS: ClaimEntry[] = [
   { pattern: /by ethos/i, scope: 'site', bugId: 'H3' },
   { pattern: /\bLIVE\b/, scope: 'site', bugId: 'H5' },
   { pattern: /dot-live/, scope: 'site', bugId: 'H5' },
+  { pattern: /GitHub Pages/i, scope: 'site', bugId: 'H6' },
+  { pattern: /404\.html/, scope: 'site+docs', bugId: 'H6' },
 ];
 
 function getSiteFiles(): string[] {

@@ -18,7 +18,7 @@ enforced by `src/test/dirDocs.test.ts`.
   2026-09-26, rendered as a dated archive) + report viewer (data: `src/data/weeklyRuns.ts`;
   reports served from `public/artifact-docs/weekly/`, outside the route namespace).
 - `/colophon` — `Colophon/` — colophon page.
-- 404 — `NotFound/` — SPA fallback (`public/404.html` redirect trick).
+- 404 — `NotFound/` — SPA fallback (via `vercel.json` rewrite).
 
 ## Data flow: week-in-review → weeklyRuns.json → /weekly
 `src/data/weeklyRuns.json` is a **vendored snapshot** appended by the Saturday

@@ -6,6 +6,7 @@ _Last updated 2026-10-18._
 - Anonymity dropped: site now names David Ryan as founder (2026-10-18, #27).
 - Consent banner and nav live badge deleted (2026-10-18, #27).
 - The megazord bench deleted (2026-10-18, #27).
+- GitHub Pages fallback script removed; deep links verified on Vercel preview (2026-10-18, #38).
 
 ## Live now
 - Multi-page two-pillar lab site is **live at https://dinnaga.ai**, hosted on **Vercel** (`weytanis-projects/dinnaga`) since 2026-07-08. HTTPS is live via Let's Encrypt through Vercel. GitHub Pages hosting is retired. **Deploying is a manual step**: `vercel deploy --prod` from the repo root. There is no Vercel Git integration — merging a PR ships nothing (verified 2026-08-09: PR #4 merged, newest deployment was 29 days old until a manual deploy). `.github/workflows/ci.yml` runs lint/unit-test/build as a deterministic PR gate — it does not deploy.
