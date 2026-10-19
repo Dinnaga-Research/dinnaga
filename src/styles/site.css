@@ -384,7 +384,6 @@
   font-size: 14px;
   line-height: 1.45;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
 .t-line { white-space: pre-wrap; word-break: break-word; }
 .t-in   { color: var(--signal); text-shadow: 0 0 8px rgba(192,254,4,0.55); }

@@ -1,15 +1,16 @@
-// ABOUTME: Hero terminal boot sequence — placeholder lines from the UI kit.
+// ABOUTME: Hero terminal boot sequence — generated from the Atisha catalog count.
 // ABOUTME: The Terminal component types these in character-by-character on mount.
 import type { BootLine } from '../types';
+import { ATISHA_CATALOG } from './atishaCatalog';
 
-export const BOOT_LINES: BootLine[] = [
-  { text: 'DINNAGA-OS  v0.4.1   //   TERMINAL', delay: 60 },
-  { text: 'ESTABLISHING UPLINK  ........  OK', delay: 70 },
-  { text: 'LOADING ATISHA INDEX ........  OK', delay: 70 },
-  { text: 'OPERATOR  : VISITOR', delay: 60 },
-  { text: 'ETHOS     : OPEN SOURCE', delay: 60 },
-  { text: 'VALIDATION BAR : ENGAGED', delay: 60 },
-  { text: '', delay: 30 },
-  { text: '▸  WE VALIDATE THINGS, THEN SHARE WHAT IS GENUINELY USEFUL.', delay: 60 },
-  { text: '', delay: 30 },
-];
+export function getBootLines(count: number): BootLine[] {
+  const docWord = count === 1 ? 'doc' : 'docs';
+  return [
+    { text: 'dinnaga research — behind the scenes', delay: 60 },
+    { text: `atisha: ${count} public ${docWord}`, delay: 70 },
+    { text: 'everything else is backstage.', delay: 70 },
+    { text: 'know the phrase? type it below.', delay: 60 },
+  ];
+}
+
+export const BOOT_LINES: BootLine[] = getBootLines(ATISHA_CATALOG.length);

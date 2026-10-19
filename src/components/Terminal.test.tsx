@@ -23,7 +23,24 @@ describe('Terminal', () => {
     await userEvent.keyboard('{Enter}');
 
     expect(screen.getByText('> How do we start?')).toBeInTheDocument();
-    expect(screen.getByText(/TRANSMISSION RECEIVED/)).toBeInTheDocument();
+    expect(screen.getByText('nothing was sent. this terminal only listens for one phrase.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '[RESET]' })).toBeInTheDocument();
+  });
+
+  it('does not show TRANSMISSION text and only shows the caret and reset button', async () => {
+    render(
+      <MemoryRouter>
+        <Terminal bootLines={BOOT} />
+      </MemoryRouter>,
+    );
+
+    const input = await screen.findByLabelText('Ask Dinnaga a question', undefined, {
+      timeout: 3000,
+    });
+    await userEvent.type(input, 'hello');
+    await userEvent.keyboard('{Enter}');
+
+    expect(screen.queryByText(/TRANSMISSION/)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: '[RESET]' })).toBeInTheDocument();
   });
 

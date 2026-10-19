@@ -19,6 +19,16 @@ const BANNED_CLAIMS: ClaimEntry[] = [
   { pattern: /loadout|ripperdoc/i, scope: 'site+docs', bugId: 'H2' },
   { pattern: /megazord|\bzords?\b|implants?\b/i, scope: 'site', bugId: 'H2' },
   { pattern: /TESTS GREEN|PAPERS REPRODUCED/, scope: 'site', bugId: 'H11' },
+  { pattern: /PING 42/, scope: 'site', bugId: 'H4' },
+  { pattern: /FIDELITY/, scope: 'site', bugId: 'H4' },
+  { pattern: /SIGNAL \/\/ 042/, scope: 'site', bugId: 'H10' },
+  { pattern: /v0\.4\.1/, scope: 'site', bugId: 'H10' },
+  { pattern: /18:42Z/, scope: 'site', bugId: 'H10' },
+  { pattern: /UPLINK/, scope: 'site', bugId: 'H10' },
+  { pattern: /DINNAGA-OS/, scope: 'site', bugId: 'H10' },
+  { pattern: /ENCRYPTED/, scope: 'site', bugId: 'H10' },
+  { pattern: /TRANSMISSION (RECEIVED|CLOSED)/, scope: 'site', bugId: 'H10' },
+  { pattern: /VALIDATION BAR/, scope: 'site', bugId: 'H10' },
 ];
 
 function getSiteFiles(): string[] {
