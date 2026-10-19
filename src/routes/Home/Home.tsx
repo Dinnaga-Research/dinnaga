@@ -6,7 +6,6 @@ import { Practices } from '../../components/Practices';
 import { DataPanel } from '../../components/DataPanel';
 import { AsciiArt } from '../../components/AsciiArt';
 import { CautionDivider } from '../../components/CautionDivider';
-import { Transmission } from '../../components/Transmission';
 import { TICKER_ITEMS } from '../../data/tickerItems';
 
 export function Home() {
@@ -18,7 +17,6 @@ export function Home() {
       <DataPanel />
       <AsciiArt />
       <CautionDivider />
-      <Transmission />
     </>
   );
 }

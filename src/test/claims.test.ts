@@ -29,6 +29,10 @@ const BANNED_CLAIMS: ClaimEntry[] = [
   { pattern: /ENCRYPTED/, scope: 'site', bugId: 'H10' },
   { pattern: /TRANSMISSION (RECEIVED|CLOSED)/, scope: 'site', bugId: 'H10' },
   { pattern: /VALIDATION BAR/, scope: 'site', bugId: 'H10' },
+  { pattern: /ONLINE/, scope: 'site', bugId: 'H7' },
+  { pattern: /Initiative is open/i, scope: 'site', bugId: 'H7' },
+  { pattern: /grows as we validate/i, scope: 'site', bugId: 'H7' },
+  { pattern: /Initiatives live/i, scope: 'site', bugId: 'H7' },
 ];
 
 function getSiteFiles(): string[] {

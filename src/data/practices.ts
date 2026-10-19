@@ -1,15 +1,15 @@
-// ABOUTME: The lab's stance + two pillars — rendered by Practices.tsx.
-// ABOUTME: Open-source ethos, the project-planning funnel, and the Atisha Initiative.
+// ABOUTME: The lab's practices — rendered by Practices.tsx.
+// ABOUTME: Public openness, the project-planning funnel, and the Atisha public library.
 import type { Practice } from '../types';
 
 export const PRACTICES: Practice[] = [
   {
     num: '01',
-    title: 'Open by ethos',
+    title: 'What is public',
     icon: 'ethos',
-    summary: 'We validate things and share what is genuinely useful, openly.',
-    body: 'We validate things and share what is genuinely useful, openly — to make AI adoption faster for everyone. The lab is anonymous; the work is real and checkable.',
-    meta: '▸ open source',
+    summary: 'This site\'s source and the Atisha board are public on GitHub.',
+    body: 'This site\'s source is public on GitHub, and so is the Atisha board where plans for Atisha are tracked. Project Planning is private.',
+    meta: '▸ public on GitHub',
   },
   {
     num: '02',
@@ -21,10 +21,10 @@ export const PRACTICES: Practice[] = [
   },
   {
     num: '03',
-    title: 'The Atisha Initiative',
+    title: 'Atisha',
     icon: 'atisha',
-    summary: 'The open-source reference of what we validated as worth sharing.',
-    body: 'What comes out the other end: a public, open-source reference of the tools, skills, and methods we have validated as genuinely useful — so you do not have to take it on faith.',
-    meta: '▸ validated, then shared',
+    summary: 'The public library, where tested documents are published.',
+    body: 'Atisha is the public library. Every document there was tested before it was published, and says how. Whitepapers and living documents are planned.',
+    meta: '▸ the public library',
   },
 ];

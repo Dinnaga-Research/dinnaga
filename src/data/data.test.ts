@@ -28,7 +28,7 @@ describe('content data files', () => {
     ]);
   });
 
-  it('ships exactly six ticker items', () => {
-    expect(TICKER_ITEMS).toHaveLength(6);
+  it('ships exactly five ticker items', () => {
+    expect(TICKER_ITEMS).toHaveLength(5);
   });
 });

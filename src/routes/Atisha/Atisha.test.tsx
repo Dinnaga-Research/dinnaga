@@ -26,17 +26,45 @@ const THIRD_PARTY_ENTRY: AtishaEntry = {
 };
 
 describe('Atisha', () => {
-  it('renders the mission heading and the repo link', () => {
+  it('renders the heading "Atisha" exactly', () => {
     render(<MemoryRouter><Atisha /></MemoryRouter>);
-    expect(screen.getByRole('heading', { name: /Atisha Initiative/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /open-source reference/i }))
-      .toHaveAttribute('href', 'https://github.com/orgs/Dinnaga-Research/projects/1');
+    expect(screen.getByRole('heading', { name: 'Atisha' })).toBeInTheDocument();
+  });
+
+  it('renders both approved paragraphs verbatim', () => {
+    render(<MemoryRouter><Atisha /></MemoryRouter>);
+    expect(screen.getByText('The public library. Every document here was tested before it was published, and says how.'))
+      .toBeInTheDocument();
+    expect(screen.getByText('We only publish what we\'ve used ourselves. When a document relies on someone else\'s tool, it names the tool and links to it.'))
+      .toBeInTheDocument();
   });
 
   it('shows the empty-state when the catalog has no entries', () => {
     render(<MemoryRouter><Atisha /></MemoryRouter>);
     // ATISHA_CATALOG ships empty at launch.
-    expect(screen.getByText(/first validated entries are on the way/i)).toBeInTheDocument();
+    expect(screen.getByText('Nothing is published here yet. Whitepapers and living documents are planned.'))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/Cheat sheets and reports today/i)).not.toBeInTheDocument();
+  });
+
+  it('shows the "Cheat sheets and reports today" line when the catalog has entries', () => {
+    render(<MemoryRouter><Atisha entries={[FIRST_PARTY_ENTRY]} /></MemoryRouter>);
+    expect(screen.getByText('Cheat sheets and reports today. Whitepapers and living documents are planned.'))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/Nothing is published here yet/i)).not.toBeInTheDocument();
+  });
+
+  it('renders the Atisha board link', () => {
+    render(<MemoryRouter><Atisha /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: /Atisha board/ }))
+      .toHaveAttribute('href', 'https://github.com/orgs/Dinnaga-Research/projects/1');
+  });
+
+  it('does not render any open-source or genuinely useful text', () => {
+    render(<MemoryRouter><Atisha /></MemoryRouter>);
+    expect(screen.queryByText(/open-source/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/genuinely useful/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/on the way/i)).not.toBeInTheDocument();
   });
 
   it('renders a first-party entry card with no attribution span', () => {

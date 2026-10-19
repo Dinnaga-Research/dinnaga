@@ -1,32 +1,36 @@
-// ABOUTME: Atisha Initiative route (/atisha) — the open-source validated-reference front door.
-// ABOUTME: Renders mission, the validation bar, and the catalog (or an honest empty-state).
+// ABOUTME: Atisha public library route (/atisha) — the validated-reference front door.
+// ABOUTME: Renders mission, the state line based on catalog, and the catalog (or an honest empty-state).
 import { ATISHA_CATALOG } from '../../data/atishaCatalog';
 import { ATISHA_PROJECT_URL } from '../../data/links';
 import type { AtishaEntry } from '../../types';
 
 export function Atisha({ entries = ATISHA_CATALOG }: { entries?: AtishaEntry[] } = {}) {
   return (
-    <section className="section" id="atisha" data-screen-label="Atisha Initiative">
+    <section className="section" id="atisha" data-screen-label="Atisha">
       <header className="section-head">
-        <span className="section-eye">// VALIDATED, THEN SHARED</span>
-        <h1 className="section-title">The Atisha Initiative.</h1>
+        <span className="section-eye">// THE PUBLIC LIBRARY</span>
+        <h1 className="section-title">Atisha</h1>
       </header>
       <p className="panel-body">
-        Atisha is an{' '}
-        <a href={ATISHA_PROJECT_URL}>open-source reference</a> of the tools, skills, and methods the lab
-        has validated as genuinely useful — published openly to make AI adoption faster for everyone.
+        The public library. Every document here was tested before it was published, and says how.
       </p>
       <p className="panel-body">
-        The bar: we have to have used it and checked it ourselves. Veracity-first, real APIs, no
-        mocks. Third-party tools we rely on are credited, never claimed.
+        We only publish what we've used ourselves. When a document relies on someone else's tool, it
+        names the tool and links to it.
       </p>
 
-      {entries.length === 0 ? (
-        <p className="atisha-empty">
-          ▸ The first validated entries are on the way. The Atisha Initiative is tracked in the open
-          as <a href={ATISHA_PROJECT_URL}>the Atisha project</a>.
-        </p>
-      ) : (
+      <p className="panel-body">
+        {entries.length === 0
+          ? 'Nothing is published here yet. Whitepapers and living documents are planned.'
+          : 'Cheat sheets and reports today. Whitepapers and living documents are planned.'}
+      </p>
+
+      <p className="panel-body">
+        Plans for Atisha are tracked on the public{' '}
+        <a href={ATISHA_PROJECT_URL}>Atisha board</a>.
+      </p>
+
+      {entries.length > 0 && (
         <ul className="atisha-catalog">
           {entries.map((e) => (
             <li className="atisha-entry" key={e.slug}>

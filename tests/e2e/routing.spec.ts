@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 const ROUTES = [
-  { path: '/atisha', heading: /Atisha Initiative/i },
+  { path: '/atisha', heading: 'Atisha' },
   { path: '/method', heading: /From read to ship/i },
   { path: '/colophon', heading: /Colophon/i },
 ];
