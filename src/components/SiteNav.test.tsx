@@ -8,11 +8,11 @@ import { SiteNav } from './SiteNav';
 describe('SiteNav', () => {
   it('renders the brand link and route links', () => {
     render(<MemoryRouter><SiteNav /></MemoryRouter>);
-    expect(screen.getByRole('link', { name: /DINNAGA/ })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: 'ATISHA' })).toHaveAttribute('href', '/atisha');
-    expect(screen.getByRole('link', { name: 'HOW WE WORK' })).toHaveAttribute('href', '/method');
-    expect(screen.getByRole('link', { name: 'COLOPHON' })).toHaveAttribute('href', '/colophon');
-    expect(screen.getByRole('link', { name: 'WEEKLY' })).toHaveAttribute('href', '/weekly');
+    expect(screen.getByRole('link', { name: /Dinnaga/ })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Atisha' })).toHaveAttribute('href', '/atisha');
+    expect(screen.getByRole('link', { name: 'How we work' })).toHaveAttribute('href', '/method');
+    expect(screen.getByRole('link', { name: 'Colophon' })).toHaveAttribute('href', '/colophon');
+    expect(screen.getByRole('link', { name: 'Weekly' })).toHaveAttribute('href', '/weekly');
   });
 
   it('does not list the hidden artifact shelf', () => {

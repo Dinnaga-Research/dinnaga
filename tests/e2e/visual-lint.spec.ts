@@ -102,3 +102,50 @@ test('.green-square never renders', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.green-square')).toHaveCount(0);
 });
+
+const SURVIVING = ['/atisha', '/method', '/colophon', '/artifacts', '/artifacts/slamwich-tasting-report', '/weekly', '/weekly/2026-08-08', '/nope'];
+
+for (const path of SURVIVING) {
+  test(`${path}: no chrome prefixes, label-role eyebrows, sentence-case nav and buttons`, async ({ page }) => {
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+    const r = await page.evaluate(() => {
+      const bad: string[] = [];
+      const eyebrows: string[] = [];
+      const nav: string[] = [];
+      const buttons: string[] = [];
+      const surviving = (el: Element) =>
+        !el.closest('.hero, .ticker, .practices, .ascii-section, .caution, .data-panel, .tx-block, [aria-hidden="true"]');
+      for (const el of Array.from(document.querySelectorAll('body *'))) {
+        if (!surviving(el)) continue;
+        const cs = getComputedStyle(el);
+        const own = Array.from(el.childNodes)
+          .filter((n) => n.nodeType === Node.TEXT_NODE)
+          .map((n) => (n.textContent ?? '').trim())
+          .join(' ')
+          .trim();
+        if (own && (own.startsWith('//') || /^\d{2} ·/.test(own))) bad.push(`${el.className}: ${own}`);
+        if (el.classList.contains('section-eye') && own) {
+          const ok =
+            cs.fontFamily.startsWith('"JetBrains Mono"') &&
+            cs.fontWeight === '500' &&
+            cs.fontSize === '12px' &&
+            cs.color === 'rgb(154, 154, 154)' &&
+            parseFloat(cs.letterSpacing) <= 0.08 * 12 + 0.001;
+          if (!ok) eyebrows.push(`${own} ${cs.fontFamily} ${cs.fontWeight} ${cs.fontSize} ${cs.color} ${cs.letterSpacing}`);
+        }
+        if (el.closest('.nav-links') && el.tagName === 'A' && cs.textTransform !== 'none') nav.push(own);
+        if ((el.tagName === 'BUTTON' || el.classList.contains('btn')) && cs.textTransform === 'uppercase') {
+          if (!cs.fontFamily.startsWith('"JetBrains Mono"')) buttons.push(own);
+        }
+      }
+      return { bad, eyebrows, nav, buttons };
+    });
+    expect(r).toEqual({ bad: [], eyebrows: [], nav: [], buttons: [] });
+  });
+}
+
+test('nav shows labels as written in the nav data', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('.nav-links a')).toHaveText(['Atisha', 'How we work', 'Colophon', 'Weekly']);
+});

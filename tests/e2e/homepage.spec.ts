@@ -4,7 +4,7 @@ test('renders the homepage hero and lab sections', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Validated, then shared.' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'How the lab works.' })).toBeVisible();
-  await expect(page.getByText(/© 2026 DINNAGA/)).toBeVisible();
+  await expect(page.getByText(/© 2026 Dinnaga Research/)).toBeVisible();
 });
 
 test('has no analytics banner', async ({ page }) => {
@@ -21,7 +21,7 @@ test('removes the travelling green square after the mount animation', async ({ p
 
 test('nav links route between pages', async ({ page }) => {
   await page.goto('/');
-  await page.locator('.nav-links').getByRole('link', { name: 'ATISHA' }).click();
+  await page.locator('.nav-links').getByRole('link', { name: 'Atisha' }).click();
   await expect(page).toHaveURL(/\/atisha$/);
   // Atisha heading is asserted in routing.spec.ts once Phase 3 builds the page.
 });

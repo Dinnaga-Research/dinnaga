@@ -5,7 +5,7 @@ export function NotFound() {
   return (
     <section className="section" id="notfound" data-screen-label="404">
       <header className="section-head">
-        <span className="section-eye">// 404 · SIGNAL LOST</span>
+        <span className="section-eye">404 · Signal lost</span>
         <h1 className="section-title">No transmission here.</h1>
       </header>
       <p className="panel-body">

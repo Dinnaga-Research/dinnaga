@@ -21,7 +21,7 @@ describe('ArtifactViewer', () => {
     expect(
       screen.getByRole('heading', { name: 'SLAMWICH Tasting Report' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('// SLAMWICH')).toBeInTheDocument();
+    expect(screen.getByText('Slamwich')).toBeInTheDocument();
     expect(screen.getByText(/published 2026-08-08/)).toBeInTheDocument();
     expect(screen.getByText(/localhost:9021/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /open standalone/i })).toHaveAttribute(
