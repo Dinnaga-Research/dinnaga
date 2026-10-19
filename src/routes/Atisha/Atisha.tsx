@@ -8,7 +8,7 @@ export function Atisha({ entries = ATISHA_CATALOG }: { entries?: AtishaEntry[] }
   return (
     <section className="section" id="atisha" data-screen-label="Atisha">
       <header className="section-head">
-        <span className="section-eye">// THE PUBLIC LIBRARY</span>
+        <span className="section-eye">The public library</span>
         <h1 className="section-title">Atisha</h1>
       </header>
       <p className="panel-body">
@@ -34,7 +34,7 @@ export function Atisha({ entries = ATISHA_CATALOG }: { entries?: AtishaEntry[] }
         <ul className="atisha-catalog">
           {entries.map((e) => (
             <li className="atisha-entry" key={e.slug}>
-              <span className="atisha-cat">{e.category.toUpperCase()}</span>
+              <span className="atisha-cat">{e.category}</span>
               <h3 className="atisha-title">{e.title}</h3>
               <p className="atisha-oneliner">{e.oneLiner}</p>
               <p className="atisha-why">{e.whyUseful}</p>

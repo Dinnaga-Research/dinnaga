@@ -1,4 +1,4 @@
-// ABOUTME: Shared site chrome around routed pages — nav, footer, CRT overlay.
+// ABOUTME: Shared site chrome around routed pages — nav and footer.
 // ABOUTME: Renders the matched route via <Outlet/>.
 import { Outlet } from 'react-router-dom';
 import { SiteNav } from './SiteNav';
@@ -15,7 +15,6 @@ export function Layout() {
         <Outlet />
       </main>
       <SiteFooter />
-      <div className="crt-overlay" aria-hidden="true" />
     </div>
   );
 }

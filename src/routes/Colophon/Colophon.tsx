@@ -6,7 +6,7 @@ export function Colophon() {
   return (
     <section className="section" id="colophon" data-screen-label="Colophon">
       <header className="section-head">
-        <span className="section-eye">// COLOPHON</span>
+        <span className="section-eye">Colophon</span>
         <h1 className="section-title">Colophon.</h1>
       </header>
       <div className="panel-body-wrap">

@@ -7,7 +7,7 @@ export function Artifacts() {
   return (
     <section className="section" id="artifacts" data-screen-label="Artifacts">
       <header className="section-head">
-        <span className="section-eye">// ARTIFACTS</span>
+        <span className="section-eye">Artifacts</span>
         <h1 className="section-title">Documents off the bench.</h1>
       </header>
       <p className="panel-body">

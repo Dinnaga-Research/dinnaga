@@ -6,7 +6,7 @@ export const ARTIFACTS: ArtifactEntry[] = [
   {
     slug: 'llm-best-practices-github-copilot',
     title: 'Applying LLM Best Practices in GitHub Copilot',
-    project: 'HERMES',
+    project: 'Hermes',
     oneLiner:
       'Cheat sheet: the hermes LLM doctrine resolved into GitHub Copilot\u2019s control surface \u2014 instructions files, the cloud agent\u2019s fences, CI as verifier, the premium-request meter.',
     published: '2026-09-09',
@@ -16,7 +16,7 @@ export const ARTIFACTS: ArtifactEntry[] = [
   {
     slug: 'llm-best-practices-copilot-studio',
     title: 'Applying LLM Best Practices in Microsoft Copilot Studio',
-    project: 'HERMES',
+    project: 'Hermes',
     oneLiner:
       'Cheat sheet: the hermes LLM doctrine resolved into Copilot Studio\u2019s control surface \u2014 topics before orchestration, named knowledge, Entra Agent IDs, DLP, the credit meter.',
     published: '2026-09-09',
@@ -26,7 +26,7 @@ export const ARTIFACTS: ArtifactEntry[] = [
   {
     slug: 'slamwich-tasting-report',
     title: 'SLAMWICH Tasting Report',
-    project: 'SLAMWICH',
+    project: 'Slamwich',
     oneLiner:
       'The synthesis of the 84-dish portfolio test kitchen — corpus traits, the technique leaderboard, and specimen walkthroughs.',
     published: '2026-08-08',

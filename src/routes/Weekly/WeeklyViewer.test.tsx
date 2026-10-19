@@ -18,7 +18,7 @@ function renderViewer(date: string) {
 describe('WeeklyViewer', () => {
   it('renders the header strip for a valid date', () => {
     renderViewer('2026-08-08');
-    expect(screen.getByText('// WEEK IN REVIEW')).toBeInTheDocument();
+    expect(screen.getByText('Week in review')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: '3–8 Aug 2026' }),
     ).toBeInTheDocument();

@@ -147,7 +147,7 @@ export function Terminal({
                 className="t-input"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="ASK A QUESTION_"
+                placeholder="ask a question"
                 spellCheck={false}
                 autoComplete="off"
                 aria-label="Ask Dinnaga a question"

@@ -2,7 +2,9 @@
 // ABOUTME: StrictMode is intentionally omitted; its dev double-invoke would
 // ABOUTME: fire the one-shot signature motions (nav reveal, CTA blink) twice.
 import { createRoot } from 'react-dom/client';
-import './styles/colors_and_type.css';
+import './styles/fonts.css';
+import './styles/tokens.css';
+import './styles/base.css';
 import './styles/components.css';
 import './styles/site.css';
 import './styles/artifacts.css';

@@ -30,9 +30,6 @@ export function AsciiArt() {
       <div className="ascii-stack" aria-hidden="true">
         <pre>{ASCII_ART}</pre>
       </div>
-      <div className="ascii-caption">
-        <span>▸ EXTRUDED IN EIGHT TINTS OF #C0FE04 · BREATHING ENABLED</span>
-      </div>
     </section>
   );
 }

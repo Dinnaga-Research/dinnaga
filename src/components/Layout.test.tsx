@@ -20,4 +20,9 @@ describe('Layout', () => {
     expect(screen.getByText('HOME CONTENT')).toBeInTheDocument();
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
   });
+
+  it('does not render a CRT overlay element', () => {
+    const { container } = renderAt('/');
+    expect(container.querySelector('.crt-overlay')).not.toBeInTheDocument();
+  });
 });

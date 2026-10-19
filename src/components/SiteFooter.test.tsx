@@ -32,6 +32,6 @@ describe('SiteFooter', () => {
       </MemoryRouter>,
     );
     expect(screen.getByText('Dinnaga Research is run by David Ryan.')).toBeInTheDocument();
-    expect(screen.getByText('© 2026 DINNAGA')).toBeInTheDocument();
+    expect(screen.getByText('© 2026 Dinnaga Research')).toBeInTheDocument();
   });
 });

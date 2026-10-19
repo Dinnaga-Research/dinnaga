@@ -13,7 +13,7 @@ export function WeeklyViewer() {
   const title = formatDateRange(run.windowStart, run.date);
   return (
     <DocFrame
-      eyebrow="// WEEK IN REVIEW"
+      eyebrow="Week in review"
       title={title}
       meta={`run ${run.date}`}
       docPath={run.docPath}
