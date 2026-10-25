@@ -1,0 +1,74 @@
+Font files and their upstream sources, instances, unicode ranges, and measured byte sizes.
+Spec: docs/superpowers/specs/2026-10-18-visual-system.md §5.2
+
+archivo-expanded-800.woff2
+  Family: Archivo Expanded
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/archivo/Archivo[wdth,wght].ttf
+  Instance: wdth=125 wght=800
+  Ranges: LATIN + EXTA (Latin Extended-A for IAST letters)
+  Bytes: 17704
+
+atkinson-next-400.woff2
+  Family: Atkinson Hyperlegible Next
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/atkinsonhyperlegiblenext/AtkinsonHyperlegibleNext[wght].ttf
+  Instance: wght=400
+  Ranges: LATIN + EXTA
+  Bytes: 14272
+
+atkinson-next-500.woff2
+  Family: Atkinson Hyperlegible Next
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/atkinsonhyperlegiblenext/AtkinsonHyperlegibleNext[wght].ttf
+  Instance: wght=500
+  Ranges: LATIN + EXTA
+  Bytes: 14912
+
+atkinson-next-400-italic.woff2
+  Family: Atkinson Hyperlegible Next
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/atkinsonhyperlegiblenext/AtkinsonHyperlegibleNext-Italic[wght].ttf
+  Instance: wght=400
+  Ranges: LATIN + EXTA
+  Bytes: 16632
+
+atkinson-next-500-italic.woff2
+  Family: Atkinson Hyperlegible Next
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/atkinsonhyperlegiblenext/AtkinsonHyperlegibleNext-Italic[wght].ttf
+  Instance: wght=500
+  Ranges: LATIN + EXTA
+  Bytes: 16920
+
+jetbrains-mono-400.woff2
+  Family: JetBrains Mono
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/jetbrainsmono/JetBrainsMono[wght].ttf
+  Instance: wght=400
+  Ranges: LATIN + ARROWS
+  Bytes: 21108
+
+jetbrains-mono-500.woff2
+  Family: JetBrains Mono
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/jetbrainsmono/JetBrainsMono[wght].ttf
+  Instance: wght=500
+  Ranges: LATIN + ARROWS
+  Bytes: 21700
+
+departure-mono-400.woff2
+  Family: Departure Mono
+  Source: rektdeckard/departure-mono v1.500 DepartureMono-Regular
+  Instance: Regular (static)
+  Ranges: LATIN + ARROWS + BOX
+  Bytes: 8612
+
+noto-sans-iast-greek-400.woff2
+  Family: Noto Sans
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/notosans/NotoSans[wdth,wght].ttf
+  Instance: wdth=100 wght=400
+  Ranges: IAST-GREEK
+  Bytes: 7948
+
+noto-sans-iast-greek-500.woff2
+  Family: Noto Sans
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/notosans/NotoSans[wdth,wght].ttf
+  Instance: wdth=100 wght=500
+  Ranges: IAST-GREEK
+  Bytes: 7972
+
+Total measured: 147,780 bytes

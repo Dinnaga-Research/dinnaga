@@ -11,7 +11,7 @@ export function SiteFooter() {
         <div className="foot-brand">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <BrandMark size={28} />
-            <span className="word">DINNAGA</span>
+            <span className="word">Dinnaga Research</span>
           </div>
           <p>Dinnaga Research is run by David Ryan.</p>
         </div>
@@ -28,8 +28,7 @@ export function SiteFooter() {
         </nav>
       </div>
       <div className="foot-meta">
-        <span>© 2026 DINNAGA</span>
-        <span>// VALIDATE · THEN SHARE</span>
+        <span>© 2026 Dinnaga Research</span>
       </div>
     </footer>
   );

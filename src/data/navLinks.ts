@@ -4,7 +4,7 @@ import type { NavLink } from '../types';
 
 export const NAV_LINKS: NavLink[] = [
   { label: 'Atisha', to: '/atisha' },
-  { label: 'How We Work', to: '/method' },
+  { label: 'How we work', to: '/method' },
   { label: 'Colophon', to: '/colophon' },
   { label: 'Weekly', to: '/weekly' },
 ];

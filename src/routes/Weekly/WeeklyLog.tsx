@@ -10,7 +10,7 @@ export function WeeklyLog() {
   return (
     <section className="section" id="weekly" data-screen-label="Weekly">
       <header className="section-head">
-        <span className="section-eye">// WEEKLY</span>
+        <span className="section-eye">Weekly</span>
         <h1 className="section-title">The Saturday run log.</h1>
       </header>
       <p className="panel-body">

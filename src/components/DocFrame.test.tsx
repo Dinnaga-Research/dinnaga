@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { DocFrame } from './DocFrame';
 
 const BASE = {
-  eyebrow: '// TEST DOC',
+  eyebrow: 'Test doc',
   title: 'Test Document',
   meta: 'published 2026-01-01',
   docPath: '/artifact-docs/test.html',
@@ -15,7 +15,7 @@ const BASE = {
 describe('DocFrame', () => {
   it('renders the header strip: eyebrow, title, meta, and standalone link', () => {
     render(<DocFrame {...BASE} />);
-    expect(screen.getByText('// TEST DOC')).toBeInTheDocument();
+    expect(screen.getByText('Test doc')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Test Document', level: 1 })).toBeInTheDocument();
     expect(screen.getByText('published 2026-01-01')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /open standalone/i })).toHaveAttribute(

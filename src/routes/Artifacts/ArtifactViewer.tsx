@@ -11,7 +11,7 @@ export function ArtifactViewer() {
   if (!artifact) return <NotFound />;
   return (
     <DocFrame
-      eyebrow={`// ${artifact.project}`}
+      eyebrow={artifact.project}
       title={artifact.title}
       meta={`published ${artifact.published}`}
       note={artifact.note || undefined}

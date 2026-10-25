@@ -9,7 +9,7 @@ import { WeeklyLog } from './WeeklyLog';
 describe('WeeklyLog', () => {
   it('renders the section heading', () => {
     render(<MemoryRouter><WeeklyLog /></MemoryRouter>);
-    expect(screen.getByText('// WEEKLY')).toBeInTheDocument();
+    expect(screen.getByText('Weekly')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 

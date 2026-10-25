@@ -7,7 +7,7 @@ export function Method() {
   return (
     <section className="section" id="method" data-screen-label="How We Work">
       <header className="section-head">
-        <span className="section-eye">// HOW WE WORK</span>
+        <span className="section-eye">How we work</span>
         <h1 className="section-title">From read to ship.</h1>
       </header>
       <p className="panel-body">
@@ -15,9 +15,9 @@ export function Method() {
         other as something we would actually stand behind.
       </p>
       <ol className="method-loop">
-        {METHOD_STAGES.map((s) => (
-          <li className="method-stage" key={s.num}>
-            <span className="method-num">// {s.num}</span>
+        {METHOD_STAGES.map((s, i) => (
+          <li className="method-stage" key={s.name}>
+            <span className="method-num">{String(i + 1).padStart(2, '0')}</span>
             <h3 className="method-name">{s.name}</h3>
             <p className="method-detail">{s.detail}</p>
           </li>

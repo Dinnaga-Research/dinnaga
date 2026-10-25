@@ -11,7 +11,7 @@ describe('ARTIFACTS', () => {
   it('ships the SLAMWICH tasting report', () => {
     const report = ARTIFACTS.find((a) => a.slug === 'slamwich-tasting-report');
     expect(report?.title).toBe('SLAMWICH Tasting Report');
-    expect(report?.project).toBe('SLAMWICH');
+    expect(report?.project).toBe('Slamwich');
     expect(report?.published).toBe('2026-08-08');
     expect(report?.docPath).toBe('/artifact-docs/slamwich-tasting-report.html');
     expect(report?.note).toMatch(/localhost:9021/);
