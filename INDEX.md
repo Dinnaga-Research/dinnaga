@@ -40,7 +40,7 @@ land under `public/artifact-docs/weekly/`.
 
 ## Deploy
 Vercel (`.vercel/project.json`, project `dinnaga`) — **dinnaga.ai is live via
-Vercel**. Deploys are **manual**: `vercel deploy --prod` from the repo root
-(no Git integration — pushing `main` does NOT deploy); `.github/workflows/ci.yml`
-runs lint/test/build as a gate only (no deploy step). Vercel bot protection
-challenges non-browser clients (curl/automation get 403 + security checkpoint).
+Vercel**. **Merging to `main` deploys production** (Vercel Git integration);
+every PR gets a protected preview. `.github/workflows/ci.yml` runs
+lint/test/build/e2e as a gate only (no deploy step). Production answers curl and
+headless Chromium; preview URLs need a Vercel sign-in.
