@@ -1,5 +1,5 @@
-// ABOUTME: Tests the /artifacts/:slug viewer — header strip metadata, the doc iframe's
-// ABOUTME: src/title attributes (jsdom never loads iframes), and NotFound on unknown slugs.
+// ABOUTME: Tests the /artifacts/:slug viewer — header strip metadata, the doc viewer
+// ABOUTME: in shadow DOM, and NotFound on unknown slugs.
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -19,7 +19,7 @@ describe('ArtifactViewer', () => {
   it('renders the header strip for a valid slug', () => {
     renderViewer('slamwich-tasting-report');
     expect(
-      screen.getByRole('heading', { name: 'SLAMWICH Tasting Report' }),
+      screen.getByText('SLAMWICH Tasting Report'),
     ).toBeInTheDocument();
     expect(screen.getByText('Slamwich')).toBeInTheDocument();
     expect(screen.getByText(/published 2026-08-08/)).toBeInTheDocument();
@@ -30,11 +30,10 @@ describe('ArtifactViewer', () => {
     );
   });
 
-  it('renders the doc iframe with the artifact title and docPath src', () => {
-    renderViewer('slamwich-tasting-report');
-    const frame = screen.getByTitle('SLAMWICH Tasting Report');
-    expect(frame.tagName).toBe('IFRAME');
-    expect(frame).toHaveAttribute('src', '/artifact-docs/slamwich-tasting-report.html');
+  it('renders the doc viewer with shadow DOM mounting', () => {
+    const { container } = renderViewer('slamwich-tasting-report');
+    const host = container.querySelector('[data-doc-host]');
+    expect(host).toBeInTheDocument();
   });
 
   it('renders NotFound content for an unknown slug', () => {

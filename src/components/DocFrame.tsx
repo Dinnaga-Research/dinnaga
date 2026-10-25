@@ -1,5 +1,6 @@
 // ABOUTME: Shared doc-viewer chrome — compact header strip (eyebrow, title, meta, optional
-// ABOUTME: note, standalone link) over a full-bleed iframe rendering a static doc.
+// ABOUTME: note, standalone link) over the shadow-DOM viewer or full-bleed iframe.
+import { DocViewer } from './DocViewer';
 
 interface DocFrameProps {
   eyebrow: string;
@@ -15,14 +16,14 @@ export function DocFrame({ eyebrow, title, meta, note, docPath, screenLabel }: D
     <section className="section artifact-viewer" id="artifact-viewer" data-screen-label={screenLabel}>
       <header className="artifact-strip">
         <span className="section-eye">{eyebrow}</span>
-        <h1 className="artifact-strip-title">{title}</h1>
+        <p className="artifact-strip-title">{title}</p>
         <span className="artifact-date">{meta}</span>
         {note && <p className="artifact-note">{note}</p>}
         <a className="artifact-open" href={docPath}>
           Open standalone →
         </a>
       </header>
-      <iframe className="artifact-frame" src={docPath} title={title} />
+      <DocViewer docPath={docPath} key={docPath} />
     </section>
   );
 }

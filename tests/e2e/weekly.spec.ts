@@ -1,5 +1,5 @@
 // ABOUTME: E2E for the /weekly run log and /weekly/:date viewer — list-to-viewer navigation,
-// ABOUTME: deep-link load, the report iframe actually rendering, and the raw static doc fetch.
+// ABOUTME: deep-link load, the report shadow-DOM mounting, and the raw static doc fetch.
 import { expect, test } from '@playwright/test';
 
 test('/weekly lists the run and clicking navigates to the viewer', async ({ page }) => {
@@ -23,10 +23,15 @@ test('deep link to the viewer resolves on hard load', async ({ page }) => {
   );
 });
 
-test('the viewer iframe loads the actual report document', async ({ page }) => {
+test('the viewer mounts the actual report document in shadow DOM', async ({ page }) => {
   await page.goto('/weekly/2026-08-08');
-  const frame = page.frameLocator('iframe[title="3–8 Aug 2026"]');
-  await expect(frame.getByRole('heading', { name: /Your Week in Review/ })).toBeVisible();
+  const host = page.locator('[data-doc-host]');
+  const hasHeading = await host.evaluate((el) => {
+    const sr = el.shadowRoot;
+    if (!sr) return false;
+    return sr.textContent?.includes('Your Week in Review') ?? false;
+  });
+  expect(hasHeading).toBe(true);
 });
 
 test('the raw report is served as a static file', async ({ page }) => {

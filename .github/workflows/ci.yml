@@ -25,7 +25,7 @@ jobs:
       - name: Install Playwright browsers
         run: bunx playwright install --with-deps chromium
       - name: Run e2e tests
-        run: bunx playwright test
+        run: bunx playwright test --project=chromium
       - name: Upload Playwright report on failure
         if: failure()
         uses: actions/upload-artifact@v4

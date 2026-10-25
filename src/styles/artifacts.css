@@ -92,11 +92,8 @@
   text-transform: uppercase;
   justify-self: start;
 }
-.artifact-frame {
+.doc-host {
   display: block;
   width: 100%;
-  height: calc(100vh - 280px);
-  min-height: 520px;
   border: 1px solid var(--dn-rule-strong);
-  background: var(--dn-bg);
 }

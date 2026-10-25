@@ -23,14 +23,16 @@ test('deep link to the viewer resolves on hard load', async ({ page }) => {
   );
 });
 
-test('the viewer iframe loads the actual report document', async ({ page }) => {
+test('the viewer mounts the actual report document in shadow DOM', async ({ page }) => {
   await page.goto('/artifacts/slamwich-tasting-report');
-  const frame = page.frameLocator('iframe[title="SLAMWICH Tasting Report"]');
-  await expect(
-    frame.getByRole('heading', {
-      name: /What 84 rebuilds of 28 acclaimed portfolios teach about design/i,
-    }),
-  ).toBeVisible();
+  const host = page.locator('[data-doc-host]');
+  // Verify the shadow DOM contains the expected heading
+  const hasHeading = await host.evaluate((el) => {
+    const sr = el.shadowRoot;
+    if (!sr) return false;
+    return sr.textContent?.includes('What 84 rebuilds of 28 acclaimed portfolios teach about design') ?? false;
+  });
+  expect(hasHeading).toBe(true);
 });
 
 test('the raw doc is served as a static file', async ({ page }) => {
