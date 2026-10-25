@@ -63,17 +63,22 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
   // Strip unsafe content
   stripDocument(doc);
 
-  // Gather and rewrite CSS
-  const cssText = gatherAndRewriteCSS(doc);
+  // Concatenate the doc's CSS into one sheet, then rewrite rule preludes IN PLACE.
+  // Never rebuild a rule from rule.style.cssText: shorthands containing var()
+  // serialise as empty strings and would delete e.g. the Copilot `.principle` border.
+  const docCss = [...doc.querySelectorAll('style')].map((s) => s.textContent ?? '').join('\n');
   const sheet = new CSSStyleSheet();
+  sheet.replaceSync(docCss);
+  rewriteRulesInPlace(sheet.cssRules);
 
-  // Build the final CSS with reset and guard
-  const resetCSS =
-    ':host{all:initial;display:block}doc-body,doc-main{display:block}';
-  const guardCSS =
-    ':host{overflow-x:auto!important;height:auto!important;max-height:none!important;position:relative!important}';
-
-  sheet.replaceSync(resetCSS + '\n' + cssText + '\n' + guardCSS);
+  // Reset goes first, guard goes last, so a doc's own root rules can style the host
+  // but cannot clip it or fix its size.
+  sheet.insertRule('doc-body,doc-main{display:block}', 0);
+  sheet.insertRule(':host{all:initial;display:block}', 0);
+  sheet.insertRule(
+    ':host{overflow-x:auto!important;height:auto!important;max-height:none!important;position:relative!important}',
+    sheet.cssRules.length,
+  );
 
   // Extract body attributes
   const bodyAttrs: Record<string, string> = {};
@@ -119,70 +124,23 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
 }
 
 /**
- * Gather CSS from style tags and rewrite selectors and media queries.
+ * Rewrite rule preludes (selectors, color-scheme media) in place, recursing into
+ * grouping rules (@media, @supports, nested rules).
  */
-function gatherAndRewriteCSS(doc: Document): string {
-  const parts: string[] = [];
-
-  for (const style of doc.querySelectorAll('style')) {
-    let cssText = style.textContent || '';
-    cssText = rewriteCSS(cssText);
-    parts.push(cssText);
-  }
-
-  return parts.join('\n');
-}
-
-/**
- * Rewrite a CSS text block: selectors and media queries.
- */
-function rewriteCSS(cssText: string): string {
-  // Parse CSS and rewrite rules
-  try {
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync(cssText);
-    return rewriteSheetRules(sheet.cssRules);
-  } catch {
-    // If replaceSync fails, return original (safe fallback)
-    return cssText;
-  }
-}
-
-/**
- * Recursively rewrite a CSSRuleList.
- */
-function rewriteSheetRules(rules: CSSRuleList): string {
-  let result = '';
-
-  for (let i = 0; i < rules.length; i++) {
-    const rule = rules[i]!;
-
+function rewriteRulesInPlace(rules: CSSRuleList): void {
+  for (const rule of Array.from(rules)) {
     if (rule instanceof CSSStyleRule) {
-      // Rewrite selector
-      const newSelector = rewriteSelector(rule.selectorText);
-      result += `${newSelector}{${rule.style.cssText}}\n`;
+      rule.selectorText = rewriteSelector(rule.selectorText);
     } else if (rule instanceof CSSMediaRule) {
-      // Rewrite media query
-      const newMedia = rewriteColorSchemeMedia(rule.media.mediaText);
-      const mediaText = newMedia !== null ? newMedia : rule.media.mediaText;
-
-      if (newMedia === null && rule.media.mediaText.includes('prefers-color-scheme')) {
-        devWarn(`Compound color-scheme query left unchanged: ${rule.media.mediaText}`);
+      const text = rule.media.mediaText;
+      const next = rewriteColorSchemeMedia(text);
+      if (next !== null) {
+        rule.media.mediaText = next;
+      } else if (text.includes('prefers-color-scheme')) {
+        devWarn(`Compound color-scheme query left unchanged: ${text}`);
       }
-
-      result += `@media ${mediaText}{`;
-      result += rewriteSheetRules(rule.cssRules);
-      result += '}\n';
-    } else if (rule instanceof CSSSupportsRule) {
-      // Recurse into @supports
-      result += `@supports ${rule.conditionText}{`;
-      result += rewriteSheetRules(rule.cssRules);
-      result += '}\n';
-    } else {
-      // Other rules (keyframes, etc.) - keep as-is
-      result += rule.cssText + '\n';
     }
+    const nested = (rule as { cssRules?: CSSRuleList }).cssRules;
+    if (nested) rewriteRulesInPlace(nested);
   }
-
-  return result;
 }

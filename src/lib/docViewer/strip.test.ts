@@ -125,3 +125,10 @@ test('real Copilot Studio doc stripping', () => {
   expect(dom.window.document.querySelectorAll('noscript')).toHaveLength(0);
   expect(dom.window.document.querySelectorAll('doc-main').length).toBeGreaterThan(0);
 });
+
+test('keeps the head <style> (the doc CSS) while stripping body leftovers', () => {
+  const dom = new JSDOM('<head><style>p{color:red}</style></head><body><style>x{}</style><p>t</p></body>');
+  stripDocument(dom.window.document);
+  expect(dom.window.document.head.querySelectorAll('style')).toHaveLength(1);
+  expect(dom.window.document.body.querySelectorAll('style')).toHaveLength(0);
+});

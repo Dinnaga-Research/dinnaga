@@ -144,3 +144,39 @@ test('returns AdaptedDoc with required fields', async () => {
   // content should be a DocumentFragment or Element
   expect(result.content instanceof DocumentFragment || result.content instanceof Element).toBe(true);
 });
+
+function stubDoc(html: string) {
+  global.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, text: async () => html });
+}
+const U = new URL('http://localhost:4242/x.html');
+
+test('rewrites rule preludes in place: root -> :host, dark media -> screen, shorthand with var() survives', async () => {
+  stubDoc(
+    '<html><head><style>:root{--c:red}html{background:var(--c)}body{margin:0}' +
+      '.principle{border:1px solid var(--c)}@media (prefers-color-scheme: dark){:root{--c:blue}}' +
+      '</style></head><body><main><h1>t</h1></main></body></html>',
+  );
+  const { sheet } = await adaptDoc(U, { docUrl: U });
+  const text = [...sheet.cssRules].map((r) => r.cssText).join('\n');
+  expect(text).toContain(':host');
+  expect(text).toContain('doc-body');
+  expect(text).not.toMatch(/(^|[\s,{])(html|body|:root)\s*[{,]/m);
+  expect(text).toMatch(/@media screen/);
+  expect(text).not.toContain('prefers-color-scheme');
+  // in place: the var() shorthand is not serialised away
+  expect(text).toMatch(/\.principle\s*\{[^}]*border[^}]*var\(--c\)/);
+  // reset first, guard last
+  expect(sheet.cssRules[0]!.cssText).toContain('all: initial');
+  expect(sheet.cssRules[sheet.cssRules.length - 1]!.cssText).toContain('overflow-x: auto !important');
+});
+
+test('compound color-scheme query is left unchanged and warns', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  stubDoc(
+    '<html><head><style>@media (prefers-color-scheme: dark) and (min-width: 600px){p{color:red}}</style></head><body><p>t</p></body></html>',
+  );
+  const { sheet } = await adaptDoc(U, { docUrl: U });
+  expect([...sheet.cssRules].map((r) => r.cssText).join('')).toContain('prefers-color-scheme');
+  expect(warn).toHaveBeenCalled();
+  warn.mockRestore();
+});

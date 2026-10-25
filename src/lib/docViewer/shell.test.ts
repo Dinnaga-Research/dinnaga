@@ -4,7 +4,7 @@ import { expect, test } from 'vitest';
 import { isSpaShell } from './shell';
 // @ts-expect-error - jsdom types not available in test environment
 import { JSDOM } from 'jsdom';
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 test('detects SPA shell with #root', () => {
@@ -62,4 +62,17 @@ test('weekly report 2026-08-08 is not a shell', () => {
   );
   const dom = new JSDOM(html);
   expect(isSpaShell(dom.window.document)).toBe(false);
+});
+
+test('each of the 11 real docs is not a shell', () => {
+  const dirs = ['public/artifact-docs', 'public/artifact-docs/weekly'];
+  const files = dirs.flatMap((d) =>
+    readdirSync(join(process.cwd(), d))
+      .filter((f) => f.endsWith('.html'))
+      .map((f) => join(process.cwd(), d, f)),
+  );
+  expect(files).toHaveLength(11);
+  for (const f of files) {
+    expect(isSpaShell(new JSDOM(readFileSync(f, 'utf-8')).window.document), f).toBe(false);
+  }
 });

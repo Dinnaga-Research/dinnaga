@@ -12,9 +12,9 @@
  */
 export function stripDocument(doc: Document): void {
   // Remove script, noscript, and other body-level meta tags
-  doc.querySelectorAll('script, noscript, link, meta, title, base, style').forEach((el) => {
-    el.remove();
-  });
+  doc.querySelectorAll('script, noscript').forEach((el) => el.remove());
+  // The head's <style> carries the doc's CSS (the adapter reads it): only strip body leftovers.
+  doc.body.querySelectorAll('link, meta, title, base, style').forEach((el) => el.remove());
 
   // Remove on* handlers and javascript: URLs
   doc.body.querySelectorAll('*').forEach((el) => {

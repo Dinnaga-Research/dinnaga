@@ -1,5 +1,7 @@
 // ABOUTME: E2E tests for shadow-DOM doc viewer — all 11 routes at multiple viewports.
 // ABOUTME: Covers: mounting, colors, overflow, forced-dark, missing doc, focus/motion.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { DOC_ROUTES, hostLocator, noHorizontalOverflow } from './helpers/docViewer';
 
@@ -13,22 +15,24 @@ const FORCED_DARK_COLORS: Record<string, string> = {
 // Test each of the 11 routes at desktop and mobile viewports
 for (const route of DOC_ROUTES) {
   test(`${route} @ desktop (1280px): h1 visible, single main`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(msg.text());
+    });
+    page.on('pageerror', (err) => errors.push(err.message));
     await page.goto(route);
 
-    // Check doc's h1 is visible
+    // Check doc's h1 is visible, and is the only h1
     const h1 = page.getByRole('heading', { level: 1 });
     await expect(h1).toBeVisible();
+    await expect(h1).toHaveCount(1);
 
     // Exactly one main on page (site's main, not doc's)
     await expect(page.locator('main')).toHaveCount(1);
 
     // No console errors
-    const errors: string[] = [];
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') errors.push(msg.text());
-    });
     await page.waitForLoadState('networkidle');
-    expect(errors.length).toBe(0);
+    expect(errors).toEqual([]);
 
     // No horizontal overflow
     await noHorizontalOverflow(page);
@@ -41,6 +45,7 @@ for (const route of DOC_ROUTES) {
     // Check doc's h1 is visible
     const h1 = page.getByRole('heading', { level: 1 });
     await expect(h1).toBeVisible();
+    await expect(h1).toHaveCount(1);
 
     // Exactly one main on page
     await expect(page.locator('main')).toHaveCount(1);
@@ -56,6 +61,7 @@ test('slamwich @ light OS: forced-dark background', async ({ page }) => {
   await page.goto('/artifacts/slamwich-tasting-report');
 
   const host = hostLocator(page);
+  await expect(host).toHaveAttribute('aria-busy', 'false');
   const bgColor = await host.evaluate((el) => {
     return window.getComputedStyle(el).backgroundColor;
   });
@@ -68,6 +74,7 @@ test('copilot-studio @ light OS: forced-dark background', async ({ page }) => {
   await page.goto('/artifacts/llm-best-practices-copilot-studio');
 
   const host = hostLocator(page);
+  await expect(host).toHaveAttribute('aria-busy', 'false');
   const bgColor = await host.evaluate((el) => {
     return window.getComputedStyle(el).backgroundColor;
   });
@@ -80,8 +87,12 @@ test('weekly 2026-08-08 @ light OS: forced-dark background', async ({ page }) =>
   await page.goto('/weekly/2026-08-08');
 
   const host = hostLocator(page);
+  await expect(host).toHaveAttribute('aria-busy', 'false');
+  // The weekly sheets put their ground on `body` (-> doc-body), not on `html`, and doc-body
+  // fills the host. Its colour is the ticket's rgb(17, 17, 20).
   const bgColor = await host.evaluate((el) => {
-    return window.getComputedStyle(el).backgroundColor;
+    const body = el.shadowRoot?.querySelector('doc-body');
+    return body ? window.getComputedStyle(body).backgroundColor : null;
   });
 
   expect(bgColor).toBe(FORCED_DARK_COLORS['2026-08-08']);
@@ -92,6 +103,7 @@ test('copilot-studio @ print: light background', async ({ page }) => {
   await page.goto('/artifacts/llm-best-practices-copilot-studio');
 
   const host = hostLocator(page);
+  await expect(host).toHaveAttribute('aria-busy', 'false');
   const bgColor = await host.evaluate((el) => {
     return window.getComputedStyle(el).backgroundColor;
   });
@@ -103,6 +115,7 @@ test('copilot-studio: .principle border re-serialization canary', async ({ page 
   await page.goto('/artifacts/llm-best-practices-copilot-studio');
 
   const host = hostLocator(page);
+  await expect(host).toHaveAttribute('aria-busy', 'false');
   const borderWidth = await host.evaluate((el) => {
     const sr = el.shadowRoot;
     if (!sr) return null;
@@ -115,32 +128,27 @@ test('copilot-studio: .principle border re-serialization canary', async ({ page 
 });
 
 test('missing doc: shows error message and link', async ({ page }) => {
-  // Route the doc request to the SPA shell
-  await page.route('**/artifact-docs/slamwich-tasting-report.html', (route) => {
-    route.abort('blockedbyclient');
-  });
+  // Vercel and the dev server answer a missing doc with the SPA shell, status 200.
+  const shell = readFileSync(join(process.cwd(), 'index.html'), 'utf-8');
+  await page.route('**/artifact-docs/slamwich-tasting-report.html', (route) =>
+    route.fulfill({ status: 200, contentType: 'text/html', body: shell }),
+  );
 
   await page.goto('/artifacts/slamwich-tasting-report');
 
-  // Should show error message
-  await expect(page.getByText(/didn't load/i)).toBeVisible();
+  await expect(page.getByText("This doc didn't load.")).toBeVisible();
 
-  // Should show Open standalone link
-  const link = page.getByRole('link', { name: /open standalone/i });
+  // The error link (exact name) sits beside the strip's "Open standalone →" link.
+  const link = page.getByRole('link', { name: 'Open standalone', exact: true });
   await expect(link).toBeVisible();
-  expect(link).toHaveAttribute('href', '/artifact-docs/slamwich-tasting-report.html');
+  await expect(link).toHaveAttribute('href', '/artifact-docs/slamwich-tasting-report.html');
 
-  // Should have no shadow content
-  const host = hostLocator(page);
-  const hasContent = await host.evaluate((el) => {
-    const sr = el.shadowRoot;
-    return sr && sr.childNodes.length > 0;
-  });
-  expect(hasContent).toBeFalsy();
+  // No shadow content: there is no host at all, and no h1 from the shell
+  await expect(page.locator('[data-doc-host]')).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(0);
 
-  // Should have exactly one site nav (not duplicated)
-  const navs = page.locator('.nav-links');
-  await expect(navs).toHaveCount(1);
+  // Exactly one site nav (the app was not rendered inside itself)
+  await expect(page.getByRole('navigation', { name: 'Primary' })).toHaveCount(1);
 });
 
 test('reduced motion: no animations', async ({ page }) => {
@@ -148,35 +156,54 @@ test('reduced motion: no animations', async ({ page }) => {
   await page.goto('/artifacts/slamwich-tasting-report');
 
   const host = hostLocator(page);
-  const hasAnimation = await host.evaluate((el) => {
+  await expect(host).toHaveAttribute('aria-busy', 'false');
+  const running = await host.evaluate((el) => {
     const sr = el.shadowRoot;
-    if (!sr) return false;
-    const body = sr.querySelector('doc-body');
-    if (!body) return false;
-    const cs = window.getComputedStyle(body);
-    const anim = cs.animation;
-    const trans = cs.transition;
-    return anim !== 'none' || trans !== 'none';
+    if (!sr) return -1;
+    const all = [el, ...sr.querySelectorAll('*')];
+    return all.reduce((n, node) => n + node.getAnimations().length, 0);
   });
 
-  expect(hasAnimation).toBeFalsy();
+  expect(running).toBe(0);
 });
 
-test('focus-visible: skip link → strip link → doc link have outlines', async ({ page }) => {
+test('focus-visible: skip link, strip link, doc link have outlines', async ({ page, browserName }) => {
+  // macOS WebKit only tabs to links with Option held (Safari default)
+  const TAB = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
   await page.goto('/artifacts/slamwich-tasting-report');
+  await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
 
-  // Tab from skip link through strip link into doc
-  const skipLink = page.locator('[href="#main"]').first();
-  await skipLink.focus();
-  let outline = await skipLink.evaluate((el) => window.getComputedStyle(el).outline);
-  expect(outline).not.toBe('none');
+  const visibleOutline = () =>
+    page.evaluate(() => {
+      let el: Element | null = document.activeElement;
+      while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+      if (!el) return null;
+      const cs = getComputedStyle(el);
+      return {
+        tag: el.tagName,
+        style: cs.outlineStyle,
+        width: parseFloat(cs.outlineWidth),
+      };
+    });
 
-  // Tab to strip's "Open standalone"
-  await page.keyboard.press('Tab');
-  const stripLink = page.locator('.artifact-open');
-  outline = await stripLink.evaluate((el) => window.getComputedStyle(el).outline);
-  expect(outline).not.toBe('none');
-
-  // Tab into doc's first link (if present)
-  // The exact behavior depends on the doc structure, but focus should be visible
+  // Tab from the page start: skip link first, then through the nav to the strip link.
+  await page.keyboard.press(TAB);
+  let seenStrip = false;
+  let seenDocLink = false;
+  for (let i = 0; i < 40 && !seenDocLink; i++) {
+    const o = await visibleOutline();
+    expect(o, `tab stop ${i}`).not.toBeNull();
+    expect(o!.style, `outline style at stop ${i} (${o!.tag})`).not.toBe('none');
+    expect(o!.width, `outline width at stop ${i} (${o!.tag})`).toBeGreaterThan(0);
+    const inDoc = await page.evaluate(
+      () => !!document.querySelector('[data-doc-host]')?.shadowRoot?.activeElement,
+    );
+    if (await page.evaluate(() => document.activeElement?.classList.contains('artifact-open'))) {
+      seenStrip = true;
+    }
+    if (inDoc) seenDocLink = true;
+    else await page.keyboard.press(TAB);
+  }
+  expect(seenStrip).toBe(true);
+  expect(seenDocLink).toBe(true);
 });

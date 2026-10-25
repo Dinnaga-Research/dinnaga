@@ -1,5 +1,5 @@
 // ABOUTME: Shared doc-viewer chrome — compact header strip (eyebrow, title, meta, optional
-// ABOUTME: note, standalone link) over the shadow-DOM viewer or full-bleed iframe.
+// ABOUTME: note, standalone link) over the shadow-DOM viewer.
 import { DocViewer } from './DocViewer';
 
 interface DocFrameProps {

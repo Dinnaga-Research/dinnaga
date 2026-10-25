@@ -8,14 +8,14 @@ test('/artifacts lists the report and clicking navigates to the viewer', async (
   await page.getByRole('link', { name: /SLAMWICH Tasting Report/ }).click();
   await expect(page).toHaveURL(/\/artifacts\/slamwich-tasting-report$/);
   await expect(
-    page.getByRole('heading', { name: /SLAMWICH Tasting Report/i }),
+    page.getByRole('heading', { name: /What 84 rebuilds of 28 acclaimed portfolios/i }),
   ).toBeVisible();
 });
 
 test('deep link to the viewer resolves on hard load', async ({ page }) => {
   await page.goto('/artifacts/slamwich-tasting-report');
   await expect(
-    page.getByRole('heading', { name: /SLAMWICH Tasting Report/i }),
+    page.getByRole('heading', { name: /What 84 rebuilds of 28 acclaimed portfolios/i }),
   ).toBeVisible();
   await expect(page.getByRole('link', { name: /open standalone/i })).toHaveAttribute(
     'href',
@@ -25,14 +25,12 @@ test('deep link to the viewer resolves on hard load', async ({ page }) => {
 
 test('the viewer mounts the actual report document in shadow DOM', async ({ page }) => {
   await page.goto('/artifacts/slamwich-tasting-report');
-  const host = page.locator('[data-doc-host]');
-  // Verify the shadow DOM contains the expected heading
-  const hasHeading = await host.evaluate((el) => {
-    const sr = el.shadowRoot;
-    if (!sr) return false;
-    return sr.textContent?.includes('What 84 rebuilds of 28 acclaimed portfolios teach about design') ?? false;
-  });
-  expect(hasHeading).toBe(true);
+  await expect(
+    page.getByRole('heading', {
+      name: /What 84 rebuilds of 28 acclaimed portfolios teach about design/i,
+    }),
+  ).toBeVisible();
+  await expect(page.locator('[data-doc-host]')).toHaveJSProperty('shadowRoot.mode', 'open');
 });
 
 test('the raw doc is served as a static file', async ({ page }) => {

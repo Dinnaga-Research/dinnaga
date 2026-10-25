@@ -8,14 +8,14 @@ test('/weekly lists the run and clicking navigates to the viewer', async ({ page
   await page.getByRole('link', { name: /Week in review — 2026-08-08/ }).click();
   await expect(page).toHaveURL(/\/weekly\/2026-08-08$/);
   await expect(
-    page.getByRole('heading', { name: '3–8 Aug 2026' }),
+    page.getByRole('heading', { name: /Your Week in Review/ }),
   ).toBeVisible();
 });
 
 test('deep link to the viewer resolves on hard load', async ({ page }) => {
   await page.goto('/weekly/2026-08-08');
   await expect(
-    page.getByRole('heading', { name: '3–8 Aug 2026' }),
+    page.getByRole('heading', { name: /Your Week in Review/ }),
   ).toBeVisible();
   await expect(page.getByRole('link', { name: /open standalone/i })).toHaveAttribute(
     'href',
@@ -25,13 +25,8 @@ test('deep link to the viewer resolves on hard load', async ({ page }) => {
 
 test('the viewer mounts the actual report document in shadow DOM', async ({ page }) => {
   await page.goto('/weekly/2026-08-08');
-  const host = page.locator('[data-doc-host]');
-  const hasHeading = await host.evaluate((el) => {
-    const sr = el.shadowRoot;
-    if (!sr) return false;
-    return sr.textContent?.includes('Your Week in Review') ?? false;
-  });
-  expect(hasHeading).toBe(true);
+  await expect(page.getByRole('heading', { name: /Your Week in Review/ })).toBeVisible();
+  await expect(page.locator('[data-doc-host]')).toHaveJSProperty('shadowRoot.mode', 'open');
 });
 
 test('the raw report is served as a static file', async ({ page }) => {

@@ -47,18 +47,16 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
           'adoptedStyleSheets' in ShadowRoot.prototype &&
           'replaceSync' in CSSStyleSheet.prototype;
 
-        // Adopt the stylesheet
+        // Mount the adapted content, then attach the stylesheet
+        root.replaceChildren(adapted.content);
         if (supportsAdopted) {
           root.adoptedStyleSheets = [adapted.sheet];
         } else {
-          // Fallback: append <style> for jsdom tests
+          // Fallback (jsdom has no adoptedStyleSheets): a <style> with the rewritten CSS
           const styleEl = document.createElement('style');
           styleEl.textContent = serializeSheet(adapted.sheet);
-          root.appendChild(styleEl);
+          root.prepend(styleEl);
         }
-
-        // Mount the adapted content
-        root.replaceChildren(adapted.content);
 
         setIsLoading(false);
       } catch (err) {

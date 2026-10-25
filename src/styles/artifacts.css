@@ -1,5 +1,5 @@
 /* ABOUTME: /artifacts routes — page-scoped styles for the document shelf index
-   ABOUTME: and the /artifacts/:slug viewer strip + full-bleed doc iframe. */
+   ABOUTME: and the /artifacts/:slug viewer strip + shadow-DOM doc. */
 
 /* ── Index shelf (/artifacts) ──────────────────────────────────────── */
 /* Seam-grid of document cards, mirroring the .atisha-catalog language:
@@ -59,7 +59,7 @@
 .artifact-date { color: var(--dn-text-label); }
 
 /* ── Viewer (/artifacts/:slug) ─────────────────────────────────────── */
-/* Compact header strip over a full-bleed iframe; tighter section padding
+/* Compact header strip over the shadow-DOM doc; tighter section padding
    so the doc reads like a page, not a letterbox. */
 .artifact-viewer { padding: 32px 24px 24px; }
 @media (min-width: 1024px) { .artifact-viewer { padding: 40px 48px 32px; } }
