@@ -1,6 +1,7 @@
 // ABOUTME: Tests the shared DocFrame viewer chrome — header strip props, the doc
 // ABOUTME: viewer shadow root mounting (via DocViewer), optional note.
 import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { DocFrame } from './DocFrame';
 
@@ -24,7 +25,11 @@ describe('DocFrame', () => {
       text: vi.fn().mockResolvedValue('Not found'),
     });
 
-    render(<DocFrame {...BASE} />);
+    render(
+      <BrowserRouter>
+        <DocFrame {...BASE} />
+      </BrowserRouter>,
+    );
     expect(screen.getByText('Test doc')).toBeInTheDocument();
     // Title is now a paragraph, not h1
     expect(screen.getByText('Test Document')).toBeInTheDocument();
@@ -42,7 +47,11 @@ describe('DocFrame', () => {
       text: vi.fn().mockResolvedValue('Not found'),
     });
 
-    const { container } = render(<DocFrame {...BASE} />);
+    const { container } = render(
+      <BrowserRouter>
+        <DocFrame {...BASE} />
+      </BrowserRouter>,
+    );
     const host = container.querySelector('[data-doc-host]');
     expect(host).toBeInTheDocument();
   });
@@ -54,7 +63,11 @@ describe('DocFrame', () => {
       text: vi.fn().mockResolvedValue('Not found'),
     });
 
-    render(<DocFrame {...BASE} note="A caveat about the doc." />);
+    render(
+      <BrowserRouter>
+        <DocFrame {...BASE} note="A caveat about the doc." />
+      </BrowserRouter>,
+    );
     expect(screen.getByText('A caveat about the doc.')).toBeInTheDocument();
   });
 
@@ -65,7 +78,11 @@ describe('DocFrame', () => {
       text: vi.fn().mockResolvedValue('Not found'),
     });
 
-    const { container } = render(<DocFrame {...BASE} />);
+    const { container } = render(
+      <BrowserRouter>
+        <DocFrame {...BASE} />
+      </BrowserRouter>,
+    );
     expect(container.querySelector('.artifact-note')).toBeNull();
   });
 
@@ -76,7 +93,11 @@ describe('DocFrame', () => {
       text: vi.fn().mockResolvedValue('Not found'),
     });
 
-    const { container } = render(<DocFrame {...BASE} />);
+    const { container } = render(
+      <BrowserRouter>
+        <DocFrame {...BASE} />
+      </BrowserRouter>,
+    );
     expect(container.querySelector('section')).toHaveAttribute('data-screen-label', 'Test');
   });
 });

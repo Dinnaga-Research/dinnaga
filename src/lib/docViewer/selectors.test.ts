@@ -163,6 +163,19 @@ test('real GitHub Copilot selector list', async () => {
   }
 });
 
+// UNIT-003 tests
+test(':target becomes [data-doc-target]', () => {
+  expect(rewriteSelector('.card:target')).toBe('.card[data-doc-target]');
+});
+
+test(':target in compound selector', () => {
+  expect(rewriteSelector('.card:target.active')).toBe('.card[data-doc-target].active');
+});
+
+test('multiple :target in selector list', () => {
+  expect(rewriteSelector('.card:target, div:target')).toBe('.card[data-doc-target], div[data-doc-target]');
+});
+
 // Helper to extract selectors from a document
 function extractSelectors(html: string): string[] {
   const selectors: string[] = [];

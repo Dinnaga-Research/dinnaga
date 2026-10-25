@@ -2,18 +2,21 @@
 // ABOUTME: Handles strings, attribute brackets, escapes, and pseudo-class arguments correctly.
 
 /**
- * Rewrite type selectors in a CSS selector string.
+ * Rewrite type selectors and pseudo-classes in a CSS selector string.
  * - html/:root → :host (or :host(compounds))
  * - body → doc-body
  * - main → doc-main
+ * - :target → [data-doc-target] (UNIT-003)
  *
  * Must not touch:
  * - Attribute values (strings in [...])
  * - String values (in "..." or '...')
  * - Escaped characters (\)
- * - Pseudo-selectors like :main or #main or .body
+ * - Pseudo-selectors like :main or #main or .body (unless explicitly handled)
  */
 export function rewriteSelector(selectorText: string): string {
+  // First, replace :target with [data-doc-target]
+  selectorText = selectorText.replace(/:target\b/g, '[data-doc-target]');
   let result = '';
   let i = 0;
   const len = selectorText.length;
