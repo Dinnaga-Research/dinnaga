@@ -21,6 +21,10 @@ test('deep link to the viewer resolves on hard load', async ({ page }) => {
     'href',
     '/artifact-docs/slamwich-tasting-report.html',
   );
+  // The catalogue title lives in the colophon, as plain text; the doc owns the h1.
+  await expect(page.getByRole('heading', { level: 2, name: 'About this doc' })).toBeVisible();
+  await expect(page.locator('footer strong', { hasText: 'SLAMWICH Tasting Report' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
 });
 
 test('the viewer mounts the actual report document in shadow DOM', async ({ page }) => {

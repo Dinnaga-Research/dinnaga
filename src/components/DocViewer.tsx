@@ -79,11 +79,11 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
     };
   }, [docPath, toRoute]);
 
-  // Sticky nav offset: while a doc is mounted, anchors clear the site nav.
+  // Sticky nav offset: while a doc is mounted, anchors clear the site nav and the Doc bar.
   useEffect(() => {
     if (!root) return;
     const html = document.documentElement;
-    html.style.scrollPaddingTop = 'var(--dn-nav-h)';
+    html.style.scrollPaddingTop = 'calc(var(--dn-nav-h) + var(--doc-bar-h))';
     // The browser's own scroll restoration would fight the hash effect on Back/Forward
     // (it restores a smooth-scroll mid-point). The hash effect owns the position instead.
     const prevRestoration = window.history.scrollRestoration;

@@ -58,42 +58,83 @@
 }
 .artifact-date { color: var(--dn-text-label); }
 
-/* ── Viewer (/artifacts/:slug) ─────────────────────────────────────── */
-/* Compact header strip over the shadow-DOM doc; tighter section padding
-   so the doc reads like a page, not a letterbox. */
-.artifact-viewer { padding: 32px 24px 24px; }
-@media (min-width: 1024px) { .artifact-viewer { padding: 40px 48px 32px; } }
-.artifact-strip {
-  display: grid;
-  gap: var(--dn-sp-3);
-  margin-bottom: var(--dn-sp-5);
-  max-width: 760px;
-}
-.artifact-strip-title {
-  font-family: var(--dn-font-display);
-  font-size: clamp(24px, 3.5vw, 40px);
-  line-height: 0.95;
-  letter-spacing: -0.02em;
-  font-weight: 700;
-  text-transform: none;
-  margin: 0;
-}
-.artifact-note {
-  font-family: var(--dn-font-body);
-  font-size: var(--dn-t-meta);
-  line-height: 1.55;
-  color: var(--dn-text-2);
-  margin: 0;
-}
-.artifact-open {
+/* ── Viewer reader frame (/artifacts/:slug, /weekly/:date) ─────────── */
+/* The Doc owns the page: a slim sticky bar under the site nav, the host edge to
+   edge, then an "About this doc" colophon. --doc-bar-h feeds the bar's height and
+   the scroll-padding-top DocViewer sets on the root, so it lives on :root. */
+:root { --doc-bar-h: 40px; }
+.doc-reader { display: block; }
+.doc-bar {
+  position: sticky;
+  top: var(--dn-nav-h);
+  z-index: 40;
+  height: var(--doc-bar-h);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--dn-sp-4);
+  padding: 0 var(--dn-sp-4);
+  background: var(--dn-bg);
+  border-bottom: 1px solid var(--dn-rule-strong);
   font-family: var(--dn-font-mono);
-  font-size: var(--dn-t-label);
-  letter-spacing: var(--dn-ls-label);
-  text-transform: uppercase;
-  justify-self: start;
+  font-size: var(--dn-t-mono);
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--dn-text-2);
+  white-space: nowrap;
+}
+@media (min-width: 1024px) { .doc-bar { padding: 0 var(--dn-sp-9); } }
+.doc-bar a {
+  flex: none;
+  color: var(--dn-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.doc-bar a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.doc-bar-kind {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
 }
 .doc-host {
   display: block;
   width: 100%;
-  border: 1px solid var(--dn-rule-strong);
+  border: 0;
+}
+.doc-colophon {
+  padding: var(--dn-sp-8) var(--dn-sp-4);
+  border-top: 1px solid var(--dn-rule-strong);
+  font-family: var(--dn-font-mono);
+  font-size: var(--dn-t-mono);
+  line-height: 1.55;
+  color: var(--dn-text-2);
+  display: grid;
+  gap: var(--dn-sp-2);
+}
+@media (min-width: 1024px) { .doc-colophon { padding: var(--dn-sp-8) var(--dn-sp-9); } }
+.doc-colophon-head {
+  margin: 0;
+  font-family: var(--dn-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: none;
+  color: var(--dn-text-label);
+}
+.doc-colophon-line { margin: 0; max-width: 72ch; }
+.doc-colophon-line strong { color: var(--dn-text); font-weight: 600; }
+
+/* Print: on viewer routes only, the Doc and its colophon, not the site chrome. */
+@media print {
+  html[data-doc-reader] .nav,
+  html[data-doc-reader] .foot,
+  html[data-doc-reader] .skip-link,
+  html[data-doc-reader] .doc-bar { display: none; }
+  html[data-doc-reader] .doc-colophon { border-top: 1px solid #000; color: #000; }
+  html[data-doc-reader] .doc-colophon-head,
+  html[data-doc-reader] .doc-colophon-line strong { color: #000; }
 }

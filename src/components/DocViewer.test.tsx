@@ -105,7 +105,7 @@ test('scroll-padding-top on the root is set while a doc is mounted and removed o
   );
   const host = view.container.querySelector<HTMLElement>('[data-doc-host]')!;
   await waitFor(() => expect(host.getAttribute('aria-busy')).toBe('false'));
-  await waitFor(() => expect(document.documentElement.style.scrollPaddingTop).toBe('var(--dn-nav-h)'));
+  await waitFor(() => expect(document.documentElement.style.scrollPaddingTop).toBe('calc(var(--dn-nav-h) + var(--doc-bar-h))'));
   view.unmount();
   expect(document.documentElement.style.scrollPaddingTop).toBe('');
 });

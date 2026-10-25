@@ -138,8 +138,10 @@ test('missing doc: shows error message and link', async ({ page }) => {
 
   await expect(page.getByText("This doc didn't load.")).toBeVisible();
 
-  // The error link (exact name) sits beside the strip's "Open standalone →" link.
-  const link = page.getByRole('link', { name: 'Open standalone', exact: true });
+  // The error link sits in the host's place, after the bar's own "Open standalone" link.
+  const links = page.getByRole('link', { name: 'Open standalone', exact: true });
+  await expect(links).toHaveCount(2);
+  const link = links.last();
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute('href', '/artifact-docs/slamwich-tasting-report.html');
 
@@ -167,46 +169,66 @@ test('reduced motion: no animations', async ({ page }) => {
   expect(running).toBe(0);
 });
 
-test('focus-visible: skip link, strip link, doc link have outlines', async ({ page, browserName }) => {
-  // macOS WebKit only tabs to links with Option held (Safari default)
-  const TAB = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
-  await page.goto('/artifacts/slamwich-tasting-report');
-  await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
+for (const vp of [
+  { name: '1280px', width: 1280, height: 800 },
+  { name: '390px', width: 390, height: 812 },
+]) {
+  test(`focus-visible @ ${vp.name}: skip link, then back link, standalone link, doc's first link, each with an outline`, async ({
+    page,
+    browserName,
+  }) => {
+    // macOS WebKit only tabs to links with Option held (Safari default)
+    const TAB = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
+    await page.setViewportSize({ width: vp.width, height: vp.height });
+    await page.goto('/artifacts/slamwich-tasting-report');
+    await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
 
-  const visibleOutline = () =>
-    page.evaluate(() => {
-      let el: Element | null = document.activeElement;
-      while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
-      if (!el) return null;
-      const cs = getComputedStyle(el);
-      return {
-        tag: el.tagName,
-        style: cs.outlineStyle,
-        width: parseFloat(cs.outlineWidth),
-      };
-    });
+    const stop = () =>
+      page.evaluate(() => {
+        let el: Element | null = document.activeElement;
+        const inDoc = !!document.querySelector('[data-doc-host]')?.shadowRoot?.activeElement;
+        while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+        if (!el) return null;
+        const cs = getComputedStyle(el);
+        return {
+          tag: el.tagName,
+          cls: el.getAttribute('class') ?? '',
+          text: (el.textContent ?? '').trim(),
+          inDoc,
+          style: cs.outlineStyle,
+          width: parseFloat(cs.outlineWidth),
+        };
+      });
 
-  // Tab from the page start: skip link first, then through the nav to the strip link.
-  await page.keyboard.press(TAB);
-  let seenStrip = false;
-  let seenDocLink = false;
-  for (let i = 0; i < 40 && !seenDocLink; i++) {
-    const o = await visibleOutline();
-    expect(o, `tab stop ${i}`).not.toBeNull();
-    expect(o!.style, `outline style at stop ${i} (${o!.tag})`).not.toBe('none');
-    expect(o!.width, `outline width at stop ${i} (${o!.tag})`).toBeGreaterThan(0);
-    const inDoc = await page.evaluate(
-      () => !!document.querySelector('[data-doc-host]')?.shadowRoot?.activeElement,
-    );
-    if (await page.evaluate(() => document.activeElement?.classList.contains('artifact-open'))) {
-      seenStrip = true;
+    const stops: NonNullable<Awaited<ReturnType<typeof stop>>>[] = [];
+    for (let i = 0; i < 40; i++) {
+      await page.keyboard.press(TAB);
+      const o = await stop();
+      expect(o, `tab stop ${i}`).not.toBeNull();
+      expect(o!.style, `outline style at stop ${i} (${o!.tag})`).not.toBe('none');
+      expect(o!.width, `outline width at stop ${i} (${o!.tag})`).toBeGreaterThan(0);
+      stops.push(o!);
+      if (o!.inDoc) break;
     }
-    if (inDoc) seenDocLink = true;
-    else await page.keyboard.press(TAB);
-  }
-  expect(seenStrip).toBe(true);
-  expect(seenDocLink).toBe(true);
-});
+    expect(stops[0]!.text).toBe('Skip to content');
+    const back = stops.findIndex((o) => o.cls.includes('doc-bar-back'));
+    expect(back, 'reached the back link').toBeGreaterThan(0);
+    expect(stops[back]!.text).toBe('\u2190 Behind the scenes');
+    expect(stops[back + 1]!.cls).toContain('doc-bar-open');
+    expect(stops[back + 1]!.text).toBe('Open standalone');
+    // Firefox makes a horizontally scrollable element a Tab stop. At 390px the host scrolls
+    // wide code inside itself (page overflow stays 0), so the host may be a stop of its own.
+    let docStop = back + 2;
+    if (stops[docStop]!.cls.includes('doc-host')) {
+      const scrolls = await hostLocator(page).evaluate((el) => el.scrollWidth > el.clientWidth);
+      expect(scrolls, 'the host is only a Tab stop when it scrolls').toBe(true);
+      docStop += 1;
+    }
+    expect(stops[docStop]!.inDoc, "the stop after the standalone link is in the doc").toBe(true);
+    expect(stops[docStop]!.tag).toBe('A');
+    expect(stops).toHaveLength(docStop + 1);
+  });
+}
 
 // Container query tests (UNIT-002)
 // Note: Container queries are used internally for width adaptation.
@@ -345,14 +367,18 @@ const targetState = (page: Page, id: string) =>
     };
   }, id);
 
+/** Bottom edge of the sticky Doc bar, in viewport px. */
+const barBottom = (page: Page) =>
+  page.getByRole('navigation', { name: 'Doc' }).evaluate((el) => el.getBoundingClientRect().bottom);
+
 async function expectInPlace(page: Page, id: string) {
-  const nav = await navHeight(page);
-  expect(nav).toBeGreaterThan(0);
+  const nav = await barBottom(page);
+  expect(nav).toBeGreaterThan(await navHeight(page));
   await expect
     .poll(async () => {
       const s = await targetState(page, id);
       return s.top !== null && s.top >= nav - 0.5 && s.top <= nav + 32 + 0.5;
-    }, { message: `#${id} top edge between nav-h (${nav}) and nav-h + 32px` })
+    }, { message: `#${id} top edge between the bar's bottom edge (${nav}) and +32px` })
     .toBe(true);
   const s = await targetState(page, id);
   expect(s.marked).toBe(true);
@@ -432,10 +458,13 @@ test('SPA: scroll-padding-top is set while a doc is mounted and removed when lea
   await page.goto(COPILOT_STUDIO);
   await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
   const padding = () => page.evaluate(() => document.documentElement.style.scrollPaddingTop);
-  expect(await padding()).toBe('var(--dn-nav-h)');
+  expect(await padding()).toBe('calc(var(--dn-nav-h) + var(--doc-bar-h))');
+  const nav = await navHeight(page);
+  const bar = await barBottom(page);
   expect(
     await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)),
-  ).toBeGreaterThan(0);
+  ).toBeCloseTo(bar, 0);
+  expect(bar).toBeGreaterThan(nav);
   await hostLocator(page).locator('a[href$="/artifacts"]').last().click();
   await expect(page).toHaveURL(/\/artifacts$/);
   await expect(page.locator('[data-doc-host]')).toHaveCount(0);
@@ -464,7 +493,7 @@ test('reduced motion: #c07 is in place on the first animation frame after the cl
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(COPILOT_STUDIO);
   await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
-  const nav = await navHeight(page);
+  const nav = await barBottom(page);
   const top = await hostLocator(page).evaluate(
     (el) =>
       new Promise<number>((resolve) => {
@@ -523,4 +552,151 @@ test('focus-visible: Tab to the #c07 rail link, Enter moves focus to the clause,
     return a ? (a.getAttribute('href') ?? a.id) : null;
   });
   expect(after).toBe(expected);
+});
+
+// ---------------------------------------------------------------------------
+// UNIT-004 (#49): the reader frame
+// ---------------------------------------------------------------------------
+
+const VIEWPORTS = [
+  { name: '1280px', width: 1280, height: 800 },
+  { name: '390px', width: 390, height: 812 },
+];
+
+for (const vp of VIEWPORTS) {
+  for (const route of DOC_ROUTES) {
+    test(`reader frame ${route} @ ${vp.name}: one h1, one main, one-line sticky bar, edge-to-edge host, no overflow`, async ({
+      page,
+    }) => {
+      const errors: string[] = [];
+      page.on('console', (msg) => {
+        if (msg.type() === 'error') errors.push(msg.text());
+      });
+      page.on('pageerror', (err) => errors.push(err.message));
+      await page.setViewportSize({ width: vp.width, height: vp.height });
+      await page.goto(route);
+      await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
+
+      await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+      await expect(page.locator('main')).toHaveCount(1);
+
+      const bar = page.getByRole('navigation', { name: 'Doc' });
+      await expect(bar).toBeVisible();
+      const barBox = await bar.boundingBox();
+      expect(barBox!.height).toBeLessThanOrEqual(44);
+      const open = bar.getByRole('link', { name: 'Open standalone' });
+      const openBox = await open.boundingBox();
+      expect(openBox!.x).toBeGreaterThanOrEqual(0);
+      expect(openBox!.x + openBox!.width).toBeLessThanOrEqual(vp.width);
+      expect(openBox!.y).toBeGreaterThanOrEqual(barBox!.y);
+      expect(openBox!.y + openBox!.height).toBeLessThanOrEqual(barBox!.y + barBox!.height);
+      // The back link never wraps or truncates.
+      const back = bar.getByRole('link').first();
+      const backFits = await back.evaluate((el) => el.scrollWidth <= el.clientWidth && el.getClientRects().length === 1);
+      expect(backFits).toBe(true);
+
+      // Host: edge to edge, the viewport width minus any scrollbar.
+      const hostBox = await hostLocator(page).evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return { left: r.left, width: r.width, client: document.documentElement.clientWidth };
+      });
+      expect(hostBox.left).toBe(0);
+      expect(hostBox.width).toBe(hostBox.client);
+
+      // Sticky: after scrolling 2000px the bar's top equals --dn-nav-h.
+      await page.evaluate(() => window.scrollTo(0, 2000));
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+      const nav = await navHeight(page);
+      await expect.poll(() => bar.evaluate((el) => el.getBoundingClientRect().top)).toBeCloseTo(nav, 0);
+
+      await noHorizontalOverflow(page);
+      expect(errors).toEqual([]);
+    });
+  }
+
+  test.describe(`copilot studio anchor @ ${vp.name}`, () => {
+    test.use({ viewport: { width: vp.width, height: vp.height } });
+
+    test('clicking #c07 leaves the clause top edge below the bar bottom edge', async ({ page }) => {
+      await page.goto(COPILOT_STUDIO);
+      await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
+      await hostLocator(page).locator('.rail a[href="#c07"]').click();
+      await expect(page).toHaveURL(/#c07$/);
+      await expect
+        .poll(async () => {
+          const top = (await targetState(page, 'c07')).top;
+          return top !== null && top >= (await barBottom(page)) - 0.5;
+        })
+        .toBe(true);
+    });
+  });
+}
+
+test('reader frame: the old strip is gone; bar and colophon carry the exact copy', async ({ page }) => {
+  await page.goto('/artifacts/slamwich-tasting-report');
+  await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
+  const bar = page.getByRole('navigation', { name: 'Doc' });
+  await expect(bar.getByRole('link', { name: '\u2190 Behind the scenes' })).toHaveAttribute('href', '/artifacts');
+  await expect(bar).toContainText('Doc \u00b7 Slamwich');
+  await expect(bar.getByRole('link', { name: 'Open standalone' })).toHaveAttribute(
+    'href',
+    '/artifact-docs/slamwich-tasting-report.html',
+  );
+  const colophon = page.locator('footer', { has: page.getByRole('heading', { level: 2, name: 'About this doc' }) });
+  await expect(colophon).toContainText('SLAMWICH Tasting Report');
+  await expect(colophon).toContainText('Published 2026-08-08');
+  await expect(colophon).toContainText('localhost:9021');
+  await expect(page.locator('.artifact-strip')).toHaveCount(0);
+
+  await page.goto('/weekly/2026-08-08');
+  await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
+  const wbar = page.getByRole('navigation', { name: 'Doc' });
+  await expect(wbar.getByRole('link', { name: '\u2190 Weekly reports' })).toHaveAttribute('href', '/weekly');
+  await expect(wbar).toContainText('Weekly report');
+  const wcol = page.locator('footer', { has: page.getByRole('heading', { level: 2, name: 'About this doc' }) });
+  await expect(wcol).toContainText('Weekly report');
+  await expect(wcol).toContainText('Run 2026-08-08, covering 2026-08-03 to 2026-08-08');
+});
+
+test('print: the site nav, reader bar and site footer are hidden; the colophon is visible', async ({ page }) => {
+  await page.emulateMedia({ media: 'print' });
+  await page.goto('/artifacts/slamwich-tasting-report');
+  await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
+  await expect(page.getByRole('navigation', { name: 'Primary' })).toBeHidden();
+  await expect(page.getByRole('navigation', { name: 'Doc' })).toBeHidden();
+  await expect(page.locator('footer#footer')).toBeHidden();
+  await expect(page.getByRole('heading', { level: 2, name: 'About this doc' })).toBeVisible();
+  await expect(hostLocator(page)).toBeVisible();
+});
+
+test('print rules do not hide the site nav and footer on non-viewer routes', async ({ page }) => {
+  await page.emulateMedia({ media: 'print' });
+  await page.goto('/artifacts');
+  await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible();
+  await expect(page.locator('footer#footer')).toBeVisible();
+});
+
+test('reduced motion: the bar links and colophon have no transitions or animations', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/artifacts/slamwich-tasting-report');
+  await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
+  const bar = page.getByRole('navigation', { name: 'Doc' });
+  const links = bar.getByRole('link');
+  await expect(links).toHaveCount(2);
+  for (const link of await links.all()) {
+    const seconds = await link.evaluate((el) => {
+      const d = getComputedStyle(el).transitionDuration;
+      return Math.max(...d.split(',').map((x) => parseFloat(x)));
+    });
+    expect(seconds).toBeLessThan(0.001);
+  }
+  const running = await page.evaluate(() => {
+    const colophon = document.querySelector('.doc-colophon');
+    const nodes = [
+      ...document.querySelectorAll('.doc-bar, .doc-bar *'),
+      ...(colophon ? [colophon, ...colophon.querySelectorAll('*')] : []),
+    ];
+    return nodes.reduce((n, el) => n + el.getAnimations().length, 0);
+  });
+  expect(running).toBe(0);
 });
