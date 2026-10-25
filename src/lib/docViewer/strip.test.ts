@@ -2,7 +2,7 @@
 // ABOUTME: Covers: <script>, onclick/ONLOAD, href="javascript:alert(1)", main → doc-main.
 import { expect, test } from 'vitest';
 import { stripDocument, renameMain } from './strip';
-// @ts-ignore - jsdom types not available in test environment
+// @ts-expect-error - jsdom types not available in test environment
 import { JSDOM } from 'jsdom';
 import { readFileSync } from 'fs';
 import { join } from 'path';

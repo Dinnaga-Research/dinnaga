@@ -1,5 +1,5 @@
 // ABOUTME: Artifact viewer route (/artifacts/:slug) — compact header strip over a
-// ABOUTME: full-bleed iframe rendering the static doc; unknown slugs render NotFound.
+// ABOUTME: shadow-DOM viewer rendering the static doc; unknown slugs render NotFound.
 import { useParams } from 'react-router-dom';
 import { DocFrame } from '../../components/DocFrame';
 import { ARTIFACTS } from '../../data/artifacts';

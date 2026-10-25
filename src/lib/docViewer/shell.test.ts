@@ -2,7 +2,7 @@
 // ABOUTME: Covers: #root exists → true, real docs → false.
 import { expect, test } from 'vitest';
 import { isSpaShell } from './shell';
-// @ts-ignore - jsdom types not available in test environment
+// @ts-expect-error - jsdom types not available in test environment
 import { JSDOM } from 'jsdom';
 import { readFileSync } from 'fs';
 import { join } from 'path';
