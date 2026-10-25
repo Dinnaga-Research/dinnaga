@@ -176,6 +176,12 @@ test('multiple :target in selector list', () => {
   expect(rewriteSelector('.card:target, div:target')).toBe('.card[data-doc-target], div[data-doc-target]');
 });
 
+test(':target is left alone inside strings and attribute brackets, and :target-within is not matched', () => {
+  expect(rewriteSelector('[data-x=":target"]')).toBe('[data-x=":target"]');
+  expect(rewriteSelector('.a[title=\'p:target\']:target')).toBe('.a[title=\'p:target\'][data-doc-target]');
+  expect(rewriteSelector('.a:target-within')).toBe('.a:target-within');
+});
+
 // Helper to extract selectors from a document
 function extractSelectors(html: string): string[] {
   const selectors: string[] = [];

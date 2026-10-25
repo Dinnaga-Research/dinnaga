@@ -15,8 +15,6 @@
  * - Pseudo-selectors like :main or #main or .body (unless explicitly handled)
  */
 export function rewriteSelector(selectorText: string): string {
-  // First, replace :target with [data-doc-target]
-  selectorText = selectorText.replace(/:target\b/g, '[data-doc-target]');
   let result = '';
   let i = 0;
   const len = selectorText.length;
@@ -83,6 +81,18 @@ export function rewriteSelector(selectorText: string): string {
           i++;
         }
       }
+      continue;
+    }
+
+    // :target pseudo-class (not ::target-text or :target-within) -> [data-doc-target]
+    if (
+      ch === ':' &&
+      selectorText.slice(i, i + 7) === ':target' &&
+      selectorText[i - 1] !== ':' &&
+      !(i + 7 < len && isIdentifierChar(selectorText[i + 7]!))
+    ) {
+      result += '[data-doc-target]';
+      i += 7;
       continue;
     }
 

@@ -88,3 +88,47 @@ test('SPA: /method route (no extension)', () => {
     classifyLink(url, { button: 0, modifiers: false }, docUrl),
   ).toBe('spa');
 });
+
+// The ticket #48 table, against a real doc URL
+const copilot = new URL('http://localhost:4242/artifact-docs/llm-best-practices-copilot-studio.html');
+const base = { button: 0, modifiers: false };
+
+test('table: GitHub Copilot sheet with target=_top is spa', () => {
+  const url = new URL('/artifacts/llm-best-practices-github-copilot', copilot);
+  expect(classifyLink(url, { ...base, target: '_top' }, copilot)).toBe('spa');
+});
+
+test('table: /artifact-docs/slamwich-tasting-report.html is browser', () => {
+  const url = new URL('/artifact-docs/slamwich-tasting-report.html', copilot);
+  expect(classifyLink(url, base, copilot)).toBe('browser');
+});
+
+test('table: #c07 is anchor, with Meta held is browser', () => {
+  const url = new URL('#c07', copilot);
+  expect(classifyLink(url, base, copilot)).toBe('anchor');
+  expect(classifyLink(url, { ...base, modifiers: true }, copilot)).toBe('browser');
+});
+
+test('table: https://example.com with no target is browser; /weekly with _blank is browser', () => {
+  expect(classifyLink(new URL('https://example.com'), base, copilot)).toBe('browser');
+  expect(classifyLink(new URL('/weekly', copilot), { ...base, target: '_blank' }, copilot)).toBe('browser');
+});
+
+test('table: _self and _parent are spa, a named target is browser', () => {
+  const url = new URL('/weekly', copilot);
+  expect(classifyLink(url, { ...base, target: '_self' }, copilot)).toBe('spa');
+  expect(classifyLink(url, { ...base, target: '_parent' }, copilot)).toBe('spa');
+  expect(classifyLink(url, { ...base, target: 'somewhere' }, copilot)).toBe('browser');
+});
+
+test('table: non-primary button and download are browser even for anchors', () => {
+  const url = new URL('#c07', copilot);
+  expect(classifyLink(url, { button: 2, modifiers: false }, copilot)).toBe('browser');
+  expect(classifyLink(url, { ...base, download: true }, copilot)).toBe('browser');
+});
+
+test('table: a different doc path with a hash is not an anchor; an extension makes it browser', () => {
+  expect(classifyLink(new URL('/weekly/2026-08-08#x', copilot), base, copilot)).toBe('spa');
+  expect(classifyLink(new URL('/files/report.pdf', copilot), base, copilot)).toBe('browser');
+  expect(classifyLink(new URL('/artifacts/', copilot), base, copilot)).toBe('spa');
+});

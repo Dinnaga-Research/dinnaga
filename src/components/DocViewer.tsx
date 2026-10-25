@@ -15,10 +15,17 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const navigateRef = useRef(navigate);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [root, setRoot] = useState<ShadowRoot | null>(null);
 
-  // Mount doc and set up listeners (UNIT-003)
+  useEffect(() => {
+    navigateRef.current = navigate;
+  }, [navigate]);
+
+  // Mount the doc. Runs once per docPath (the parent keys this component by docPath);
+  // hash changes never remount.
   useEffect(() => {
     const ctl = new AbortController();
     let mounted = true;
@@ -28,25 +35,14 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
         setIsLoading(true);
         setError(null);
 
-        // Convert docPath to absolute URL
         const docUrl = new URL(docPath, window.location.href);
-
-        const adapted = await adaptDoc(docUrl, {
-          docUrl,
-          signal: ctl.signal,
-          toRoute,
-        });
-
+        const adapted = await adaptDoc(docUrl, { docUrl, signal: ctl.signal, toRoute });
         if (!mounted) return;
 
-        // Get or create shadow root
         const host = hostRef.current;
         if (!host) return;
 
-        let root = host.shadowRoot;
-        if (!root) {
-          root = host.attachShadow({ mode: 'open' });
-        }
+        const shadow = host.shadowRoot ?? host.attachShadow({ mode: 'open' });
 
         // Check if adoptedStyleSheets is supported
         const supportsAdopted =
@@ -54,70 +50,18 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
           'replaceSync' in CSSStyleSheet.prototype;
 
         // Mount the adapted content, then attach the stylesheet
-        root.replaceChildren(adapted.content);
+        shadow.replaceChildren(adapted.content);
         if (supportsAdopted) {
-          root.adoptedStyleSheets = [adapted.sheet];
+          shadow.adoptedStyleSheets = [adapted.sheet];
         } else {
           // Fallback (jsdom has no adoptedStyleSheets): a <style> with the rewritten CSS
           const styleEl = document.createElement('style');
           styleEl.textContent = serializeSheet(adapted.sheet);
-          root.prepend(styleEl);
+          shadow.prepend(styleEl);
         }
 
-        // Set up sticky nav padding (UNIT-003)
-        document.documentElement.style.scrollPaddingTop = 'var(--dn-nav-h)';
-
-        // Set up delegated click listener (UNIT-003)
-        const handleClick = (e: Event) => {
-          const event = e as MouseEvent;
-          const link = (event.composedPath()[0] as Element)?.closest('a');
-          if (!link) return;
-
-          const href = link.getAttribute('href');
-          if (!href) return;
-
-          try {
-            const linkUrl = new URL(href, docUrl);
-            const classification = classifyLink(
-              linkUrl,
-              {
-                target: link.getAttribute('target'),
-                download: link.hasAttribute('download'),
-                button: event.button,
-                modifiers: event.ctrlKey || event.metaKey || event.shiftKey || event.altKey,
-              },
-              docUrl,
-            );
-
-            if (classification === 'anchor') {
-              event.preventDefault();
-              const id = linkUrl.hash.slice(1);
-              applyAnchorBehavior(root, id, docUrl);
-              navigate({ hash: '#' + id });
-            } else if (classification === 'spa') {
-              event.preventDefault();
-              navigate(linkUrl.pathname + linkUrl.search + linkUrl.hash);
-              window.scrollTo({ top: 0, behavior: 'instant' });
-            }
-            // 'browser' links are not prevented, allow default behavior
-          } catch {
-            // URL parsing failed, allow default behavior
-          }
-        };
-
-        root.addEventListener('click', handleClick as EventListener);
-
+        setRoot(shadow);
         setIsLoading(false);
-
-        // Apply hash on initial mount
-        if (location.hash) {
-          const id = location.hash.slice(1);
-          applyAnchorBehavior(root, id, docUrl);
-        }
-
-        return () => {
-          root.removeEventListener('click', handleClick as EventListener);
-        };
       } catch (err) {
         if (ctl.signal.aborted) return;
         if (!mounted) return;
@@ -131,15 +75,81 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
     return () => {
       mounted = false;
       ctl.abort();
+      setRoot(null);
     };
-  }, [docPath, toRoute, navigate, location.hash]);
+  }, [docPath, toRoute]);
 
-  // Clean up sticky nav padding on unmount
+  // Sticky nav offset: while a doc is mounted, anchors clear the site nav.
   useEffect(() => {
+    if (!root) return;
+    const html = document.documentElement;
+    html.style.scrollPaddingTop = 'var(--dn-nav-h)';
+    // The browser's own scroll restoration would fight the hash effect on Back/Forward
+    // (it restores a smooth-scroll mid-point). The hash effect owns the position instead.
+    const prevRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
     return () => {
-      document.documentElement.style.scrollPaddingTop = '';
+      html.style.scrollPaddingTop = '';
+      window.history.scrollRestoration = prevRestoration;
     };
-  }, []);
+  }, [root]);
+
+  // One delegated click listener on the shadow root.
+  useEffect(() => {
+    if (!root) return;
+    const docUrl = new URL(docPath, window.location.href);
+
+    const handleClick = (e: Event) => {
+      const event = e as MouseEvent;
+      if (event.defaultPrevented) return;
+      const link = event
+        .composedPath()
+        .find((n): n is Element => n instanceof Element && n.localName === 'a');
+      if (!link) return;
+
+      const href = link.getAttribute('href');
+      if (!href) return;
+
+      let linkUrl: URL;
+      try {
+        linkUrl = new URL(href, docUrl);
+      } catch {
+        return;
+      }
+
+      const classification = classifyLink(
+        linkUrl,
+        {
+          target: link.getAttribute('target'),
+          download: link.hasAttribute('download'),
+          button: event.button,
+          modifiers: event.ctrlKey || event.metaKey || event.shiftKey || event.altKey,
+        },
+        docUrl,
+      );
+
+      if (classification === 'anchor') {
+        event.preventDefault();
+        const id = linkUrl.hash.slice(1);
+        applyAnchorBehavior(root, id, docUrl);
+        navigateRef.current({ hash: '#' + id });
+      } else if (classification === 'spa') {
+        event.preventDefault();
+        navigateRef.current(linkUrl.pathname + linkUrl.search + linkUrl.hash);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+      // 'browser': leave the click alone
+    };
+
+    root.addEventListener('click', handleClick);
+    return () => root.removeEventListener('click', handleClick);
+  }, [root, docPath]);
+
+  // Hash on load and on history moves: apply without pushing a new entry.
+  useEffect(() => {
+    if (!root || !location.hash) return;
+    applyAnchorBehavior(root, location.hash.slice(1), new URL(docPath, window.location.href));
+  }, [root, location.hash, docPath]);
 
   if (error) {
     return (
@@ -169,7 +179,12 @@ function applyAnchorBehavior(
   id: string,
   docUrl: URL,
 ): void {
-  const decodedId = decodeURIComponent(id);
+  let decodedId = id;
+  try {
+    decodedId = decodeURIComponent(id);
+  } catch {
+    /* malformed escape: use the raw id */
+  }
   const target = shadowRoot.getElementById(decodedId);
 
   if (!target) {

@@ -34,31 +34,33 @@ export function classifyLink(
     return 'browser';
   }
 
-  // Explicit target="_blank"
-  if (opts.target === '_blank') {
-    return 'browser';
-  }
-
-  // Different origin (absolute URL with different scheme/host)
+  // Different origin
   if (url.origin !== currentDocUrl.origin) {
     return 'browser';
   }
 
-  // Anchor link: href is #id (relative to current doc)
-  if (url.pathname === currentDocUrl.pathname && url.hash && !url.search) {
+  const target = opts.target ?? '';
+  const targetOk = target === '' || ['_self', '_top', '_parent'].includes(target.toLowerCase());
+
+  // Anchor: `#id`, or the current doc URL plus a hash
+  if (
+    url.hash &&
+    url.pathname === currentDocUrl.pathname &&
+    url.search === currentDocUrl.search &&
+    targetOk
+  ) {
     return 'anchor';
   }
 
-  // Same-origin SPA link: path not under /artifact-docs/ and no file extension
-  // Must have no target or target is _self, _top, _parent
+  // SPA: same origin, outside the docs folder, last segment without a file extension
+  const lastSegment = url.pathname.split('/').pop() ?? '';
   if (
-    !['_blank', '_new'].includes(opts.target ?? '') &&
-    !url.pathname.includes('/artifact-docs/') &&
-    !url.pathname.match(/\.\w+$/) // no file extension at end
+    targetOk &&
+    !url.pathname.startsWith('/artifact-docs/') &&
+    !/\.[^./]+$/.test(lastSegment)
   ) {
     return 'spa';
   }
 
-  // Everything else is browser (external file, static doc, etc.)
   return 'browser';
 }

@@ -1,7 +1,14 @@
 // ABOUTME: Tests for the doc adapter — fetch, parse, adapt CSS and HTML.
 // ABOUTME: Covers: fetch real docs, CSS rewriting, stripping, SPA shell detection.
 import { expect, test, vi } from 'vitest';
-import { adaptDoc, adaptCssText } from './adapter';
+import {
+  adaptDoc,
+  adaptCssText,
+  absolutizeMarkup,
+  collectSheets,
+  docBaseUrl,
+  getHoistedFontSheet,
+} from './adapter';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -250,30 +257,160 @@ test('adaptCssText: CSS url() with # unchanged', () => {
   expect(result.css).toContain('url(#my-mask)');
 });
 
-test('real Weekly 2026-08-08 yields one @container doc (max-width:640px)', () => {
-  const weeklyHtml = readDoc('weekly/2026-08-08.html');
-  const doc = new DOMParser().parseFromString(weeklyHtml, 'text/html');
-  const docCss = [...doc.querySelectorAll('style')].map((s) => s.textContent ?? '').join('\n');
-  const result = adaptCssText(docCss, new URL('http://localhost/artifact-docs/weekly/2026-08-08.html'));
-
-  // Check that @container is present and @media (max-width) is gone
-  expect(result.css).toContain('@container doc');
-  expect(result.css).not.toContain('@media (max-width:640px)');
-  expect(result.css).not.toContain('@media (min-width:');
+test('real Weekly 2026-08-08 yields one @container doc (max-width:640px) rule and no width @media', async () => {
+  stubDoc(readDoc('weekly/2026-08-08.html'));
+  const u = new URL('http://localhost:4242/artifact-docs/weekly/2026-08-08.html');
+  const { sheet } = await adaptDoc(u, { docUrl: u });
+  const rules = [...sheet.cssRules].map((r) => r.cssText);
+  const containers = rules.filter((t) => /^@container doc \(max-width:\s*640px\)/.test(t));
+  expect(containers).toHaveLength(1);
+  expect(containers[0]).toContain('.grid2');
+  const widthMedia = [...sheet.cssRules].filter(
+    (r) => r instanceof CSSMediaRule && /(min|max)-width/.test(r.media.mediaText),
+  );
+  expect(widthMedia).toHaveLength(0);
 });
 
-test('real Copilot Studio doc has no vw in declarations after adapt', () => {
-  const copilotHtml = readDoc('llm-best-practices-copilot-studio.html');
-  const doc = new DOMParser().parseFromString(copilotHtml, 'text/html');
-  const docCss = [...doc.querySelectorAll('style')].map((s) => s.textContent ?? '').join('\n');
-  const result = adaptCssText(docCss, new URL('http://localhost/artifact-docs/llm-best-practices-copilot-studio.html'));
+test('real Copilot Studio sheet has no vw in any declaration', async () => {
+  stubDoc(readDoc('llm-best-practices-copilot-studio.html'));
+  const u = new URL('http://localhost:4242/artifact-docs/llm-best-practices-copilot-studio.html');
+  const { sheet } = await adaptDoc(u, { docUrl: u });
+  const text = [...sheet.cssRules].map((r) => r.cssText).join('\n');
+  expect(text).not.toMatch(/\dvw\b/);
+  // the raw adapter output agrees
+  const raw = [...new DOMParser().parseFromString(readDoc('llm-best-practices-copilot-studio.html'), 'text/html').querySelectorAll('style')]
+    .map((x) => x.textContent ?? '')
+    .join('\n');
+  expect(raw).toMatch(/\dvw\b/);
+  const adapted = adaptCssText(raw, u).css;
+  expect(adapted).not.toMatch(/\dvw\b/);
+  expect(adapted).toMatch(/3\.4cqi/); // jsdom's CSSOM drops cqi values, so check the text
+});
 
-  // Check that no vw units remain in declarations (not in comments or strings)
-  const lines = result.css.split('\n');
-  for (const line of lines) {
-    if (line.includes('vw')) {
-      // vw might still appear in comments or variable names, but not in actual declarations
-      expect(line.trim()).toMatch(/^\s*(\/\*|--)/);
-    }
+test('adaptCssText: width media with a media type or other feature is left alone', () => {
+  const u = new URL('http://localhost/');
+  for (const q of ['screen and (max-width:640px)', 'print', '(prefers-color-scheme: dark)']) {
+    const out = adaptCssText(`@media ${q} { p { color: red; } }`, u).css;
+    expect(out).toContain('@media');
+    expect(out).not.toContain('@container');
   }
+});
+
+test('adaptCssText: @import is dropped', () => {
+  const out = adaptCssText('@import url(other.css);\np{color:red}', new URL('http://localhost/'));
+  expect(out.css).not.toContain('@import');
+  expect(out.css).toContain('p{color:red}');
+});
+
+test('adaptCssText: CSS url(img/x.png) from a linked sheet at /a/b/site.css resolves on the site origin', () => {
+  const out = adaptCssText('p{background:url(img/x.png)}', new URL('http://localhost:4242/a/b/site.css'));
+  expect(out.css).toContain('http://localhost:4242/a/b/img/x.png');
+});
+
+test('@font-face: two docs declaring the identical rule produce one hoisted rule', async () => {
+  const html =
+    '<html><head><style>@font-face{font-family:"Dup";src:url(fonts/dup.woff2)}p{color:red}</style></head><body><p>t</p></body></html>';
+  stubDoc(html);
+  const u1 = new URL('http://localhost:4242/artifact-docs/a/one.html');
+  const first = await adaptDoc(u1, { docUrl: u1 });
+  await adaptDoc(u1, { docUrl: u1 });
+  stubDoc(html);
+  await adaptDoc(u1, { docUrl: u1 });
+
+  // removed from the doc sheet
+  expect([...first.sheet.cssRules].some((r) => r instanceof CSSFontFaceRule)).toBe(false);
+  const hoisted = getHoistedFontSheet();
+  expect(hoisted).toBeTruthy();
+  const faces = [...hoisted!.cssRules].filter((r) => r.cssText.includes('"Dup"'));
+  expect(faces).toHaveLength(1);
+  // jsdom's CSSOM drops `src`, so check the absolutised text from the string stage
+  expect(adaptCssText(html.match(/<style>(.*)<\/style>/)![1]!, u1).fontFaces[0]).toContain(
+    'http://localhost:4242/artifact-docs/a/fonts/dup.woff2',
+  );
+  // (jsdom has no document.adoptedStyleSheets; the append-once check lives in the e2e spec)
+});
+
+test('markup URLs are absolutised against <base href>, including srcset; #, mailto:, https:// stay', () => {
+  const doc = new DOMParser().parseFromString(
+    '<html><head><base href="../shared/"></head><body>' +
+      '<img src="a.png" srcset="a.png 1x, b.png 2x">' +
+      '<a href="#c07">x</a><a href="mailto:a@b.co">m</a><a href="https://example.com/p">e</a>' +
+      '<form action="go"></form><video poster="p.jpg"></video><object data="d.svg"></object></body></html>',
+    'text/html',
+  );
+  const docUrl = new URL('http://localhost:4242/artifact-docs/sub/doc.html');
+  const base = docBaseUrl(doc, docUrl);
+  expect(base.href).toBe('http://localhost:4242/artifact-docs/shared/');
+  absolutizeMarkup(doc.body, base);
+  const q = (sel: string) => doc.querySelector(sel)!;
+  expect(q('img').getAttribute('src')).toBe('http://localhost:4242/artifact-docs/shared/a.png');
+  expect(q('img').getAttribute('srcset')).toBe(
+    'http://localhost:4242/artifact-docs/shared/a.png 1x, http://localhost:4242/artifact-docs/shared/b.png 2x',
+  );
+  expect(q('a[href^="#"]').getAttribute('href')).toBe('#c07');
+  expect(q('a[href^="mailto"]').getAttribute('href')).toBe('mailto:a@b.co');
+  expect(q('a[href^="https"]').getAttribute('href')).toBe('https://example.com/p');
+  expect(q('form').getAttribute('action')).toBe('http://localhost:4242/artifact-docs/shared/go');
+  expect(q('video').getAttribute('poster')).toBe('http://localhost:4242/artifact-docs/shared/p.jpg');
+  expect(q('object').getAttribute('data')).toBe('http://localhost:4242/artifact-docs/shared/d.svg');
+});
+
+test('without <base>, markup resolves against the doc URL', () => {
+  const doc = new DOMParser().parseFromString('<html><body><img src="x.png"></body></html>', 'text/html');
+  const docUrl = new URL('http://localhost:4242/artifact-docs/sub/doc.html');
+  absolutizeMarkup(doc.body, docBaseUrl(doc, docUrl));
+  expect(doc.querySelector('img')!.getAttribute('src')).toBe('http://localhost:4242/artifact-docs/sub/x.png');
+});
+
+test('link order: <style>, <link>, <style> keep document order; media wraps; a 404 link is skipped with a warning', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+    const href = String(input);
+    if (href.endsWith('/ok.css')) return { ok: true, status: 200, text: async () => '.b{color:blue}' } as Response;
+    if (href.endsWith('/print.css')) return { ok: true, status: 200, text: async () => '.p{color:black}' } as Response;
+    return { ok: false, status: 404, text: async () => 'nope' } as Response;
+  }) as typeof fetch;
+  const doc = new DOMParser().parseFromString(
+    '<html><head><style>.a{color:red}</style><link rel="stylesheet" href="ok.css">' +
+      '<link rel="stylesheet" href="missing.css"><link rel="stylesheet alternate" href="print.css" media="print">' +
+      '<link rel="icon" href="x.ico"><style>.c{color:green}</style></head><body></body></html>',
+    'text/html',
+  );
+  const base = new URL('http://localhost:4242/artifact-docs/d.html');
+  const sheets = await collectSheets(doc, base);
+  expect(sheets.map((x) => x.css.replace(/\s+/g, ''))).toEqual([
+    '.a{color:red}',
+    '.b{color:blue}',
+    '@mediaprint{.p{color:black}}',
+    '.c{color:green}',
+  ]);
+  expect(sheets[1]!.url.href).toBe('http://localhost:4242/artifact-docs/ok.css');
+  expect(warn).toHaveBeenCalledWith(expect.stringContaining('missing.css'));
+  warn.mockRestore();
+});
+
+test('a 404 linked sheet does not fail the mount', async () => {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+    if (String(input).endsWith('.html'))
+      return {
+        ok: true,
+        status: 200,
+        text: async () =>
+          '<html><head><link rel="stylesheet" href="gone.css"><style>p{color:red}</style></head><body><p>t</p></body></html>',
+      } as Response;
+    return { ok: false, status: 404, text: async () => '' } as Response;
+  }) as typeof fetch;
+  const u = new URL('http://localhost:4242/artifact-docs/x.html');
+  const { sheet } = await adaptDoc(u, { docUrl: u });
+  expect([...sheet.cssRules].map((r) => r.cssText).join('')).toContain('color: red');
+  warn.mockRestore();
+});
+
+test('adaptDoc absolutises body markup URLs against the doc', async () => {
+  stubDoc('<html><body><img src="x.png"><a href="#top">t</a></body></html>');
+  const u = new URL('http://localhost:4242/artifact-docs/sub/x.html');
+  const { content } = await adaptDoc(u, { docUrl: u });
+  const img = (content as DocumentFragment).querySelector('img')!;
+  expect(img.getAttribute('src')).toBe('http://localhost:4242/artifact-docs/sub/x.png');
 });

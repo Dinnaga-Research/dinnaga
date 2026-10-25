@@ -95,3 +95,45 @@ test("shows the didn't-load message on a non-OK status and on a network error", 
   expect(await second.findByText("This doc didn't load.")).toBeTruthy();
   expect(second.queryByText(/Failed to fetch/)).toBeNull();
 });
+
+test('scroll-padding-top on the root is set while a doc is mounted and removed on unmount', async () => {
+  stubFetch(read('public/artifact-docs/llm-best-practices-copilot-studio.html'));
+  const view = render(
+    <BrowserRouter>
+      <DocViewer docPath="/artifact-docs/llm-best-practices-copilot-studio.html" />
+    </BrowserRouter>,
+  );
+  const host = view.container.querySelector<HTMLElement>('[data-doc-host]')!;
+  await waitFor(() => expect(host.getAttribute('aria-busy')).toBe('false'));
+  await waitFor(() => expect(document.documentElement.style.scrollPaddingTop).toBe('var(--dn-nav-h)'));
+  view.unmount();
+  expect(document.documentElement.style.scrollPaddingTop).toBe('');
+});
+
+test('clicking an in-doc anchor marks the target, focuses it and updates the hash once', async () => {
+  window.history.replaceState(null, '', '/artifacts/llm-best-practices-copilot-studio');
+  stubFetch(read('public/artifact-docs/llm-best-practices-copilot-studio.html'));
+  const view = render(
+    <BrowserRouter>
+      <DocViewer docPath="/artifact-docs/llm-best-practices-copilot-studio.html" />
+    </BrowserRouter>,
+  );
+  const host = view.container.querySelector<HTMLElement>('[data-doc-host]')!;
+  await waitFor(() => expect(host.getAttribute('aria-busy')).toBe('false'));
+  const root = host.shadowRoot!;
+  Element.prototype.scrollIntoView = vi.fn();
+  const before = window.history.length;
+  root.querySelector<HTMLAnchorElement>('a[href="#c07"]')!.click();
+  await waitFor(() => expect(window.location.hash).toBe('#c07'));
+  const target = root.getElementById('c07')!;
+  expect(target.hasAttribute('data-doc-target')).toBe(true);
+  expect(root.activeElement).toBe(target);
+  expect(window.history.length).toBe(before + 1);
+  await new Promise((r) => setTimeout(r, 50)); // let the hash effect for #c07 settle
+  root.querySelector<HTMLAnchorElement>('a[href="#c03"]')!.click();
+  await waitFor(() => expect(window.location.hash).toBe('#c03'));
+  await waitFor(() => expect(root.getElementById('c03')!.hasAttribute('data-doc-target')).toBe(true));
+  expect(root.querySelectorAll('[data-doc-target]')).toHaveLength(1);
+  expect(root.getElementById('c03')!.hasAttribute('data-doc-target')).toBe(true);
+  expect(window.history.length).toBe(before + 2);
+});

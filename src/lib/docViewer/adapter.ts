@@ -44,7 +44,7 @@ export interface AdaptedDoc {
  * Used by both jsdom (string-based) and browser (CSSStyleSheet-based) paths.
  */
 export function adaptCssText(cssText: string, sheetUrl: URL): AdaptedCss {
-  let css = cssText;
+  let css = dropImports(cssText);
   const fontFaces: string[] = [];
 
   // 1. Extract and absolutize @font-face rules
@@ -234,12 +234,195 @@ function absolutizeUrlsInCss(css: string, sheetUrl: URL): string {
     // Absolutize relative URL against sheet URL
     try {
       const absolute = new URL(trimmed, sheetUrl).href;
-      return `url(${absolute})`;
+      return `url("${absolute}")`;
     } catch {
       // If URL parsing fails, return original
       return match;
     }
   });
+}
+
+/**
+ * Drop `@import` rules (constructed sheets ignore them) and warn once per rule.
+ */
+function dropImports(css: string): string {
+  return css.replace(/@import\b[^;]*;?/gi, (rule) => {
+    devWarn(`@import dropped (constructed sheets ignore it): ${rule.trim()}`);
+    return '';
+  });
+}
+
+/**
+ * Count `position: fixed` and vh/svh/lvh/dvh declarations (not rewritten) and warn.
+ */
+export function warnViewportDependent(css: string): { fixed: number; vh: number } {
+  const fixed = (css.match(/position\s*:\s*fixed/gi) ?? []).length;
+  const vh = (css.match(/\d[sld]?vh\b/gi) ?? []).length;
+  if (fixed > 0 || vh > 0) {
+    devWarn(`Viewport-dependent CSS left unchanged: ${fixed} position:fixed, ${vh} vh-family declarations`);
+  }
+  return { fixed, vh };
+}
+
+const SCHEME = /^[a-z][a-z0-9+.-]*:/i;
+
+function absolutizeValue(value: string, base: URL): string {
+  const v = value.trim();
+  if (v === '' || v.startsWith('#') || SCHEME.test(v)) return value;
+  try {
+    return new URL(v, base).href;
+  } catch {
+    return value;
+  }
+}
+
+/** Absolutize each candidate of a `srcset` value individually. */
+export function absolutizeSrcset(srcset: string, base: URL): string {
+  const out: string[] = [];
+  let i = 0;
+  const n = srcset.length;
+  while (i < n) {
+    while (i < n && /[\s,]/.test(srcset[i]!)) i++;
+    if (i >= n) break;
+    let start = i;
+    while (i < n && !/\s/.test(srcset[i]!)) i++;
+    let url = srcset.slice(start, i);
+    let descriptor = '';
+    if (url.endsWith(',')) {
+      url = url.replace(/,+$/, '');
+    } else {
+      while (i < n && /\s/.test(srcset[i]!)) i++;
+      start = i;
+      let depth = 0;
+      while (i < n && !(srcset[i] === ',' && depth === 0)) {
+        if (srcset[i] === '(') depth++;
+        else if (srcset[i] === ')') depth--;
+        i++;
+      }
+      descriptor = srcset.slice(start, i).trim();
+    }
+    out.push(`${absolutizeValue(url, base)}${descriptor ? ' ' + descriptor : ''}`);
+  }
+  return out.join(', ');
+}
+
+const URL_ATTRS = ['href', 'src', 'poster', 'data', 'action'];
+
+/**
+ * Make `href`, `src`, `poster`, `data`, `action` and `srcset` absolute against `base`.
+ * Values starting with `#` or already carrying a scheme are left alone.
+ */
+export function absolutizeMarkup(root: ParentNode, base: URL): void {
+  const sel = [...URL_ATTRS, 'srcset'].map((a) => `[${a}]`).join(',');
+  for (const el of root.querySelectorAll(sel)) {
+    for (const attr of URL_ATTRS) {
+      const v = el.getAttribute(attr);
+      if (v !== null) {
+        const next = absolutizeValue(v, base);
+        if (next !== v) el.setAttribute(attr, next);
+      }
+    }
+    const ss = el.getAttribute('srcset');
+    if (ss !== null) el.setAttribute('srcset', absolutizeSrcset(ss, base));
+  }
+}
+
+/** The doc's `<base href>` resolved against the doc URL, or else the doc URL. */
+export function docBaseUrl(doc: Document, docUrl: URL): URL {
+  const href = doc.querySelector('base[href]')?.getAttribute('href');
+  if (href) {
+    try {
+      return new URL(href, docUrl);
+    } catch {
+      /* fall through */
+    }
+  }
+  return docUrl;
+}
+
+export interface SheetSource {
+  css: string;
+  url: URL;
+}
+
+/**
+ * Collect `<style>` elements and `<link rel~="stylesheet">` in document order. Links are
+ * fetched (same abort signal) and keep their position. A failed link is skipped with a
+ * dev warning. A `media` attribute wraps the text in `@media <value> { ... }`.
+ */
+export async function collectSheets(
+  doc: Document,
+  base: URL,
+  signal?: AbortSignal,
+): Promise<SheetSource[]> {
+  const nodes = [...doc.querySelectorAll('style, link')].filter(
+    (el) =>
+      el.localName === 'style' ||
+      (el.getAttribute('rel') ?? '').toLowerCase().split(/\s+/).includes('stylesheet'),
+  );
+  const out = await Promise.all(
+    nodes.map(async (el): Promise<SheetSource | null> => {
+      const media = el.getAttribute('media')?.trim();
+      const wrap = (css: string) => (media ? `@media ${media} {\n${css}\n}` : css);
+      if (el.localName === 'style') {
+        return { css: wrap(el.textContent ?? ''), url: base };
+      }
+      const href = el.getAttribute('href');
+      if (!href) return null;
+      let url: URL;
+      try {
+        url = new URL(href, base);
+      } catch {
+        devWarn(`Stylesheet skipped (bad href): ${href}`);
+        return null;
+      }
+      try {
+        const res = await fetch(url, { signal });
+        if (!res.ok) {
+          devWarn(`Stylesheet skipped (status ${res.status}): ${url.href}`);
+          return null;
+        }
+        return { css: wrap(await res.text()), url };
+      } catch (err) {
+        if (signal?.aborted) throw err;
+        devWarn(`Stylesheet skipped (${err instanceof Error ? err.message : 'fetch failed'}): ${url.href}`);
+        return null;
+      }
+    }),
+  );
+  return out.filter((x): x is SheetSource => x !== null);
+}
+
+let hoistedFonts: CSSStyleSheet | null = null;
+const hoistedFontText = new Set<string>();
+
+/** The one module-level sheet holding every Doc's hoisted `@font-face` rules. */
+export function getHoistedFontSheet(): CSSStyleSheet | null {
+  return hoistedFonts;
+}
+
+/**
+ * Add `@font-face` rules to one module-level constructed sheet, appended once to
+ * `document.adoptedStyleSheets`. De-duplicated by text.
+ */
+export function hoistFontFaces(fontFaces: string[]): void {
+  if (fontFaces.length === 0) return;
+  if (!hoistedFonts) {
+    hoistedFonts = new CSSStyleSheet();
+  }
+  for (const text of fontFaces) {
+    if (hoistedFontText.has(text)) continue;
+    hoistedFontText.add(text);
+    try {
+      hoistedFonts.insertRule(text, hoistedFonts.cssRules.length);
+    } catch (err) {
+      devWarn('Could not hoist @font-face rule', err);
+    }
+  }
+  const adopted = (document as Document & { adoptedStyleSheets?: CSSStyleSheet[] }).adoptedStyleSheets;
+  if (adopted && !adopted.includes(hoistedFonts)) {
+    document.adoptedStyleSheets = [...adopted, hoistedFonts];
+  }
 }
 
 /**
@@ -276,14 +459,25 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
   // Strip unsafe content
   stripDocument(doc);
 
-  // Concatenate the doc's CSS into one sheet, applying UNIT-002 transforms.
-  // Never rebuild a rule from rule.style.cssText: shorthands containing var()
-  // serialise as empty strings and would delete e.g. the Copilot `.principle` border.
-  let docCss = [...doc.querySelectorAll('style')].map((s) => s.textContent ?? '').join('\n');
+  // Collect <style> and <link rel=stylesheet> in document order, then apply the UNIT-002
+  // transforms (vw -> cqi, width @media -> @container, @font-face hoisting, url() absolutising)
+  // as string work per source sheet. Never rebuild a rule from rule.style.cssText: shorthands
+  // containing var() serialise as empty strings and would delete e.g. the Copilot `.principle` border.
+  const base = docBaseUrl(doc, opts.docUrl);
+  const sources = await collectSheets(doc, base, opts.signal);
+  const cssParts: string[] = [];
+  const fontFaces: string[] = [];
+  for (const src of sources) {
+    const adaptedCss = adaptCssText(src.css, src.url);
+    cssParts.push(adaptedCss.css);
+    fontFaces.push(...adaptedCss.fontFaces);
+  }
+  const docCss = cssParts.join('\n');
+  hoistFontFaces(fontFaces);
+  warnViewportDependent(docCss);
 
-  // Apply adaptCssText for vw→cqi, @media→@container, @font-face extraction, URL absolutization
-  const adaptedCss = adaptCssText(docCss, opts.docUrl);
-  docCss = adaptedCss.css;
+  // Markup URLs resolve against the doc, not the site route
+  absolutizeMarkup(doc.body, base);
 
   // Build sheet from adapted CSS
   const sheet = new CSSStyleSheet();
