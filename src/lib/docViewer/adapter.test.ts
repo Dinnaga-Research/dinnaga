@@ -1,7 +1,7 @@
 // ABOUTME: Tests for the doc adapter — fetch, parse, adapt CSS and HTML.
 // ABOUTME: Covers: fetch real docs, CSS rewriting, stripping, SPA shell detection.
 import { expect, test, vi } from 'vitest';
-import { adaptDoc } from './adapter';
+import { adaptDoc, adaptCssText } from './adapter';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -179,4 +179,101 @@ test('compound color-scheme query is left unchanged and warns', async () => {
   expect([...sheet.cssRules].map((r) => r.cssText).join('')).toContain('prefers-color-scheme');
   expect(warn).toHaveBeenCalled();
   warn.mockRestore();
+});
+
+// Tests for adaptCssText
+test('adaptCssText: vw rewrite keeps !important', () => {
+  const result = adaptCssText('h1 { font-size: 5vw !important; }', new URL('http://localhost/'));
+  expect(result.css).toContain('5cqi');
+  expect(result.css).toContain('!important');
+});
+
+test('adaptCssText: vw rewrite leaves px alone', () => {
+  const result = adaptCssText('h1 { font-size: 12px; }', new URL('http://localhost/'));
+  expect(result.css).not.toContain('cqi');
+  expect(result.css).toContain('12px');
+});
+
+test('adaptCssText: vw rewrite leaves var(--vw-ish) alone', () => {
+  const result = adaptCssText('h1 { margin: var(--vw-ish); }', new URL('http://localhost/'));
+  expect(result.css).toContain('var(--vw-ish)');
+});
+
+test('adaptCssText: width-media converts to container', () => {
+  const result = adaptCssText('@media (max-width:640px) { .grid2 { display: grid; } }', new URL('http://localhost/'));
+  expect(result.css).toContain('@container doc');
+  expect(result.css).toContain('max-width');
+});
+
+test('adaptCssText: compound width media converts', () => {
+  const result = adaptCssText('@media (min-width: 40rem) and (max-width: 60rem) { .card { color: red; } }', new URL('http://localhost/'));
+  expect(result.css).toContain('@container doc');
+});
+
+test('adaptCssText: color-scheme media unchanged', () => {
+  const result = adaptCssText('@media (prefers-color-scheme: dark) { p { color: white; } }', new URL('http://localhost/'));
+  expect(result.css).toContain('prefers-color-scheme');
+  expect(result.css).not.toContain('@container');
+});
+
+test('adaptCssText: @font-face is extracted', () => {
+  const cssText = '@font-face { font-family: "Custom"; src: url(/fonts/custom.woff2); }';
+  const result = adaptCssText(cssText, new URL('http://localhost/'));
+  console.log('fontFaces:', result.fontFaces);
+  expect(result.fontFaces.length).toBe(1);
+  expect(result.fontFaces[0]).toContain('@font-face');
+});
+
+test('adaptCssText: font face URLs are absolutized', () => {
+  const cssText = '@font-face { font-family: "Custom"; src: url(fonts/custom.woff2); }';
+  const sheetUrl = new URL('http://example.com/path/to/style.css');
+  const result = adaptCssText(cssText, sheetUrl);
+  expect(result.fontFaces[0]).toContain('http://example.com/path/to/fonts/custom.woff2');
+});
+
+test('adaptCssText: CSS url() values are absolutized', () => {
+  const cssText = 'body { background: url(../img/bg.png); }';
+  const sheetUrl = new URL('http://example.com/css/style.css');
+  const result = adaptCssText(cssText, sheetUrl);
+  expect(result.css).toContain('http://example.com/img/bg.png');
+});
+
+test('adaptCssText: CSS url() with data: unchanged', () => {
+  const cssText = 'body { background: url(data:image/png;base64,ABC==); }';
+  const result = adaptCssText(cssText, new URL('http://localhost/'));
+  expect(result.css).toContain('data:image/png');
+});
+
+test('adaptCssText: CSS url() with # unchanged', () => {
+  const cssText = 'svg { clip-path: url(#my-mask); }';
+  const result = adaptCssText(cssText, new URL('http://localhost/'));
+  expect(result.css).toContain('url(#my-mask)');
+});
+
+test('real Weekly 2026-08-08 yields one @container doc (max-width:640px)', () => {
+  const weeklyHtml = readDoc('weekly/2026-08-08.html');
+  const doc = new DOMParser().parseFromString(weeklyHtml, 'text/html');
+  const docCss = [...doc.querySelectorAll('style')].map((s) => s.textContent ?? '').join('\n');
+  const result = adaptCssText(docCss, new URL('http://localhost/artifact-docs/weekly/2026-08-08.html'));
+
+  // Check that @container is present and @media (max-width) is gone
+  expect(result.css).toContain('@container doc');
+  expect(result.css).not.toContain('@media (max-width:640px)');
+  expect(result.css).not.toContain('@media (min-width:');
+});
+
+test('real Copilot Studio doc has no vw in declarations after adapt', () => {
+  const copilotHtml = readDoc('llm-best-practices-copilot-studio.html');
+  const doc = new DOMParser().parseFromString(copilotHtml, 'text/html');
+  const docCss = [...doc.querySelectorAll('style')].map((s) => s.textContent ?? '').join('\n');
+  const result = adaptCssText(docCss, new URL('http://localhost/artifact-docs/llm-best-practices-copilot-studio.html'));
+
+  // Check that no vw units remain in declarations (not in comments or strings)
+  const lines = result.css.split('\n');
+  for (const line of lines) {
+    if (line.includes('vw')) {
+      // vw might still appear in comments or variable names, but not in actual declarations
+      expect(line.trim()).toMatch(/^\s*(\/\*|--)/);
+    }
+  }
 });

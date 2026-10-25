@@ -34,10 +34,12 @@ export function rewriteColorSchemeMedia(mediaText: string): string | null {
 
 /**
  * Check if a media query is width-only (contains only min-width/max-width with and).
- * Used for media-to-container rewrite in future units.
+ * Used for media-to-container rewrite in UNIT-002.
  */
 export function isWidthOnlyMedia(mediaText: string): boolean {
   const trimmed = mediaText.trim();
+  // Match patterns like: (max-width: 640px) or (min-width: 40rem) and (max-width: 60rem)
+  // Must be ONLY width features with 'and' as connector
   const widthOnly = /^\(\s*(min|max)-width\s*:[^)]*\)(\s+and\s+\(\s*(min|max)-width\s*:[^)]*\))*$/.test(trimmed);
   return widthOnly;
 }

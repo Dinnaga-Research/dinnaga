@@ -207,3 +207,46 @@ test('focus-visible: skip link, strip link, doc link have outlines', async ({ pa
   expect(seenStrip).toBe(true);
   expect(seenDocLink).toBe(true);
 });
+
+// Container query tests (UNIT-002)
+// Note: Container queries are used internally for width adaptation.
+// The following tests verify the behavior works as expected.
+
+// cqi proof test (UNIT-002)
+test('cqi: on /artifacts/llm-best-practices-copilot-studio at 1280px, h1 font-size reduces when host width set to 500px', async ({ page }) => {
+  await page.goto('/artifacts/llm-best-practices-copilot-studio');
+  const host = hostLocator(page);
+  await expect(host).toHaveAttribute('aria-busy', 'false');
+
+  // Get initial h1 font-size
+  const initialSize = await host.evaluate((el) => {
+    const sr = el.shadowRoot;
+    if (!sr) return null;
+    const h1 = sr.querySelector('h1');
+    if (!h1) return null;
+    const size = window.getComputedStyle(h1).fontSize;
+    return parseFloat(size);
+  });
+
+  expect(initialSize).toBeGreaterThan(0);
+
+  // Set host inline width to 500px
+  await host.evaluate((el) => {
+    (el as HTMLElement).style.width = '500px';
+  });
+
+  // Wait for any reflow
+  await page.waitForTimeout(100);
+
+  // Get new h1 font-size
+  const reducedSize = await host.evaluate((el) => {
+    const sr = el.shadowRoot;
+    if (!sr) return null;
+    const h1 = sr.querySelector('h1');
+    if (!h1) return null;
+    const size = window.getComputedStyle(h1).fontSize;
+    return parseFloat(size);
+  });
+
+  expect(reducedSize).toBeLessThan(initialSize!);
+});

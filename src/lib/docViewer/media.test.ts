@@ -1,7 +1,7 @@
 // ABOUTME: Tests for the media query rewriter — normalize color-scheme to forced-dark.
 // ABOUTME: Covers: (prefers-color-scheme: dark) → screen, light → not all, compounds unchanged.
 import { expect, test } from 'vitest';
-import { rewriteColorSchemeMedia } from './media';
+import { rewriteColorSchemeMedia, isWidthOnlyMedia } from './media';
 
 test('bare dark media query becomes screen', () => {
   const result = rewriteColorSchemeMedia('(prefers-color-scheme: dark)');
@@ -56,4 +56,33 @@ test('query without prefers-color-scheme unchanged', () => {
 test('unknown prefers-color-scheme value returns null (warning case)', () => {
   const result = rewriteColorSchemeMedia('(prefers-color-scheme: contrast)');
   expect(result).toBeNull();
+});
+
+// Tests for isWidthOnlyMedia
+test('width-only media: single max-width', () => {
+  expect(isWidthOnlyMedia('(max-width:640px)')).toBe(true);
+});
+
+test('width-only media: single min-width', () => {
+  expect(isWidthOnlyMedia('(min-width: 40rem)')).toBe(true);
+});
+
+test('width-only media: min and max with and', () => {
+  expect(isWidthOnlyMedia('(min-width: 40rem) and (max-width: 60rem)')).toBe(true);
+});
+
+test('width-only media with spaces normalized', () => {
+  expect(isWidthOnlyMedia('( max-width : 640px )')).toBe(true);
+});
+
+test('media with color-scheme is not width-only', () => {
+  expect(isWidthOnlyMedia('screen and (max-width:640px)')).toBe(false);
+});
+
+test('media with prefers-color-scheme is not width-only', () => {
+  expect(isWidthOnlyMedia('(prefers-color-scheme: dark)')).toBe(false);
+});
+
+test('media print is not width-only', () => {
+  expect(isWidthOnlyMedia('print')).toBe(false);
 });

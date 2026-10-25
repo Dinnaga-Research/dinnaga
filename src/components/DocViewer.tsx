@@ -58,6 +58,16 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
           root.prepend(styleEl);
         }
 
+        // Dev logging for container queries (UNIT-002)
+        if (import.meta.env.DEV) {
+          const containerRules = Array.from(adapted.sheet.cssRules).filter(
+            (r) => r.cssText.includes('@container'),
+          );
+          if (containerRules.length > 0) {
+            console.log(`[DocViewer] Found ${containerRules.length} @container rules`);
+          }
+        }
+
         setIsLoading(false);
       } catch (err) {
         if (ctl.signal.aborted) return;
