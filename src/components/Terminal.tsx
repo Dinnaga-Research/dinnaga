@@ -1,6 +1,8 @@
 // ABOUTME: Terminal — the interactive boot terminal shown in the home hero's art column.
 // ABOUTME: Types its boot sequence, invites a question, and unlocks /artifacts on the passphrase.
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -33,6 +35,8 @@ interface HistoryEntry {
   kind: 'in' | 'out';
   text: string;
 }
+
+const CromulonArt = lazy(() => import('./cromulon/CromulonArt'));
 
 const UNLOCK_NAV_DELAY_MS = 900;
 
@@ -162,6 +166,9 @@ export function Terminal({
 
 
       <div className="terminal-screen">
+        <Suspense fallback={null}>
+          <CromulonArt />
+        </Suspense>
         <div className="terminal-curvature" aria-hidden="true" />
         <div className="terminal-scanlines" aria-hidden="true" />
         <div className="terminal-flicker" aria-hidden="true" />

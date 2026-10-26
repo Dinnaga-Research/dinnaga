@@ -2,7 +2,7 @@
 // ABOUTME: Covers boot reveal, question submission, reset, and the passphrase unlock path.
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Terminal } from './Terminal';
 
@@ -175,5 +175,21 @@ describe('Terminal', () => {
       await userEvent.type(input, 'x');
       expect(screen.queryByText('ask a question')).not.toBeInTheDocument();
     });
+  });
+
+  it('renders the art layer without errors when the 2D context is null (jsdom)', async () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const ctx = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+    const { container } = render(
+      <MemoryRouter>
+        <Terminal bootLines={BOOT} />
+      </MemoryRouter>,
+    );
+    await screen.findByLabelText('Ask Dinnaga a question', undefined, { timeout: 3000 });
+    await waitFor(() => expect(container.querySelector('canvas.cromulon-art')).not.toBeNull());
+    expect(container.querySelector('canvas.cromulon-art')).toHaveAttribute('aria-hidden', 'true');
+    expect(errors).not.toHaveBeenCalled();
+    ctx.mockRestore();
+    errors.mockRestore();
   });
 });

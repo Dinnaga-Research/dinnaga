@@ -210,6 +210,18 @@
 .terminal-chrome-meta { color: var(--dn-term-dim); justify-self: end; font-size: 12px; }
 .terminal-chrome-dots { display: none; }
 
+/* ── Cromulon art: one canvas under the text (2) and the CRT layers (4-6) ── */
+.cromulon-art {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.3;
+}
+@media (forced-colors: active), (prefers-contrast: more) {
+  .cromulon-art { display: none; }
+}
+
 /* ── Screen ────────────────────────────────────────────── */
 .terminal-screen {
   position: relative;
@@ -271,11 +283,20 @@
     line-height: 21px;
   }
 }
-.t-line { white-space: pre-wrap; word-break: break-word; }
+.t-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* Knockout: an opaque backing keeps text at full contrast over the art. */
+  width: fit-content;
+  background: var(--dn-term-bg);
+  box-shadow: 0 0 0 3px var(--dn-term-bg);
+}
 .t-in   { color: var(--dn-term-text); text-shadow: var(--dn-term-glow); }
 .t-out  { color: var(--dn-term-dim); }
 
 .t-prompt {
+  background: var(--dn-term-bg);
+  box-shadow: 0 0 0 3px var(--dn-term-bg);
   display: flex;
   align-items: center;
   gap: 8px;
