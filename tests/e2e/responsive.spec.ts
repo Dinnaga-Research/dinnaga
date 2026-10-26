@@ -14,6 +14,12 @@ test('home renders without horizontal overflow on mobile', async ({ page }) => {
   expect(await hasHorizontalOverflow(page)).toBe(false);
 });
 
+test('home renders without horizontal overflow at 390px', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  expect(await hasHorizontalOverflow(page)).toBe(false);
+});
+
 for (const path of [
   '/atisha',
   '/method',

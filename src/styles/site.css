@@ -165,8 +165,16 @@
     aspect-ratio: auto;
     max-width: none;
     height: 100%;
-    min-height: 520px;
+    min-height: 600px;
     margin: 0;
+  }
+}
+/* Phones: drop the 16:10 lock so the boot text, prompt and room for the art fit. */
+@media (max-width: 700px) {
+  .terminal {
+    aspect-ratio: auto;
+    height: auto;
+    min-height: 500px;
   }
 }
 
