@@ -1,7 +1,8 @@
 // ABOUTME: The Cromulon art layer: one aria-hidden canvas inside the Terminal screen, drawn in plasma ASCII.
 // ABOUTME: Plasma flows for 5 s after load or activity, then holds; keystrokes open the mouth; unlock brightens it.
 import { useEffect, useRef } from 'react';
-import { Mat, renderHead } from './head3d';
+import { Mat } from './cell';
+import { compositeScene, decodeHex, fitFrame, source, type FrameData } from './frame';
 import { shouldAnimate } from './motion';
 import { plasma, rampChar } from './ramp';
 import type { Cell } from './cell';
@@ -52,6 +53,8 @@ export default function CromulonArt({ unlocked, keystrokes, hoverRef }: Cromulon
     let cols = 0;
     let rows = 0;
     let cw = 0;
+    let sdf: typeof import('./head3d').renderHead | null = null;
+    let frame: FrameData | null = null;
     let closed: Cell[] = [];
     let open: Cell[] = [];
     let mouthOpen = false;
@@ -81,7 +84,18 @@ export default function CromulonArt({ unlocked, keystrokes, hoverRef }: Cromulon
       if (!(cw > 0)) return false;
       cols = Math.floor(w / cw);
       rows = Math.floor(h / FONT_PX);
-      const base = { cols, rows, cellAspect: FONT_PX / cw, scene: 'scene' as const };
+      const cellAspect = FONT_PX / cw;
+      if (frame) {
+        // The operator's frame: `closed` rests, `open` pulses; without `closed` only `open` is shown.
+        const fit = (hex: string) =>
+          compositeScene(fitFrame(decodeHex(hex), frame!.width, frame!.height, cols, rows, cellAspect), cols, rows, cellAspect);
+        open = fit(frame.open);
+        closed = frame.closed && !reduced ? fit(frame.closed) : open;
+        return true;
+      }
+      if (!sdf) return false;
+      const renderHead = sdf;
+      const base = { cols, rows, cellAspect, scene: 'scene' as const };
       if (reduced) {
         closed = open = renderHead({ ...base, mouth: SHOW_ME_MOUTH });
       } else {
@@ -176,7 +190,19 @@ export default function CromulonArt({ unlocked, keystrokes, hoverRef }: Cromulon
     const ready = fonts
       ? Promise.all([fonts.ready, fonts.load(FONT).catch(() => [])])
       : Promise.resolve();
-    ready.then(() => {
+    // Only the chosen source is fetched: the frame data module, or (no frame, or it failed) the SDF head.
+    const loadSource = async () => {
+      if (source.kind === 'frame') {
+        try {
+          frame = (await source.load()).CROMULON_FRAME;
+          return;
+        } catch {
+          frame = null;
+        }
+      }
+      sdf = (await import('./head3d')).renderHead;
+    };
+    ready.then(loadSource).then(() => {
       if (cancelled || !layout()) return;
       draw();
       start();
