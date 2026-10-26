@@ -6,6 +6,7 @@ import { rewriteColorSchemeMedia, isWidthOnlyMedia } from './media';
 import { stripDocument } from './strip';
 import { isSpaShell } from './shell';
 import { devWarn } from './devWarn';
+import { detectFamily, hasOwnSelection, mapFontFamilies, themeRule, type DocFamily } from './families';
 import {
   CALLOUT_CSS,
   QUARTZ_OVERRIDE_CSS,
@@ -38,7 +39,7 @@ export interface AdaptedCss {
 export interface AdaptedDoc {
   content: DocumentFragment | Element;
   sheet: CSSStyleSheet;
-  family: string | null;
+  family: DocFamily | null;
   isQuartz: boolean;
   lang?: string;
   bodyAttrs: Record<string, string>;
@@ -502,11 +503,24 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
   // Rewrite rule preludes (selectors, color-scheme media) IN PLACE
   rewriteRulesInPlace(sheet.cssRules);
 
+  // Theme mapping (#52, #53): recognise the family from its rewritten :host variables, set
+  // font-family in place, and append one screen-only rule (just before the guard). A doc that
+  // matches nothing keeps its forced-dark palette and its own fonts.
+  const family = detectFamily(sheet.cssRules, isQuartz);
+  let themeCss: string | null = null;
+  if (family) {
+    mapFontFamilies(sheet.cssRules);
+    themeCss = themeRule(family, { selection: !hasOwnSelection(sheet.cssRules) });
+  } else {
+    devWarn(`No Doc family matched ${opts.docUrl.pathname}: left with its own palette and fonts`);
+  }
+
   // Reset goes first, guard goes last, so a doc's own root rules can style the host
   // but cannot clip it or fix its size.
   // Include container: doc / inline-size for container query support
   sheet.insertRule('doc-body,doc-main{display:block}', 0);
   sheet.insertRule(':host{all:initial;display:block;container:doc/inline-size}', 0);
+  if (themeCss) sheet.insertRule(themeCss, sheet.cssRules.length);
   sheet.insertRule(
     ':host{overflow-x:auto!important;height:auto!important;max-height:none!important;position:relative!important}',
     sheet.cssRules.length,
@@ -560,7 +574,7 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
   return {
     content: frag,
     sheet,
-    family: null, // Will be extended by UNIT-007
+    family,
     isQuartz,
     lang,
     bodyAttrs,

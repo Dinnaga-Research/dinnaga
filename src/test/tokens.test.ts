@@ -235,3 +235,99 @@ describe('Token lint (§16)', () => {
     expect(colorLines).toEqual([]);
   });
 });
+
+describe('Doc theme tokens (§13.1)', () => {
+  const tokensCss = readFileSync(join(ROOT, 'src/styles/tokens.css'), 'utf-8');
+  const hex = parseTokens(tokensCss);
+
+  const declared = new Map<string, string>();
+  const re = /(--doc-[a-z0-9-]+):\s*([^;]+);/g;
+  for (let m = re.exec(tokensCss); m; m = re.exec(tokensCss)) declared.set(m[1]!, m[2]!.trim());
+
+  // §13.1, one line per token
+  const SPEC: Record<string, { value: string; resolves: string }> = {
+    '--doc-bg': { value: 'var(--dn-bg)', resolves: '#0a0a0a' },
+    '--doc-surface': { value: 'var(--dn-bg-raised)', resolves: '#141414' },
+    '--doc-text': { value: 'var(--dn-text)', resolves: '#e8e8e8' },
+    '--doc-text-strong': { value: 'var(--dn-text)', resolves: '#e8e8e8' },
+    '--doc-muted': { value: 'var(--dn-text-2)', resolves: '#b8b8b8' },
+    '--doc-line': { value: 'var(--dn-rule-strong)', resolves: '#444444' },
+    '--doc-line-soft': { value: 'var(--dn-rule)', resolves: '#262626' },
+    '--doc-accent': { value: 'var(--dn-text)', resolves: '#e8e8e8' },
+    '--doc-accent-2': { value: 'var(--dn-text-2)', resolves: '#b8b8b8' },
+    '--doc-accent-3': { value: 'var(--dn-text-label)', resolves: '#9a9a9a' },
+    '--doc-font-display': { value: 'var(--dn-font-display)', resolves: '' },
+    '--doc-font-body': { value: 'var(--dn-font-body)', resolves: '' },
+    '--doc-font-mono': { value: 'var(--dn-font-mono)', resolves: '' },
+  };
+
+  it('defines exactly the §13.1 tokens, with the §13.1 values', () => {
+    expect(Object.fromEntries(declared)).toEqual(
+      Object.fromEntries(Object.entries(SPEC).map(([k, v]) => [k, v.value])),
+    );
+  });
+
+  const resolve = (name: string): string => {
+    const ref = /^var\((--dn-[a-z0-9-]+)\)$/.exec(declared.get(name) ?? '');
+    const value = ref ? hex.get(ref[1]!) : undefined;
+    if (!value) throw new Error(`${name} does not resolve to a hex --dn token`);
+    return value.toLowerCase();
+  };
+
+  it('each colour token resolves to the §13.1 hex', () => {
+    for (const [name, { resolves }] of Object.entries(SPEC)) {
+      if (resolves) expect(resolve(name), name).toBe(resolves);
+    }
+  });
+
+  it('no doc token resolves to the lime signal', () => {
+    for (const name of Object.keys(SPEC)) {
+      expect(declared.get(name), name).not.toMatch(/tested|c0fe04/i);
+    }
+    for (const name of Object.keys(SPEC).filter((n) => SPEC[n]!.resolves)) {
+      expect(resolve(name), name).not.toBe('#c0fe04');
+    }
+  });
+
+  it('text is at least 15:1 on bg and surface', () => {
+    expect(wcagContrast(resolve('--doc-text'), resolve('--doc-bg'))).toBeGreaterThanOrEqual(15);
+    expect(wcagContrast(resolve('--doc-text'), resolve('--doc-surface'))).toBeGreaterThanOrEqual(15);
+    expect(wcagContrast(resolve('--doc-text-strong'), resolve('--doc-bg'))).toBeGreaterThanOrEqual(15);
+  });
+
+  it('muted is at least 9:1 on bg and surface', () => {
+    expect(wcagContrast(resolve('--doc-muted'), resolve('--doc-bg'))).toBeGreaterThanOrEqual(9);
+    expect(wcagContrast(resolve('--doc-muted'), resolve('--doc-surface'))).toBeGreaterThanOrEqual(9);
+  });
+
+  it('accent is at least 15:1 on bg; accent-2 at least 9:1; accent-3 at least 7:1 (5:1 on line-soft)', () => {
+    expect(wcagContrast(resolve('--doc-accent'), resolve('--doc-bg'))).toBeGreaterThanOrEqual(15);
+    expect(wcagContrast(resolve('--doc-accent-2'), resolve('--doc-bg'))).toBeGreaterThanOrEqual(9);
+    expect(wcagContrast(resolve('--doc-accent-3'), resolve('--doc-bg'))).toBeGreaterThanOrEqual(7);
+    expect(wcagContrast(resolve('--doc-accent-3'), resolve('--doc-line-soft'))).toBeGreaterThanOrEqual(5);
+  });
+
+  // Composite an rgba colour over an opaque ground, then measure text on it
+  const blend = (fg: string, alpha: number, bg: string): string => {
+    const a = hexToRgb(fg);
+    const b = hexToRgb(bg);
+    const mix = a.map((c, i) => Math.round(c * alpha + b[i]! * (1 - alpha)));
+    return '#' + mix.map((c) => c.toString(16).padStart(2, '0')).join('');
+  };
+
+  it('every composited highlight keeps text at least 7:1 (§13.2)', () => {
+    const text = resolve('--doc-text');
+    const surface = resolve('--doc-surface');
+    const bg = resolve('--doc-bg');
+    const cases: [string, string][] = [
+      ['copilot --accent-soft on paper', blend(resolve('--doc-accent'), 0.12, surface)],
+      ['slamwich --gold-soft on paper', blend(resolve('--doc-accent-2'), 0.2, surface)],
+      ['quartz --highlight on bg', blend(resolve('--doc-accent'), 0.15, bg)],
+      ['quartz --textHighlight on bg', blend(resolve('--doc-accent-2'), 0.35, bg)],
+      ['selection on bg', blend('#e8e8e8', 0.22, bg)],
+    ];
+    for (const [label, ground] of cases) {
+      expect(wcagContrast(text, ground), label).toBeGreaterThanOrEqual(7);
+    }
+  });
+});

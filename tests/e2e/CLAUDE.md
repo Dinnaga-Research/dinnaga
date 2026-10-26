@@ -18,6 +18,8 @@ Playwright end-to-end specs, run against a live Vite dev server
   `helpers/quartz.ts` under a fake prefix) through the dev-only `/dev/doc` harness: article-only,
   theme, callouts, in-app links, reduced motion. `quartz-harness-prod.spec.ts` builds to a temp
   dir, serves it on port 4243 and checks the harness is a 404 there (chromium only).
+- `doc-theme.spec.ts` — the doc theme mapping on all 11 routes and both Quartz builds at
+  1280/390 under a light OS: ground, resolved variables, contrast, fonts; plus print and focus.
 
 Specs drive the real app through the browser, not component internals —
 prefer role/label queries over CSS selectors. Playwright locators pierce open shadow roots.

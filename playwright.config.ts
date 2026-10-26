@@ -19,12 +19,12 @@ export default defineConfig({
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
-      testMatch: '**/{artifacts,weekly,responsive,doc-viewer,doc-viewer-quartz}.spec.ts',
+      testMatch: '**/{artifacts,weekly,responsive,doc-viewer,doc-viewer-quartz,doc-theme}.spec.ts',
     },
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
-      testMatch: '**/{artifacts,weekly,responsive,doc-viewer,doc-viewer-quartz}.spec.ts',
+      testMatch: '**/{artifacts,weekly,responsive,doc-viewer,doc-viewer-quartz,doc-theme}.spec.ts',
     },
   ],
   webServer: {

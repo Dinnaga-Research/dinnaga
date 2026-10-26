@@ -5,11 +5,12 @@ import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { DOC_ROUTES, hostLocator, noHorizontalOverflow } from './helpers/docViewer';
 
-// Expected forced-dark colors (from ticket #46)
+// Expected forced-dark colors (ticket #46)
+// Updated by #52/#53: every family's ground is --doc-bg's resolved value on screen
 const FORCED_DARK_COLORS: Record<string, string> = {
-  'slamwich-tasting-report': 'rgb(14, 14, 14)',
-  'llm-best-practices-copilot-studio': 'rgb(18, 18, 16)',
-  '2026-08-08': 'rgb(17, 17, 20)',
+  'slamwich-tasting-report': 'rgb(10, 10, 10)',
+  'llm-best-practices-copilot-studio': 'rgb(10, 10, 10)',
+  '2026-08-08': 'rgb(10, 10, 10)',
 };
 
 // Test each of the 11 routes at desktop and mobile viewports
@@ -89,7 +90,7 @@ test('weekly 2026-08-08 @ light OS: forced-dark background', async ({ page }) =>
   const host = hostLocator(page);
   await expect(host).toHaveAttribute('aria-busy', 'false');
   // The weekly sheets put their ground on `body` (-> doc-body), not on `html`, and doc-body
-  // fills the host. Its colour is the ticket's rgb(17, 17, 20).
+  // fills the host. Its colour is --doc-bg's rgb(10, 10, 10).
   const bgColor = await host.evaluate((el) => {
     const body = el.shadowRoot?.querySelector('doc-body');
     return body ? window.getComputedStyle(body).backgroundColor : null;

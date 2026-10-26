@@ -205,6 +205,23 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
   useEffect(() => {
     if (!root || !location.hash) return;
     applyAnchorBehavior(root, location.hash.slice(1), new URL(docPath, window.location.href));
+
+    // The theme mapping swaps the doc onto the site's web fonts, which load after first layout and
+    // move everything below them. Settle the target once they are in, if it is still the marked one.
+    let cancelled = false;
+    const id = location.hash.slice(1);
+    const settle = () => {
+      if (cancelled) return;
+      const marked = root.querySelector('[data-doc-target]');
+      if (marked && marked.id === decodeURIComponentSafe(id)) marked.scrollIntoView({ block: 'start' });
+    };
+    const frame = requestAnimationFrame(() => {
+      document.fonts?.ready.then(settle, () => {});
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+    };
   }, [root, location.hash, docPath]);
 
   if (error) {
@@ -224,6 +241,14 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
       aria-busy={isLoading}
     />
   );
+}
+
+function decodeURIComponentSafe(id: string): string {
+  try {
+    return decodeURIComponent(id);
+  } catch {
+    return id;
+  }
 }
 
 /**
