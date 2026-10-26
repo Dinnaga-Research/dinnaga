@@ -6,6 +6,7 @@ import { rewriteColorSchemeMedia, isWidthOnlyMedia } from './media';
 import { stripDocument } from './strip';
 import { isSpaShell } from './shell';
 import { devWarn } from './devWarn';
+import { QUARTZ_OVERRIDE_CSS, extractArticle, isQuartzDoc } from './quartz';
 
 /**
  * Options for adaptDoc
@@ -454,7 +455,7 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
   }
 
   // Detect if it's a Quartz doc
-  const isQuartz = doc.getElementById('quartz-root') !== null;
+  const isQuartz = isQuartzDoc(doc);
 
   // Strip unsafe content
   stripDocument(doc);
@@ -476,6 +477,9 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
   hoistFontFaces(fontFaces);
   warnViewportDependent(docCss);
 
+  // Quartz pages mount article-only: Dinnaga provides the navigation.
+  if (isQuartz) extractArticle(doc);
+
   // Markup URLs resolve against the doc, not the site route
   absolutizeMarkup(doc.body, base);
 
@@ -496,6 +500,17 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
     sheet.cssRules.length,
   );
 
+  // Quartz: single-column overrides, last of all
+  if (isQuartz) {
+    for (const rule of QUARTZ_OVERRIDE_CSS) {
+      try {
+        sheet.insertRule(rule, sheet.cssRules.length);
+      } catch (err) {
+        devWarn('Could not insert Quartz rule', rule, err);
+      }
+    }
+  }
+
   // Extract body attributes
   const bodyAttrs: Record<string, string> = {};
   for (const attr of doc.body.attributes) {
@@ -506,6 +521,8 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
   const hostAttrs: Record<string, string> = {
     'data-doc-host': '',
   };
+  // Quartz's prescript would have set this; scripts are stripped, so the host carries it.
+  if (isQuartz) hostAttrs['saved-theme'] = 'dark';
 
   // Get language
   const lang = doc.documentElement.lang || 'en';

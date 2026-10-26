@@ -137,3 +137,74 @@ test('clicking an in-doc anchor marks the target, focuses it and updates the has
   expect(root.getElementById('c03')!.hasAttribute('data-doc-target')).toBe(true);
   expect(window.history.length).toBe(before + 2);
 });
+
+// Quartz callouts and print theme (#50, #51)
+import { fixtureUrl, stubFixtureFetch } from '../test/quartzFixture';
+
+function stubMatchMedia() {
+  vi.stubGlobal('matchMedia', (media: string) => ({
+    matches: false,
+    media,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }));
+}
+
+async function mountQuartz() {
+  if (typeof window.matchMedia !== 'function') stubMatchMedia();
+  stubFixtureFetch();
+  const docPath = fixtureUrl('build-b', 'index.html').href;
+  const utils = render(
+    <BrowserRouter>
+      <DocViewer docPath={docPath} />
+    </BrowserRouter>,
+  );
+  const host = utils.container.querySelector<HTMLElement>('[data-doc-host]')!;
+  await waitFor(() => expect(host.getAttribute('aria-busy')).toBe('false'));
+  return host;
+}
+
+test('Quartz: the host is saved-theme dark, and print switches it to light and back', async () => {
+  const listeners: Array<(e: { matches: boolean }) => void> = [];
+  const mql = {
+    matches: false,
+    media: 'print',
+    addEventListener: (_: string, fn: (e: { matches: boolean }) => void) => listeners.push(fn),
+    removeEventListener: (_: string, fn: (e: { matches: boolean }) => void) => {
+      listeners.splice(listeners.indexOf(fn), 1);
+    },
+  };
+  vi.stubGlobal('matchMedia', (q: string) => (q === 'print' ? mql : { ...mql, media: q, matches: false }));
+  const host = await mountQuartz();
+  expect(host.getAttribute('saved-theme')).toBe('dark');
+  mql.matches = true;
+  listeners.forEach((fn) => fn({ matches: true }));
+  expect(host.getAttribute('saved-theme')).toBe('light');
+  window.dispatchEvent(new Event('afterprint'));
+  mql.matches = false;
+  window.dispatchEvent(new Event('afterprint'));
+  expect(host.getAttribute('saved-theme')).toBe('dark');
+  window.dispatchEvent(new Event('beforeprint'));
+  expect(host.getAttribute('saved-theme')).toBe('light');
+});
+
+test('Quartz: print listeners are removed on unmount', async () => {
+  const add = vi.spyOn(window, 'addEventListener');
+  const remove = vi.spyOn(window, 'removeEventListener');
+  stubMatchMedia();
+  stubFixtureFetch();
+  const utils = render(
+    <BrowserRouter>
+      <DocViewer docPath={fixtureUrl('build-b', 'index.html').href} />
+    </BrowserRouter>,
+  );
+  const host = utils.container.querySelector<HTMLElement>('[data-doc-host]')!;
+  await waitFor(() => expect(host.getAttribute('aria-busy')).toBe('false'));
+  const added = add.mock.calls.filter(([t]) => t === 'beforeprint' || t === 'afterprint').length;
+  expect(added).toBe(2);
+  utils.unmount();
+  const removed = remove.mock.calls.filter(([t]) => t === 'beforeprint' || t === 'afterprint').length;
+  expect(removed).toBe(2);
+  add.mockRestore();
+  remove.mockRestore();
+});

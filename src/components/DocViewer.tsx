@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { adaptDoc, type AdaptOptions } from '../lib/docViewer/adapter';
 import { classifyLink } from '../lib/docViewer/links';
 import { devWarn } from '../lib/docViewer/devWarn';
+import { bindPrintTheme } from '../lib/docViewer/quartz';
 
 interface DocViewerProps {
   docPath: string;
@@ -16,6 +17,7 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const navigateRef = useRef(navigate);
+  const [isQuartz, setIsQuartz] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [root, setRoot] = useState<ShadowRoot | null>(null);
@@ -43,6 +45,10 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
         if (!host) return;
 
         const shadow = host.shadowRoot ?? host.attachShadow({ mode: 'open' });
+        for (const [name, value] of Object.entries(adapted.hostAttrs)) {
+          if (name !== 'data-doc-host') host.setAttribute(name, value);
+        }
+        setIsQuartz(adapted.isQuartz);
 
         // Check if adoptedStyleSheets is supported
         const supportsAdopted =
@@ -76,6 +82,7 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
       mounted = false;
       ctl.abort();
       setRoot(null);
+      setIsQuartz(false);
     };
   }, [docPath, toRoute]);
 
@@ -93,6 +100,13 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
       window.history.scrollRestoration = prevRestoration;
     };
   }, [root]);
+
+  // Quartz: dark on screen, light in print. Scripts are stripped, so the host carries the attribute.
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!root || !isQuartz || !host) return;
+    return bindPrintTheme(host);
+  }, [root, isQuartz]);
 
   // One delegated click listener on the shadow root.
   useEffect(() => {

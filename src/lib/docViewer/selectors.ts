@@ -48,6 +48,17 @@ export function rewriteSelector(selectorText: string): string {
       continue;
     }
 
+    // Quartz's `[saved-theme=dark] x` has no type selector; the attribute lives on the host,
+    // which sits outside the shadow tree, so it has to become :host([saved-theme=dark]).
+    if (ch === '[' && atSelectorStart(result) && selectorText.startsWith('saved-theme', i + 1)) {
+      const end = findBracketEnd(selectorText, i);
+      if (end !== -1 && (end + 1 >= len || /[\s>+~,]/.test(selectorText[end + 1]!))) {
+        result += `:host(${selectorText.slice(i, end + 1)})`;
+        i = end + 1;
+        continue;
+      }
+    }
+
     // Handle attribute brackets (which can contain strings)
     if (ch === '[') {
       result += ch;
@@ -107,9 +118,9 @@ export function rewriteSelector(selectorText: string): string {
       } else {
         const isTypeSelector = shouldRewriteTypeSelector(result, 'root');
         if (isTypeSelector) {
-          const compound = extractCompound(selectorText, i + 5);
+          const { compound, end } = extractCompound(selectorText, i + 5);
           result += `:host${compound ? `(${compound})` : ''}`;
-          i += 5 + compound.length;
+          i = end;
         } else {
           result += ':root';
           i += 5;
@@ -138,9 +149,9 @@ export function rewriteSelector(selectorText: string): string {
       if (isTypeSelector) {
         if (id === 'html' || id === 'root') {
           // Extract compound suffix
-          const compound = extractCompound(selectorText, i);
+          const { compound, end } = extractCompound(selectorText, i);
           result += `:host${compound ? `(${compound})` : ''}`;
-          i += compound.length;
+          i = end;
         } else if (id === 'body') {
           result += 'doc-body';
         } else if (id === 'main') {
@@ -194,7 +205,8 @@ function shouldRewriteTypeSelector(resultSoFar: string, id: string): boolean {
     const lastCh = trimmed[trimmed.length - 1];
 
     // After combinator or comma (or space which is whitespace combinator)
-    if (lastCh === '>' || lastCh === '+' || lastCh === '~' || lastCh === ',') {
+    // '&' is the parent selector in CSS nesting (`& body`)
+    if (lastCh === '>' || lastCh === '+' || lastCh === '~' || lastCh === ',' || lastCh === '&') {
       return true;
     }
 
@@ -226,7 +238,7 @@ function shouldRewriteTypeSelector(resultSoFar: string, id: string): boolean {
  * Extract the compound suffix after a type selector.
  * Compound = [attr] | .class | #id | :pseudo(...)
  */
-function extractCompound(text: string, startIdx: number): string {
+function extractCompound(text: string, startIdx: number): { compound: string; end: number } {
   let compound = '';
   let i = startIdx;
   const len = text.length;
@@ -299,6 +311,9 @@ function extractCompound(text: string, startIdx: number): string {
         i++;
       }
 
+      // `html:root` and `:root:root` are all just the host: don't repeat it inside :host(...)
+      if (pseudoName === 'root' && !(i < len && text[i]! === '(')) continue;
+
       compound += ':' + pseudoName;
 
       // Handle arguments like :not(...)
@@ -351,5 +366,22 @@ function extractCompound(text: string, startIdx: number): string {
     }
   }
 
-  return compound;
+  return { compound, end: i };
+}
+
+function atSelectorStart(resultSoFar: string): boolean {
+  const t = resultSoFar.trimEnd();
+  return t === '' || /[>+~,]$/.test(t);
+}
+
+/** Index of the `]` closing the bracket opened at `start`, skipping strings and escapes; -1 if none. */
+function findBracketEnd(text: string, start: number): number {
+  for (let i = start + 1; i < text.length; i++) {
+    const c = text[i]!;
+    if (c === '\\') i++;
+    else if (c === '"' || c === "'") {
+      for (i++; i < text.length && text[i] !== c; i++) if (text[i] === '\\') i++;
+    } else if (c === ']') return i;
+  }
+  return -1;
 }

@@ -201,3 +201,47 @@ function extractSelectors(html: string): string[] {
   }
   return selectors;
 }
+
+// Quartz theme-port selectors (#50)
+test('Quartz: html[saved-theme] with descendant body keeps the attribute on the host', () => {
+  expect(rewriteSelector('html[saved-theme="dark"] body .callout')).toBe(
+    ':host([saved-theme="dark"]) doc-body .callout',
+  );
+});
+
+test('Quartz: :root[saved-theme=dark] becomes :host([saved-theme=dark])', () => {
+  expect(rewriteSelector(':root[saved-theme=dark]')).toBe(':host([saved-theme=dark])');
+});
+
+test('Quartz: html body>:not(.print) keeps the child combinator', () => {
+  expect(rewriteSelector('html body>:not(.print)')).toBe(':host doc-body>:not(.print)');
+});
+
+test('Quartz: html>body>#main-horizontal with no spaces around the combinators', () => {
+  expect(rewriteSelector('html>body>#main-horizontal')).toBe(':host>doc-body>#main-horizontal');
+});
+
+test('Quartz: body.theme-dark .x becomes doc-body.theme-dark .x', () => {
+  expect(rewriteSelector('body.theme-dark .x')).toBe('doc-body.theme-dark .x');
+});
+
+test('Quartz: a[href$=".html"] and [data-slug="body"] are unchanged', () => {
+  expect(rewriteSelector('a[href$=".html"]')).toBe('a[href$=".html"]');
+  expect(rewriteSelector('[data-slug="body"]')).toBe('[data-slug="body"]');
+});
+
+test('Quartz: a leading [saved-theme=dark] attribute selector moves onto the host', () => {
+  expect(rewriteSelector('[saved-theme=dark] code[data-theme*=\\ ]')).toBe(
+    ':host([saved-theme=dark]) code[data-theme*=\\ ]',
+  );
+});
+
+test('Quartz: :root:root[saved-theme="dark"] (a specificity bump) is one host, not :host(:root...)', () => {
+  expect(rewriteSelector(':root:root[saved-theme="dark"]')).toBe(':host([saved-theme="dark"])');
+  expect(rewriteSelector('html:root')).toBe(':host');
+});
+
+test('Quartz: a nested `& body` descendant after the parent selector becomes doc-body', () => {
+  expect(rewriteSelector('& body[data-slug]')).toBe('& doc-body[data-slug]');
+  expect(rewriteSelector('& body .page > div')).toBe('& doc-body .page > div');
+});

@@ -14,6 +14,10 @@ Playwright end-to-end specs, run against a live Vite dev server
   mounted in shadow DOM, and the raw static report under `public/artifact-docs/weekly/`.
 - `doc-viewer.spec.ts` — all 11 doc routes at multiple viewports, forced-dark colors,
   re-serialization canary, missing doc fallback.
+- `doc-viewer-quartz.spec.ts` — Quartz fixture (`tests/fixtures/quartz`, served by
+  `helpers/quartz.ts` under a fake prefix) through the dev-only `/dev/doc` harness: article-only,
+  theme, reduced motion. `quartz-harness-prod.spec.ts` builds to a temp
+  dir, serves it on port 4243 and checks the harness is a 404 there (chromium only).
 
 Specs drive the real app through the browser, not component internals —
 prefer role/label queries over CSS selectors. Playwright locators pierce open shadow roots.
