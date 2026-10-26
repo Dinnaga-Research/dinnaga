@@ -218,6 +218,11 @@
   pointer-events: none;
   opacity: 0.3;
 }
+/* Shelf unlock: brighten from 0.3 to 0.75. Reduced motion zeroes the transition globally. */
+.cromulon-art.is-unlocked {
+  opacity: 0.75;
+  transition: opacity 800ms ease-out;
+}
 @media (forced-colors: active), (prefers-contrast: more) {
   .cromulon-art { display: none; }
 }

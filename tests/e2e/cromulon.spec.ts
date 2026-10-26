@@ -175,3 +175,167 @@ test.describe('phone 390x844, reduced motion', () => {
     expect(m.belowY).toBeGreaterThan(0);
   });
 });
+
+// ── Motion (full motion unless a test says otherwise) ─────────────────────────────────
+
+const dataUrl = (page: Page) => page.locator(ART).evaluate((c: HTMLCanvasElement) => c.toDataURL());
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Sleep until `ms` after `t0` (a Date.now() taken before navigation). */
+const sleepUntil = (t0: number, ms: number) => sleep(Math.max(0, t0 + ms - Date.now()));
+
+async function loadFullMotion(page: Page) {
+  const t0 = Date.now();
+  await page.goto('/');
+  await waitForArt(page);
+  return t0;
+}
+
+async function differsWithin(page: Page, before: string, timeout = 2000) {
+  await expect.poll(async () => (await dataUrl(page)) !== before, { timeout }).toBe(true);
+}
+
+test.describe('motion 1440x900, full motion', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('flows for the first seconds, then holds still', async ({ page }) => {
+    const t0 = await loadFullMotion(page);
+    const a = await dataUrl(page);
+    await sleep(300);
+    const b = await dataUrl(page);
+    expect(b).not.toBe(a);
+
+    await sleepUntil(t0, 7000);
+    const c = await dataUrl(page);
+    await sleep(500);
+    expect(await dataUrl(page)).toBe(c);
+  });
+
+  test('hovering the Terminal makes it flow again after settling', async ({ page }) => {
+    const t0 = await loadFullMotion(page);
+    await page.mouse.move(2, 2);
+    await sleepUntil(t0, 7000);
+    const settled = await dataUrl(page);
+    await sleep(300);
+    expect(await dataUrl(page)).toBe(settled);
+    const box = (await page.locator('.terminal').boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 4 });
+    await differsWithin(page, settled);
+  });
+
+  test('typing a character makes it flow again after settling', async ({ page }) => {
+    const t0 = await loadFullMotion(page);
+    await page.mouse.move(2, 2);
+    await sleepUntil(t0, 7000);
+    const settled = await dataUrl(page);
+    const input = page.getByLabel('Ask Dinnaga a question');
+    await expect(input).toBeVisible();
+    await input.focus();
+    await input.press('a');
+    await differsWithin(page, settled);
+    // and it keeps flowing, not just one swapped frame
+    const mid = await dataUrl(page);
+    await sleep(400);
+    expect(await dataUrl(page)).not.toBe(mid);
+  });
+
+  test('does not animate while scrolled out of view', async ({ page }) => {
+    await loadFullMotion(page);
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect
+      .poll(() => page.locator('.terminal').evaluate((el) => el.getBoundingClientRect().bottom < 0))
+      .toBe(true);
+    await sleep(500); // let the IntersectionObserver report and any in-flight frame land
+    const a = await dataUrl(page);
+    await sleep(500);
+    expect(await dataUrl(page)).toBe(a);
+  });
+
+  test('text contrast is unchanged with the art at rest (settled, full motion)', async ({ page }) => {
+    const t0 = await loadFullMotion(page);
+    await page.mouse.move(2, 2);
+    await expect(page.getByLabel('Ask Dinnaga a question')).toBeVisible();
+    await sleepUntil(t0, 7000);
+    for (const selector of ['.t-line', '.t-prompt']) {
+      const box = (await page.locator(selector).first().boundingBox())!;
+      const withArt = await page.screenshot({ clip: box });
+      await page.locator(ART).evaluate((c) => ((c as HTMLElement).style.display = 'none'));
+      const without = await page.screenshot({ clip: box });
+      await page.locator(ART).evaluate((c) => ((c as HTMLElement).style.display = ''));
+      expect(withArt.equals(without), `${selector} pixels differ with the art shown`).toBe(true);
+    }
+  });
+
+  test('makes no rAF callbacks while settled', async ({ page }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as { __raf: number };
+      w.__raf = 0;
+      const orig = window.requestAnimationFrame.bind(window);
+      window.requestAnimationFrame = (cb) => {
+        w.__raf++;
+        return orig(cb);
+      };
+    });
+    const t0 = await loadFullMotion(page);
+    await page.mouse.move(2, 2);
+    const count = () => page.evaluate(() => (window as unknown as { __raf: number }).__raf);
+    await sleepUntil(t0, 7000);
+    const a = await count();
+    expect(a).toBeGreaterThan(0); // the loop did run before settling
+    await sleep(1000);
+    expect(await count()).toBe(a);
+  });
+
+  test('unlock brightens the art to 0.75 and flows again before routing', async ({ page }) => {
+    const t0 = await loadFullMotion(page);
+    await page.mouse.move(2, 2);
+    await sleepUntil(t0, 7000); // settled
+    const input = page.getByLabel('Ask Dinnaga a question');
+    await input.fill('show me what you got');
+    await input.press('Enter');
+    await expect
+      .poll(() => page.locator(ART).evaluate((c) => getComputedStyle(c).opacity), { timeout: 5000 })
+      .toBe('0.75');
+    expect(new URL(page.url()).pathname).toBe('/');
+    const a = await dataUrl(page);
+    await sleep(300);
+    expect(await dataUrl(page)).not.toBe(a);
+    await expect(page).toHaveURL(/\/artifacts/);
+  });
+});
+
+test.describe('motion 1440x900, reduced motion', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('is fully static and typing does not change the canvas', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const t0 = Date.now();
+    await page.goto('/');
+    await waitForArt(page);
+    const a = await dataUrl(page);
+    await sleepUntil(t0, 2000);
+    expect(await dataUrl(page)).toBe(a);
+    await sleepUntil(t0, 6000);
+    expect(await dataUrl(page)).toBe(a);
+    const input = page.getByLabel('Ask Dinnaga a question');
+    await input.focus();
+    await input.pressSequentially('abc');
+    await sleep(500);
+    expect(await dataUrl(page)).toBe(a);
+  });
+
+  test('unlock jumps straight to 0.75 opacity without a loop', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await waitForArt(page);
+    const input = page.getByLabel('Ask Dinnaga a question');
+    await expect(input).toBeVisible();
+    const before = await dataUrl(page);
+    await input.fill('show me what you got');
+    await input.press('Enter');
+    await expect
+      .poll(() => page.locator(ART).evaluate((c) => getComputedStyle(c).opacity), { timeout: 1500 })
+      .toBe('0.75');
+    expect(await dataUrl(page)).toBe(before);
+  });
+});

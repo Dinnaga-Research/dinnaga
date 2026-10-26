@@ -93,11 +93,13 @@ export function Terminal({
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [sent, setSent] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
+  const [keystrokes, setKeystrokes] = useState(0);
   const [caret, setCaret] = useState(0);
   const [cursorX, setCursorX] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const mirrorRef = useRef<HTMLSpanElement>(null);
   const navigatedRef = useRef(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (done && inputRef.current && !sent) inputRef.current.focus();
@@ -148,7 +150,7 @@ export function Terminal({
   };
 
   return (
-    <div className="terminal" aria-label="Dinnaga terminal">
+    <div className="terminal" aria-label="Dinnaga terminal" ref={rootRef}>
       {media && media.type === 'video' && (
         <video
           className="terminal-media"
@@ -167,7 +169,7 @@ export function Terminal({
 
       <div className="terminal-screen">
         <Suspense fallback={null}>
-          <CromulonArt />
+          <CromulonArt unlocked={unlocked} keystrokes={keystrokes} hoverRef={rootRef} />
         </Suspense>
         <div className="terminal-curvature" aria-hidden="true" />
         <div className="terminal-scanlines" aria-hidden="true" />
@@ -199,6 +201,7 @@ export function Terminal({
                     setInput(e.target.value);
                     trackCaret(e);
                   }}
+                  onKeyDown={() => setKeystrokes((n) => n + 1)}
                   onSelect={trackCaret}
                   onKeyUp={trackCaret}
                   onClick={trackCaret}
