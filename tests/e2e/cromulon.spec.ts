@@ -258,9 +258,10 @@ test.describe('motion 1440x900, full motion', () => {
     await sleepUntil(t0, 7000);
     for (const selector of ['.t-line', '.t-prompt']) {
       const box = (await page.locator(selector).first().boundingBox())!;
-      const withArt = await page.screenshot({ clip: box });
+      // Freeze CSS animations (cursor blink, CRT flicker) so only the art can differ between shots.
+      const withArt = await page.screenshot({ clip: box, animations: 'disabled' });
       await page.locator(ART).evaluate((c) => ((c as HTMLElement).style.display = 'none'));
-      const without = await page.screenshot({ clip: box });
+      const without = await page.screenshot({ clip: box, animations: 'disabled' });
       await page.locator(ART).evaluate((c) => ((c as HTMLElement).style.display = ''));
       expect(withArt.equals(without), `${selector} pixels differ with the art shown`).toBe(true);
     }
