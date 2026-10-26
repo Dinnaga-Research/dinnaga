@@ -11,7 +11,22 @@ export default defineConfig({
     baseURL: 'http://localhost:4242',
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+      testMatch: '**/{artifacts,weekly,responsive,doc-viewer,doc-viewer-quartz,doc-theme}.spec.ts',
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+      testMatch: '**/{artifacts,weekly,responsive,doc-viewer,doc-viewer-quartz,doc-theme}.spec.ts',
+    },
+  ],
   webServer: {
     command: 'bun run dev',
     url: 'http://localhost:4242',

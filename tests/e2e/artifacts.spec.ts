@@ -8,29 +8,33 @@ test('/artifacts lists the report and clicking navigates to the viewer', async (
   await page.getByRole('link', { name: /SLAMWICH Tasting Report/ }).click();
   await expect(page).toHaveURL(/\/artifacts\/slamwich-tasting-report$/);
   await expect(
-    page.getByRole('heading', { name: /SLAMWICH Tasting Report/i }),
+    page.getByRole('heading', { name: /What 84 rebuilds of 28 acclaimed portfolios/i }),
   ).toBeVisible();
 });
 
 test('deep link to the viewer resolves on hard load', async ({ page }) => {
   await page.goto('/artifacts/slamwich-tasting-report');
   await expect(
-    page.getByRole('heading', { name: /SLAMWICH Tasting Report/i }),
+    page.getByRole('heading', { name: /What 84 rebuilds of 28 acclaimed portfolios/i }),
   ).toBeVisible();
   await expect(page.getByRole('link', { name: /open standalone/i })).toHaveAttribute(
     'href',
     '/artifact-docs/slamwich-tasting-report.html',
   );
+  // The catalogue title lives in the colophon, as plain text; the doc owns the h1.
+  await expect(page.getByRole('heading', { level: 2, name: 'About this doc' })).toBeVisible();
+  await expect(page.locator('footer strong', { hasText: 'SLAMWICH Tasting Report' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
 });
 
-test('the viewer iframe loads the actual report document', async ({ page }) => {
+test('the viewer mounts the actual report document in shadow DOM', async ({ page }) => {
   await page.goto('/artifacts/slamwich-tasting-report');
-  const frame = page.frameLocator('iframe[title="SLAMWICH Tasting Report"]');
   await expect(
-    frame.getByRole('heading', {
+    page.getByRole('heading', {
       name: /What 84 rebuilds of 28 acclaimed portfolios teach about design/i,
     }),
   ).toBeVisible();
+  await expect(page.locator('[data-doc-host]')).toHaveJSProperty('shadowRoot.mode', 'open');
 });
 
 test('the raw doc is served as a static file', async ({ page }) => {
