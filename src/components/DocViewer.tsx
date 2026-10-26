@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { adaptDoc, type AdaptOptions } from '../lib/docViewer/adapter';
 import { classifyLink } from '../lib/docViewer/links';
 import { devWarn } from '../lib/docViewer/devWarn';
-import { bindPrintTheme } from '../lib/docViewer/quartz';
+import { bindPrintTheme, toggleCallout } from '../lib/docViewer/quartz';
 
 interface DocViewerProps {
   docPath: string;
@@ -17,6 +17,8 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const navigateRef = useRef(navigate);
+  // The caller's toRoute is read through a ref so a new function identity never remounts the doc.
+  const toRouteRef = useRef(toRoute);
   const [isQuartz, setIsQuartz] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,6 +27,9 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
   useEffect(() => {
     navigateRef.current = navigate;
   }, [navigate]);
+  useEffect(() => {
+    toRouteRef.current = toRoute;
+  }, [toRoute]);
 
   // Mount the doc. Runs once per docPath (the parent keys this component by docPath);
   // hash changes never remount.
@@ -38,7 +43,7 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
         setError(null);
 
         const docUrl = new URL(docPath, window.location.href);
-        const adapted = await adaptDoc(docUrl, { docUrl, signal: ctl.signal, toRoute });
+        const adapted = await adaptDoc(docUrl, { docUrl, signal: ctl.signal, toRoute: toRouteRef.current });
         if (!mounted) return;
 
         const host = hostRef.current;
@@ -84,7 +89,7 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
       setRoot(null);
       setIsQuartz(false);
     };
-  }, [docPath, toRoute]);
+  }, [docPath]);
 
   // Sticky nav offset: while a doc is mounted, anchors clear the site nav and the Doc bar.
   useEffect(() => {
@@ -107,6 +112,35 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
     if (!root || !isQuartz || !host) return;
     return bindPrintTheme(host);
   }, [root, isQuartz]);
+
+  // Collapsible callouts: click, or Enter / Space on the focused title. The innermost title wins.
+  useEffect(() => {
+    if (!root) return;
+    const titleOf = (e: Event) =>
+      e
+        .composedPath()
+        .find((n): n is HTMLElement => n instanceof HTMLElement && n.matches('.callout-title[role="button"]'));
+    const onClick = (e: Event) => {
+      const title = titleOf(e);
+      const callout = title?.closest('.callout');
+      if (callout) toggleCallout(callout);
+    };
+    const onKey = (e: Event) => {
+      const key = (e as KeyboardEvent).key;
+      if (key !== 'Enter' && key !== ' ') return;
+      const title = titleOf(e);
+      const callout = title?.closest('.callout');
+      if (!callout) return;
+      e.preventDefault();
+      toggleCallout(callout);
+    };
+    root.addEventListener('click', onClick);
+    root.addEventListener('keydown', onKey);
+    return () => {
+      root.removeEventListener('click', onClick);
+      root.removeEventListener('keydown', onKey);
+    };
+  }, [root]);
 
   // One delegated click listener on the shadow root.
   useEffect(() => {
@@ -131,7 +165,15 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
         return;
       }
 
-      const classification = classifyLink(
+      // A link to this same viewer route (an in-app wikilink to a heading on this page) is an anchor.
+      const sameRoute =
+        linkUrl.origin === window.location.origin &&
+        linkUrl.pathname === window.location.pathname &&
+        linkUrl.search === window.location.search;
+
+      const classification = sameRoute && linkUrl.hash && !event.button && !(event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+        ? 'anchor'
+        : classifyLink(
         linkUrl,
         {
           target: link.getAttribute('target'),

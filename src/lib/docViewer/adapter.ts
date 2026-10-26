@@ -6,7 +6,14 @@ import { rewriteColorSchemeMedia, isWidthOnlyMedia } from './media';
 import { stripDocument } from './strip';
 import { isSpaShell } from './shell';
 import { devWarn } from './devWarn';
-import { QUARTZ_OVERRIDE_CSS, extractArticle, isQuartzDoc } from './quartz';
+import {
+  CALLOUT_CSS,
+  QUARTZ_OVERRIDE_CSS,
+  extractArticle,
+  isQuartzDoc,
+  prepareCallouts,
+  rewriteInternalLinks,
+} from './quartz';
 
 /**
  * Options for adaptDoc
@@ -477,8 +484,13 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
   hoistFontFaces(fontFaces);
   warnViewportDependent(docCss);
 
-  // Quartz pages mount article-only: Dinnaga provides the navigation.
-  if (isQuartz) extractArticle(doc);
+  // Quartz pages mount article-only: Dinnaga provides the navigation. Internal links become
+  // in-app routes here, before URLs are absolutised, so modifier-clicks get a real URL.
+  if (isQuartz) {
+    extractArticle(doc);
+    prepareCallouts(doc.body);
+    if (opts.toRoute) rewriteInternalLinks(doc.body, opts.docUrl, opts.toRoute);
+  }
 
   // Markup URLs resolve against the doc, not the site route
   absolutizeMarkup(doc.body, base);
@@ -500,9 +512,9 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
     sheet.cssRules.length,
   );
 
-  // Quartz: single-column overrides, last of all
+  // Quartz: single-column overrides, then the callout rules, last of all
   if (isQuartz) {
-    for (const rule of QUARTZ_OVERRIDE_CSS) {
+    for (const rule of [...QUARTZ_OVERRIDE_CSS, ...CALLOUT_CSS]) {
       try {
         sheet.insertRule(rule, sheet.cssRules.length);
       } catch (err) {

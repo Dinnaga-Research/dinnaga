@@ -41,6 +41,87 @@ export const QUARTZ_OVERRIDE_CSS = [
   '@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}',
 ];
 
+/** Callout rules, appended after the overrides. Quartz folded with script-set heights. */
+export const CALLOUT_CSS = [
+  '.callout.is-collapsed > .callout-content { display: none }',
+  '.callout-title[role="button"]:focus-visible { outline: 2px solid currentColor; outline-offset: 2px }',
+];
+
+/** The doc path for a Quartz slug: Quartz writes `tools/ripgrep.html` but links `./tools/ripgrep`. */
+export function quartzDocPath(base: string, slug: string): string {
+  return `${base.replace(/\/+$/, '')}/${slug}.html`;
+}
+
+/** The fake fixture prefix a Quartz build lives under, or else the folder holding the page. */
+export function fixtureBase(path: string): string {
+  const m = path.match(/^(.*\/__fixtures__\/quartz\/build-[a-z0-9]+)\//);
+  if (m) return m[1]!;
+  return path.slice(0, path.lastIndexOf('/'));
+}
+
+/**
+ * Point every internal link at its in-app route, at load rather than on click, so modifier-clicks
+ * and new tabs get a real URL. Links with `data-slug` use it; tag and folder links (no slug) are
+ * resolved against the doc and made relative to the site root, which is the doc's own URL minus
+ * its `<body data-slug>`. Must run before URLs are absolutised: the hash is read from the raw href.
+ */
+export function rewriteInternalLinks(
+  root: ParentNode,
+  docUrl: URL,
+  toRoute: (slug: string, hash: string) => string,
+): void {
+  const pageSlug = rootSlug(root);
+  const sitePrefix = pageSlug && docUrl.pathname.endsWith(`/${pageSlug}.html`)
+    ? docUrl.pathname.slice(0, docUrl.pathname.length - `/${pageSlug}.html`.length)
+    : null;
+
+  for (const a of root.querySelectorAll<HTMLAnchorElement>('a.internal')) {
+    const href = a.getAttribute('href');
+    if (!href || href.startsWith('#')) continue;
+    let resolved: URL;
+    try {
+      resolved = new URL(href, docUrl);
+    } catch {
+      continue;
+    }
+    let slug = a.getAttribute('data-slug');
+    if (!slug) {
+      if (sitePrefix === null || !resolved.pathname.startsWith(sitePrefix + '/')) continue;
+      slug = decodeURIComponent(resolved.pathname.slice(sitePrefix.length + 1)).replace(/\.html$/, '');
+      if (slug === '' || slug.endsWith('/')) slug += 'index';
+    }
+    a.setAttribute('href', toRoute(slug, resolved.hash));
+  }
+}
+
+// The page slug lives on <body data-slug>; callers pass doc.body or a node inside it.
+function rootSlug(root: ParentNode): string | null {
+  const el = root as Element;
+  if (el.getAttribute?.('data-slug')) return el.getAttribute('data-slug');
+  return el.ownerDocument?.body?.getAttribute('data-slug') ?? null;
+}
+
+function titleOf(callout: Element): Element | undefined {
+  return Array.from(callout.children).find((c) => c.classList.contains('callout-title'));
+}
+
+/** Give each collapsible callout's title the button semantics Quartz's script would have driven. */
+export function prepareCallouts(root: ParentNode): void {
+  for (const callout of root.querySelectorAll('.callout.is-collapsible')) {
+    const title = titleOf(callout);
+    if (!title) continue;
+    title.setAttribute('role', 'button');
+    title.setAttribute('tabindex', '0');
+    title.setAttribute('aria-expanded', callout.classList.contains('is-collapsed') ? 'false' : 'true');
+  }
+}
+
+/** Toggle a callout and keep `aria-expanded` in step. */
+export function toggleCallout(callout: Element): void {
+  const collapsed = callout.classList.toggle('is-collapsed');
+  titleOf(callout)?.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+}
+
 /**
  * Keep the host's `saved-theme` at dark on screen and light in print (#8 section 3). Listens for
  * `change` on the print media query plus `beforeprint`/`afterprint`; returns a cleanup.

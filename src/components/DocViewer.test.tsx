@@ -139,6 +139,7 @@ test('clicking an in-doc anchor marks the target, focuses it and updates the has
 });
 
 // Quartz callouts and print theme (#50, #51)
+import userEvent from '@testing-library/user-event';
 import { fixtureUrl, stubFixtureFetch } from '../test/quartzFixture';
 
 function stubMatchMedia() {
@@ -163,6 +164,41 @@ async function mountQuartz() {
   await waitFor(() => expect(host.getAttribute('aria-busy')).toBe('false'));
   return host;
 }
+
+test('Quartz: clicking a collapsed callout title opens it, and again closes it', async () => {
+  const host = await mountQuartz();
+  const root = within(host.shadowRoot as unknown as HTMLElement);
+  const title = root.getByRole('button', { name: /Collapsed callout/ });
+  const callout = title.closest('.callout')!;
+  expect(title.getAttribute('aria-expanded')).toBe('false');
+  await userEvent.click(title);
+  expect(callout.classList.contains('is-collapsed')).toBe(false);
+  expect(title.getAttribute('aria-expanded')).toBe('true');
+  await userEvent.click(title);
+  expect(callout.classList.contains('is-collapsed')).toBe(true);
+});
+
+test('Quartz: Enter opens and Space closes a focused callout title', async () => {
+  const host = await mountQuartz();
+  const root = within(host.shadowRoot as unknown as HTMLElement);
+  const title = root.getByRole('button', { name: /Collapsed callout/ });
+  title.focus();
+  await userEvent.keyboard('{Enter}');
+  expect(title.getAttribute('aria-expanded')).toBe('true');
+  await userEvent.keyboard(' ');
+  expect(title.getAttribute('aria-expanded')).toBe('false');
+});
+
+test('Quartz: a nested callout toggles on its own without toggling the outer one', async () => {
+  const host = await mountQuartz();
+  const root = within(host.shadowRoot as unknown as HTMLElement);
+  const outer = root.getByRole('button', { name: /Collapsed callout/ });
+  await userEvent.click(outer);
+  const inner = root.getByRole('button', { name: /Nested callout/ });
+  await userEvent.click(inner);
+  expect(inner.getAttribute('aria-expanded')).toBe('true');
+  expect(outer.getAttribute('aria-expanded')).toBe('true');
+});
 
 test('Quartz: the host is saved-theme dark, and print switches it to light and back', async () => {
   const listeners: Array<(e: { matches: boolean }) => void> = [];

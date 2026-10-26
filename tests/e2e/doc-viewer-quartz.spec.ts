@@ -154,6 +154,167 @@ test('Tab from the bar into the article reaches the first article link with a vi
   expect(parseFloat(outline!.width)).toBeGreaterThan(0);
 });
 
+// ---------- #51: callouts ----------
+for (const vp of VIEWPORTS) {
+  test.describe(`callouts @ ${vp.name}px`, () => {
+    test.use({ viewport: { width: vp.width, height: vp.height } });
+
+    const heights = (page: Page) =>
+      hostLocator(page).evaluate((el) => {
+        const outer = el.shadowRoot!.querySelector('.callout[data-callout="note"]')!;
+        const inner = outer.querySelector('.callout[data-callout="warning"]')!;
+        return {
+          outer: outer.querySelector(':scope > .callout-content')!.getBoundingClientRect().height,
+          nested: inner.getBoundingClientRect().height,
+          nestedContent: inner.querySelector('.callout-content')!.getBoundingClientRect().height,
+        };
+      });
+
+    test('the collapsed callout, including the nested one, has zero rendered height', async ({ page, context }) => {
+      await serveQuartz(context);
+      await open(page, harnessUrl('build-b', 'index.html'));
+      const h = await heights(page);
+      expect(h.outer).toBe(0);
+      expect(h.nested).toBe(0);
+      expect(h.nestedContent).toBe(0);
+    });
+
+    test('clicking the title shows it, and clicking again hides it', async ({ page, context }) => {
+      await serveQuartz(context);
+      await open(page, harnessUrl('build-b', 'index.html'));
+      const title = hostLocator(page).getByRole('button', { name: /Collapsed callout/ });
+      await expect(title).toHaveAttribute('aria-expanded', 'false');
+      await title.click();
+      await expect(title).toHaveAttribute('aria-expanded', 'true');
+      expect((await heights(page)).outer).toBeGreaterThan(0);
+      await expect(hostLocator(page).getByText('This callout starts collapsed')).toBeVisible();
+      await title.click();
+      await expect(title).toHaveAttribute('aria-expanded', 'false');
+      const h = await heights(page);
+      expect(h.outer).toBe(0);
+      expect(h.nested).toBe(0);
+    });
+
+    test('Tab to the title shows a focus outline; Enter opens it and Space closes it', async ({ page, context }) => {
+      await serveQuartz(context);
+      await open(page, harnessUrl('build-b', 'index.html'));
+      await page.locator('a.doc-bar-open').focus();
+      const focused = () =>
+        hostLocator(page).evaluate((el) => {
+          const a = el.shadowRoot!.activeElement;
+          if (!a) return null;
+          const cs = getComputedStyle(a);
+          return {
+            title: a.classList.contains('callout-title') && /Collapsed callout/.test(a.textContent ?? ''),
+            outlineStyle: cs.outlineStyle,
+            outlineWidth: cs.outlineWidth,
+          };
+        });
+      let state = null;
+      for (let i = 0; i < 20; i++) {
+        await page.keyboard.press('Tab');
+        state = await focused();
+        if (state?.title) break;
+      }
+      expect(state?.title, 'Tab reached the callout title').toBe(true);
+      expect(state!.outlineStyle).not.toBe('none');
+      expect(parseFloat(state!.outlineWidth)).toBeGreaterThanOrEqual(2);
+      const title = hostLocator(page).getByRole('button', { name: /Collapsed callout/ });
+      await page.keyboard.press('Enter');
+      await expect(title).toHaveAttribute('aria-expanded', 'true');
+      expect((await heights(page)).outer).toBeGreaterThan(0);
+      await page.keyboard.press('Space');
+      await expect(title).toHaveAttribute('aria-expanded', 'false');
+      expect((await heights(page)).outer).toBe(0);
+    });
+  });
+}
+
+// ---------- #51: internal links ----------
+const NOTE_URL = (build: Build, page: string, hash = '') => harnessUrl(build, page, hash);
+
+test('SPA: the cross-folder wikilink opens in place, lands at the top, and Back returns', async ({ page, context }) => {
+  await serveQuartz(context);
+  await open(page, harnessUrl('build-b', 'index.html'));
+  await page.evaluate(() => {
+    (window as unknown as { __spaMarker: number }).__spaMarker = 1;
+  });
+  await hostLocator(page).getByRole('link', { name: 'the ripgrep note' }).click();
+
+  const target = NOTE_URL('build-b', 'tools/ripgrep.html');
+  await expect.poll(() => new URL(page.url()).pathname + new URL(page.url()).search).toBe(target);
+  await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
+  await expect(page.getByRole('heading', { level: 1, name: 'Ripgrep notes' })).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { __spaMarker?: number }).__spaMarker)).toBe(1);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+
+  await page.goBack();
+  await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
+  await expect(page.getByRole('heading', { level: 1, name: 'Harbour field notes' })).toBeVisible();
+  expect(new URL(page.url()).search).toBe(new URL(harnessUrl('build-b', 'index.html'), page.url()).search);
+  expect(await page.evaluate(() => (window as unknown as { __spaMarker?: number }).__spaMarker)).toBe(1);
+});
+
+async function expectHeadingBelowBar(page: Page) {
+  const heading = hostLocator(page).locator('#spring-tides');
+  await expect(heading).toHaveAttribute('data-doc-target', '');
+  // Settled right up under the reader bar (gap 0, small tolerance), not merely somewhere below it
+  await expect
+    .poll(async () => {
+      const bar = await page.locator('nav[aria-label="Doc"]').boundingBox();
+      const h = await heading.boundingBox();
+      if (!bar || !h) return false;
+      const gap = h.y - (bar.y + bar.height);
+      return gap >= -1 && gap <= 4;
+    })
+    .toBe(true);
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+}
+
+test('heading link: clicking it lands with the heading below the reader bar and marked data-doc-target', async ({
+  page,
+  context,
+}) => {
+  await serveQuartz(context);
+  await open(page, harnessUrl('build-b', 'index.html'));
+  await page.evaluate(() => {
+    (window as unknown as { __spaMarker: number }).__spaMarker = 1;
+  });
+  await hostLocator(page).getByRole('link', { name: /Spring tides/ }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Tide guide' })).toBeVisible();
+  expect(new URL(page.url()).hash).toBe('#spring-tides');
+  await expectHeadingBelowBar(page);
+  expect(await page.evaluate(() => (window as unknown as { __spaMarker?: number }).__spaMarker)).toBe(1);
+});
+
+test('heading link: a hard load of that URL lands the same way', async ({ page, context }) => {
+  await serveQuartz(context);
+  await open(page, NOTE_URL('build-b', 'guides/tides.html', '#spring-tides'));
+  await expectHeadingBelowBar(page);
+});
+
+test('Meta/Ctrl-click on a wikilink opens a new page at the in-app route, not a file path', async ({
+  page,
+  context,
+}) => {
+  await serveQuartz(context);
+  await open(page, harnessUrl('build-b', 'index.html'));
+  const link = hostLocator(page).getByRole('link', { name: 'the ripgrep note' });
+  const [popup] = await Promise.all([
+    context.waitForEvent('page'),
+    link.click({ modifiers: ['ControlOrMeta'] }),
+  ]);
+  await popup.waitForURL(/\/dev\/doc/);
+  const url = new URL(popup.url());
+  expect(url.pathname).toBe('/dev/doc');
+  expect(url.searchParams.get('path')).toBe('/__fixtures__/quartz/build-b/tools/ripgrep.html');
+  await expect(hostLocator(popup)).toHaveAttribute('aria-busy', 'false');
+  await expect(popup.getByRole('heading', { level: 1, name: 'Ripgrep notes' })).toBeVisible();
+  // The original page did not navigate
+  expect(new URL(page.url()).pathname).toBe('/dev/doc');
+  expect(new URL(page.url()).searchParams.get('path')).toContain('index.html');
+});
+
 // ---------- reduced motion ----------
 test.describe('reduced motion', () => {
   test('the mounted page shows no animation or transition', async ({ page, context }) => {
@@ -169,5 +330,23 @@ test.describe('reduced motion', () => {
       };
     });
     expect(motion).toEqual({ animated: 0, transitioned: 0, running: 0 });
+  });
+
+  test('callout toggling has no transition', async ({ page, context }) => {
+    await serveQuartz(context);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await open(page, harnessUrl('build-b', 'index.html'));
+    const title = hostLocator(page).getByRole('button', { name: /Collapsed callout/ });
+    await title.click();
+    const after = await hostLocator(page).evaluate((el) => {
+      const parts = ['.callout', '.callout-title', '.callout-content', '.fold-callout-icon', '.callout-fold'];
+      const durations = parts.flatMap((sel) =>
+        [...el.shadowRoot!.querySelectorAll(sel)].map((n) => getComputedStyle(n).transitionDuration),
+      );
+      return { durations, running: document.getAnimations().length };
+    });
+    expect(after.durations.every((d) => d.split(',').every((x) => parseFloat(x) === 0))).toBe(true);
+    expect(after.running).toBe(0);
+    await expect(title).toHaveAttribute('aria-expanded', 'true');
   });
 });
