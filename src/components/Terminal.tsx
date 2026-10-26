@@ -1,6 +1,14 @@
 // ABOUTME: Terminal — the interactive boot terminal shown in the home hero's art column.
 // ABOUTME: Types its boot sequence, invites a question, and unlocks /artifacts on the passphrase.
-import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type SyntheticEvent,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTyped } from '../hooks/useTyped';
 import { BOOT_LINES } from '../data/bootLines';
@@ -28,6 +36,29 @@ interface HistoryEntry {
 
 const UNLOCK_NAV_DELAY_MS = 900;
 
+// Renders typed lines with the single block cursor trailing the line being
+// typed: the last non-empty line, or the first line before any character lands.
+function TypedLines({ lines, showCursor }: { lines: string[]; showCursor: boolean }) {
+  let active = 0;
+  lines.forEach((t, i) => {
+    if (t) active = i;
+  });
+  const cursor = <span className="t-cursor" aria-hidden="true" />;
+  if (lines.length === 0) {
+    return showCursor ? <div className="t-line">{cursor}</div> : null;
+  }
+  return (
+    <>
+      {lines.map((t, i) => (
+        <div className="t-line" key={i}>
+          {t || ' '}
+          {showCursor && i === active && cursor}
+        </div>
+      ))}
+    </>
+  );
+}
+
 interface UnlockRevealProps {
   lines: BootLine[];
   onDone: () => void;
@@ -44,15 +75,7 @@ function UnlockReveal({ lines, onDone }: UnlockRevealProps) {
     return () => clearTimeout(t);
   }, [done, onDone]);
 
-  return (
-    <>
-      {rendered.map((t, i) => (
-        <div className="t-line" key={i}>
-          {t || ' '}
-        </div>
-      ))}
-    </>
-  );
+  return <TypedLines lines={rendered} showCursor />;
 }
 
 export function Terminal({
@@ -66,12 +89,29 @@ export function Terminal({
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [sent, setSent] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
+  const [caret, setCaret] = useState(0);
+  const [cursorX, setCursorX] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mirrorRef = useRef<HTMLSpanElement>(null);
   const navigatedRef = useRef(false);
 
   useEffect(() => {
     if (done && inputRef.current && !sent) inputRef.current.focus();
   }, [done, sent]);
+
+  const syncCursor = useCallback(() => {
+    setCursorX((mirrorRef.current?.offsetWidth ?? 0) - (inputRef.current?.scrollLeft ?? 0));
+  }, []);
+
+  useLayoutEffect(() => {
+    syncCursor();
+  }, [caret, input, syncCursor]);
+
+  const trackCaret = (e: SyntheticEvent<HTMLInputElement>) => {
+    const el = e.currentTarget;
+    setCaret(el.selectionStart ?? el.value.length);
+    syncCursor();
+  };
 
   const goShelf = useCallback(() => {
     if (navigatedRef.current) return;
@@ -86,6 +126,7 @@ export function Terminal({
     if (isUnlockPhrase(q)) {
       setHistory((h) => [...h, { kind: 'in', text: q }]);
       setInput('');
+      setCaret(0);
       setUnlocked(true);
       return;
     }
@@ -98,6 +139,7 @@ export function Terminal({
       },
     ]);
     setInput('');
+    setCaret(0);
     setSent(true);
   };
 
@@ -125,11 +167,7 @@ export function Terminal({
         <div className="terminal-flicker" aria-hidden="true" />
 
         <div className="terminal-body">
-          {rendered.map((t, i) => (
-            <div className="t-line" key={i}>
-              {t || ' '}
-            </div>
-          ))}
+          <TypedLines lines={rendered} showCursor={!done} />
 
           {history.map((h, i) => (
             <div className={'t-line ' + (h.kind === 'in' ? 't-in' : 't-out')} key={'h' + i}>
@@ -142,18 +180,32 @@ export function Terminal({
           {done && !sent && !unlocked && (
             <form className="t-prompt" onSubmit={onSubmit}>
               <span className="t-caret">&gt;</span>
-              <input
-                ref={inputRef}
-                className="t-input"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="ask a question"
-                spellCheck={false}
-                autoComplete="off"
-                aria-label="Ask Dinnaga a question"
-              />
-              <span className="t-cursor" aria-hidden="true">
-                ▮
+              <span className="t-field">
+                <span className="t-mirror" ref={mirrorRef} aria-hidden="true">
+                  {input.slice(0, caret)}
+                </span>
+                <input
+                  ref={inputRef}
+                  className="t-input"
+                  value={input}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    trackCaret(e);
+                  }}
+                  onSelect={trackCaret}
+                  onKeyUp={trackCaret}
+                  onClick={trackCaret}
+                  onScroll={syncCursor}
+                  spellCheck={false}
+                  autoComplete="off"
+                  aria-label="Ask Dinnaga a question"
+                />
+                {input === '' && (
+                  <span className="t-placeholder" aria-hidden="true">
+                    ask a question
+                  </span>
+                )}
+                <span className="t-cursor" aria-hidden="true" style={{ left: cursorX }} />
               </span>
             </form>
           )}

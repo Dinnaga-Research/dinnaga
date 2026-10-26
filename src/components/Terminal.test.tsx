@@ -97,4 +97,83 @@ describe('Terminal', () => {
 
     expect(await screen.findByText('SHELF LANDED', undefined, { timeout: 4000 })).toBeInTheDocument();
   });
+
+  describe('block cursor and placeholder', () => {
+    const cursors = (c: HTMLElement) => c.querySelectorAll('.t-cursor');
+
+    it('renders exactly one aria-hidden cursor at every stage and none after a question is sent', async () => {
+      const { container } = render(
+        <MemoryRouter>
+          <Terminal
+            bootLines={[{ text: 'BOOTING THE LAB', delay: 30 }]}
+            unlockLines={[{ text: 'PASSPHRASE ACCEPTED.', delay: 400 }]}
+          />
+        </MemoryRouter>,
+      );
+
+      // mid-boot
+      expect(cursors(container)).toHaveLength(1);
+      expect(cursors(container)[0]).toHaveAttribute('aria-hidden', 'true');
+      await waitFor(() => expect(screen.getByText(/^BOOT/)).toBeInTheDocument());
+      expect(screen.queryByText('BOOTING THE LAB')).not.toBeInTheDocument();
+      expect(cursors(container)).toHaveLength(1);
+
+      // prompt shown
+      const input = await screen.findByLabelText('Ask Dinnaga a question', undefined, {
+        timeout: 3000,
+      });
+      expect(cursors(container)).toHaveLength(1);
+      expect(cursors(container)[0]).toHaveAttribute('aria-hidden', 'true');
+
+      // after typing
+      await userEvent.type(input, 'hello');
+      expect(cursors(container)).toHaveLength(1);
+      expect(cursors(container)[0]).toHaveAttribute('aria-hidden', 'true');
+
+      // after a non-phrase question is submitted
+      await userEvent.keyboard('{Enter}');
+      expect(screen.getByRole('button', { name: '[RESET]' })).toBeInTheDocument();
+      expect(cursors(container)).toHaveLength(0);
+    });
+
+    it('renders exactly one aria-hidden cursor during the unlock reveal', async () => {
+      const { container } = render(
+        <MemoryRouter>
+          <Terminal
+            bootLines={BOOT}
+            unlockLines={[{ text: 'PASSPHRASE ACCEPTED.', delay: 800 }]}
+          />
+        </MemoryRouter>,
+      );
+      const input = await screen.findByLabelText('Ask Dinnaga a question', undefined, {
+        timeout: 3000,
+      });
+      await userEvent.type(input, 'show me what you got{Enter}');
+      expect(screen.queryByLabelText('Ask Dinnaga a question')).not.toBeInTheDocument();
+      expect(cursors(container)).toHaveLength(1);
+      expect(cursors(container)[0]).toHaveAttribute('aria-hidden', 'true');
+      await screen.findByText('PASSPHRASE ACCEPTED.');
+      expect(cursors(container)).toHaveLength(1);
+    });
+
+    it('shows the lowercase placeholder overlay with no placeholder attribute', async () => {
+      const { container } = render(
+        <MemoryRouter>
+          <Terminal bootLines={BOOT} />
+        </MemoryRouter>,
+      );
+      const input = await screen.findByLabelText('Ask Dinnaga a question', undefined, {
+        timeout: 3000,
+      });
+      expect(input).not.toHaveAttribute('placeholder');
+      expect(input).toHaveAttribute('aria-label', 'Ask Dinnaga a question');
+      const overlay = screen.getByText('ask a question');
+      expect(overlay).toHaveAttribute('aria-hidden', 'true');
+      expect(container.textContent).not.toContain('▮');
+      expect(container.textContent).not.toContain('ASK A QUESTION_');
+
+      await userEvent.type(input, 'x');
+      expect(screen.queryByText('ask a question')).not.toBeInTheDocument();
+    });
+  });
 });
