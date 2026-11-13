@@ -1,16 +1,16 @@
-// ABOUTME: 404 route (path '*') — signal-lost message with a route home.
+// ABOUTME: The 404 page (#70) for any unknown path; the site chrome stays around it.
 import { Link } from 'react-router-dom';
+import { PageHead } from '../../components/PageHead';
 
 export function NotFound() {
   return (
-    <section className="section" id="notfound" data-screen-label="404">
-      <header className="section-head">
-        <span className="section-eye">404 · Signal lost</span>
-        <h1 className="section-title">No transmission here.</h1>
-      </header>
-      <p className="panel-body">
-        That path does not resolve. <Link to="/">Back to base →</Link>
-      </p>
-    </section>
+    <div className="not-found dn-page">
+      <PageHead title="Page not found" />
+      <div className="dn-grid">
+        <p className="not-found__body dn-grid__body">
+          There's nothing at this address. Try the <Link to="/">homepage</Link> or <Link to="/atisha">Atisha</Link>.
+        </p>
+      </div>
+    </div>
   );
 }

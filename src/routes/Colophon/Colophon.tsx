@@ -1,20 +1,20 @@
-// ABOUTME: Colophon route (/colophon) — about the lab: founder attribution and how the site is built.
-// ABOUTME: States the founder and how the site is made.
+// ABOUTME: Colophon (/colophon): how the site is built. FOUNDATION: the old copy on the new primitives,
+// ABOUTME: so the route compiles and renders; #71's page replaces it.
+import { PageHead } from '../../components/PageHead';
 import { SITE_SOURCE_URL } from '../../data/links';
 
 export function Colophon() {
   return (
-    <section className="section" id="colophon" data-screen-label="Colophon">
-      <header className="section-head">
-        <span className="section-eye">Colophon</span>
-        <h1 className="section-title">Colophon.</h1>
-      </header>
-      <div className="panel-body-wrap">
-        <p className="panel-body">
-          Built as a static site (React + Vite), hosted on Vercel, typeset in the Dinnaga design
-          system. <a href={SITE_SOURCE_URL}>This site's source is public on GitHub</a>.
-        </p>
+    <div className="dn-page">
+      <PageHead title="Colophon" />
+      <div className="dn-grid dn-section">
+        <div className="dn-grid__body dn-prose">
+          <p>
+            Built as a static site (React + Vite), hosted on Vercel, typeset in the Dinnaga design system.{' '}
+            <a href={SITE_SOURCE_URL}>This site's source is public on GitHub</a>.
+          </p>
+        </div>
       </div>
-    </section>
+    </div>
   );
 }

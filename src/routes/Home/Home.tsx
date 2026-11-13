@@ -1,22 +1,19 @@
-// ABOUTME: Home route (/) — composes the long-scroll dinnaga.ai homepage sections.
-// ABOUTME: Shared chrome (nav, footer, CRT overlay) lives in Layout.
-import { Hero } from '../../components/Hero';
-import { Ticker } from '../../components/Ticker';
-import { Practices } from '../../components/Practices';
-import { DataPanel } from '../../components/DataPanel';
-import { AsciiArt } from '../../components/AsciiArt';
-import { CautionDivider } from '../../components/CautionDivider';
-import { TICKER_ITEMS } from '../../data/tickerItems';
+// ABOUTME: Home route (/): the hero (the run), the library, What we're building, Writing and How we test,
+// ABOUTME: in that fixed order (#68, #69). Shared chrome lives in Layout.
+import { HomeHero } from './sections/HomeHero';
+import { HomeLibrary } from './sections/HomeLibrary';
+import { HomeBuilding } from './sections/HomeBuilding';
+import { HomeWriting } from './sections/HomeWriting';
+import { HowWeTest } from './sections/HowWeTest';
 
 export function Home() {
   return (
     <>
-      <Hero />
-      <Ticker items={TICKER_ITEMS} />
-      <Practices />
-      <DataPanel />
-      <AsciiArt />
-      <CautionDivider />
+      <HomeHero />
+      <HomeLibrary />
+      <HomeBuilding />
+      <HomeWriting />
+      <HowWeTest />
     </>
   );
 }
