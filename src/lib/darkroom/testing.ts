@@ -22,6 +22,12 @@ export function recordingContext(): Recorder {
         return (...args: unknown[]) => {
           calls[prop] = (calls[prop] ?? 0) + 1;
           log.push(`${prop}(${args.map((a) => (typeof a === 'number' ? a.toFixed(3) : typeof a)).join(',')})`);
+          if (prop === 'createImageData') {
+            const [w, h] = args as [number, number];
+            return { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
+          }
+          if (prop === 'createRadialGradient' || prop === 'createLinearGradient') return { addColorStop() {} };
+          return undefined;
         };
       },
       set(_t, prop: string, value) {

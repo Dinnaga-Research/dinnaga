@@ -139,7 +139,7 @@ describe('FrameStore', () => {
   it('without createImageBitmap it decodes through object URLs, and dispose revokes every one', async () => {
     const f = fakes();
     const pending: (() => void)[] = [];
-    const loadImage = vi.fn((_u: string) => new Promise<CanvasImageSource>((res) => pending.push(() => res({} as CanvasImageSource))));
+    const loadImage = vi.fn(() => new Promise<CanvasImageSource>((res) => pending.push(() => res({} as CanvasImageSource))));
     const s = new FrameStore(10, { URL: f.URL, loadImage });
     for (let i = 0; i < 4; i++) s.put(i, blob(10));
     s.request(0);
