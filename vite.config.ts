@@ -16,6 +16,13 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.ts',
-    exclude: ['**/node_modules/**', '**/tests/e2e/**', '**/tests/fixtures/**', '**/dist/**'],
+    exclude: [
+      '**/node_modules/**',
+      '**/tests/e2e/**',
+      '**/tests/fixtures/**',
+      '**/dist/**',
+      // Throwaway screenshot scripts live under .darkroom/ (gitignored); never collect them.
+      '**/.darkroom/**',
+    ],
   },
 });
