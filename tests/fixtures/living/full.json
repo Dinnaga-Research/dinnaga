@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-11-12T12:00:00.000Z",
+  "repos": {
+    "ok": true,
+    "items": [
+      {
+        "owner": "Dinnaga-Research",
+        "name": "dinnaga",
+        "url": "https://github.com/Dinnaga-Research/dinnaga",
+        "description": "Dinnaga Research — the dinnaga.ai homepage (React + Vite)",
+        "pushedAt": "2026-11-12T05:24:37Z",
+        "stars": 0,
+        "release": null
+      },
+      {
+        "owner": "weytani",
+        "name": "living-graph",
+        "url": "https://github.com/weytani/living-graph",
+        "description": "Alfred-inspired agentic maintenance system for Obsidian graphs",
+        "pushedAt": "2026-10-18T14:33:49Z",
+        "stars": 0,
+        "release": "v0.2.0"
+      },
+      {
+        "owner": "weytani",
+        "name": "d3-lwc-graphql",
+        "url": "https://github.com/weytani/d3-lwc-graphql",
+        "description": "",
+        "pushedAt": "2026-08-05T06:23:06Z",
+        "stars": 3,
+        "release": null
+      },
+      {
+        "owner": "weytani",
+        "name": "d3-lwc-soql",
+        "url": "https://github.com/weytani/d3-lwc-soql",
+        "description": "40 D3.js chart LWCs for Salesforce — shared-module architecture, Apex/SOQL data layer",
+        "pushedAt": "2026-08-03T09:18:20Z",
+        "stars": 1,
+        "release": null
+      }
+    ]
+  },
+  "gists": {
+    "ok": true,
+    "items": [
+      {
+        "title": "GitHub Copilot + Playwright in VS Code: QA cheatsheet (settings, compaction, agents, safety rails)",
+        "url": "https://gist.github.com/weytani/d049296faa7e3140909d8e3d8e14f829",
+        "updatedAt": "2026-10-18T05:07:13Z"
+      },
+      {
+        "title": "fixture-notes.md",
+        "url": "https://gist.github.com/weytani/0000000000000000000000000000000a",
+        "updatedAt": "2026-10-06T01:30:57Z"
+      },
+      {
+        "title": "fixture-checklist.md",
+        "url": "https://gist.github.com/weytani/0000000000000000000000000000000b",
+        "updatedAt": "2026-10-01T01:30:48Z"
+      },
+      {
+        "title": "fixture-outline.md",
+        "url": "https://gist.github.com/weytani/0000000000000000000000000000000c",
+        "updatedAt": "2026-09-20T01:30:40Z"
+      }
+    ]
+  },
+  "posts": {
+    "ok": true,
+    "items": [
+      {
+        "title": "The coming storm",
+        "url": "https://weytani.substack.com/p/the-coming-storm",
+        "publishedAt": "2026-10-11T05:39:24.000Z"
+      },
+      {
+        "title": "The conversation has shifted",
+        "url": "https://weytani.substack.com/p/the-conversation-has-shifted",
+        "publishedAt": "2026-02-20T14:45:25.000Z"
+      },
+      {
+        "title": "Just the beginning...",
+        "url": "https://weytani.substack.com/p/just-the-beginning",
+        "publishedAt": "2024-12-18T05:20:21.000Z"
+      }
+    ]
+  }
+}
