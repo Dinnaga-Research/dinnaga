@@ -46,6 +46,7 @@
 
 .method-stage__die {
   color: var(--dn-text);
+  white-space: nowrap; /* "Most die here." stays on one line */
 }
 
 .method-stage .still {
