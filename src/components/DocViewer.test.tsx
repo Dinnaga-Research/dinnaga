@@ -50,6 +50,18 @@ test('mounts a real doc inside the shadow root: its h1, no iframe anywhere', asy
   expect(host.shadowRoot!.querySelectorAll('doc-main')).toHaveLength(1);
 });
 
+test("the host pins doc rem to the user's default size: font-size medium, --dn-doc-rem 1em (§9.3)", () => {
+  stubFetch(read('public/artifact-docs/slamwich-tasting-report.html'));
+  const { container } = render(
+    <BrowserRouter>
+      <DocViewer docPath="/artifact-docs/slamwich-tasting-report.html" />
+    </BrowserRouter>,
+  );
+  const host = container.querySelector<HTMLElement>('[data-doc-host]')!;
+  expect(host.style.fontSize).toBe('medium');
+  expect(host.style.getPropertyValue('--dn-doc-rem')).toBe('1em');
+});
+
 test('is aria-busy while loading', () => {
   stubFetch(read('public/artifact-docs/slamwich-tasting-report.html'));
   const { container } = render(
