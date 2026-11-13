@@ -35,7 +35,7 @@ describe('BackstageWeeklyDoc', () => {
   it('names the report and its window in the colophon, with no tested line', () => {
     open('/backstage/weekly/2026-08-08');
     const colophon = screen.getByRole('heading', { level: 2, name: 'About this doc' }).closest('footer')!;
-    expect(within(colophon).getByText('Weekly report').tagName).toBe('STRONG');
+    expect(within(colophon).getByText('Weekly report')).toHaveClass('doc-colophon-title');
     expect(within(colophon).getByText('Run 2026-08-08, covering 2026-08-03 to 2026-08-08')).toBeInTheDocument();
     expect(colophon.querySelector('.tested-line')).toBeNull();
   });

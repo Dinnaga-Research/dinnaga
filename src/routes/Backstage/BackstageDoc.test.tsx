@@ -55,7 +55,7 @@ describe('BackstageDoc', () => {
   it('puts the title, the date and the note in the colophon, with no tested line', () => {
     open('/backstage/a-draft-doc', [draft]);
     const colophon = screen.getByRole('heading', { level: 2, name: 'About this doc' }).closest('footer')!;
-    expect(within(colophon).getByText('A draft doc').tagName).toBe('STRONG');
+    expect(within(colophon).getByText('A draft doc')).toHaveClass('doc-colophon-title');
     expect(within(colophon).getByText('Published 4 Mar 2026')).toBeInTheDocument();
     expect(within(colophon).getByText('Check this before you rely on it.')).toBeInTheDocument();
     expect(colophon.querySelector('.tested-line')).toBeNull();
