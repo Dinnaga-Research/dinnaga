@@ -1,6 +1,6 @@
 // ABOUTME: The Substack source (#65): the publication's RSS feed (Substack sends no CORS header, which
 // ABOUTME: is why this runs server-side), newest five posts. Sends no credentials.
-import type { LivingPost } from '../../src/lib/living/contract';
+import type { LivingPost } from '../../src/lib/living/contract.js';
 import { fetchText } from './http.js';
 import { parseRss } from './rss.js';
 

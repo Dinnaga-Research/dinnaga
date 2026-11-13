@@ -1,6 +1,6 @@
 // ABOUTME: Vercel function GET /api/living (#65): the Living README's data. Aggregates GitHub (repos,
 // ABOUTME: releases, gists) and the Substack feed server-side; each source fails alone as ok:false.
-import type { Living, LivingSource } from '../src/lib/living/contract';
+import type { Living, LivingSource } from '../src/lib/living/contract.js';
 import { loadGists, loadRepos, redactToken } from './_lib/github.js';
 import { livingResponse } from './_lib/respond.js';
 import { loadPosts } from './_lib/substack.js';

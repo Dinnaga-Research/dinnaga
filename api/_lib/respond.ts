@@ -1,6 +1,6 @@
 // ABOUTME: Builds the api/living Response (#65): always 200 JSON, cached an hour at the CDN when every
 // ABOUTME: source succeeded and five minutes when any failed, so a passing failure is not kept for an hour.
-import type { Living } from '../../src/lib/living/contract';
+import type { Living } from '../../src/lib/living/contract.js';
 
 const STALE = 'stale-while-revalidate=86400';
 export const CACHE_ALL_OK = `public, s-maxage=3600, ${STALE}`;

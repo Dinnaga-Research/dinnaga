@@ -1,6 +1,6 @@
 // ABOUTME: The GitHub source (#65): the user's and the org's repos, each kept repo's latest release,
 // ABOUTME: and the user's gists. GITHUB_TOKEN is optional, read from the environment, sent only to GitHub.
-import type { LivingGist, LivingRepo } from '../../src/lib/living/contract';
+import type { LivingGist, LivingRepo } from '../../src/lib/living/contract.js';
 import { selectGists, selectRepos } from './filter.js';
 import { fetchText } from './http.js';
 

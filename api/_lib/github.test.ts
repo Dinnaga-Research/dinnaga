@@ -127,11 +127,11 @@ describe('GitHub request headers', () => {
   });
 
   it('carry the bearer token on every request when GITHUB_TOKEN is set', async () => {
-    vi.stubEnv('GITHUB_TOKEN', 'ghp_test_not_a_real_token');
+    vi.stubEnv('GITHUB_TOKEN', 'test-token-not-real');
     const calls = await sent();
     expect(calls).toHaveLength(7);
     for (const c of calls) {
-      expect(c.headers.authorization).toBe('Bearer ghp_test_not_a_real_token');
+      expect(c.headers.authorization).toBe('Bearer test-token-not-real');
     }
   });
 

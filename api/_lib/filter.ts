@@ -1,6 +1,6 @@
 // ABOUTME: Picks what the Living README shows (#65): public, non-fork, non-archived repos pushed in the
 // ABOUTME: last 183 days (minus profile repos), newest push first; and public gists, newest update first.
-import type { LivingGist, LivingRepo } from '../../src/lib/living/contract';
+import type { LivingGist, LivingRepo } from '../../src/lib/living/contract.js';
 
 export type RepoCandidate = Omit<LivingRepo, 'release'>;
 

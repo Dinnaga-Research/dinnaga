@@ -1,6 +1,6 @@
 // ABOUTME: A small RSS 2.0 reader for the Substack feed: title, link and pubDate of each <item>,
 // ABOUTME: newest first. Handles CDATA and entities; no dependency. Throws when the body isn't a feed.
-import type { LivingPost } from '../../src/lib/living/contract';
+import type { LivingPost } from '../../src/lib/living/contract.js';
 
 const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
 

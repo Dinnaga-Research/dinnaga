@@ -59,11 +59,11 @@ describe('loadPosts', () => {
   });
 
   it('never sends the GitHub token to Substack', async () => {
-    vi.stubEnv('GITHUB_TOKEN', 'ghp_test_not_a_real_token');
+    vi.stubEnv('GITHUB_TOKEN', 'test-token-not-real');
     const { calls } = stubFetch({ [FEED]: text(feed) });
     await loadPosts();
     expect(calls).toHaveLength(1);
-    expect(JSON.stringify(calls[0]!.headers)).not.toContain('ghp_test_not_a_real_token');
+    expect(JSON.stringify(calls[0]!.headers)).not.toContain('test-token-not-real');
     expect(calls[0]!.headers).not.toHaveProperty('authorization');
   });
 });

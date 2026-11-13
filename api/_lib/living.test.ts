@@ -17,7 +17,7 @@ import {
 } from '../__fixtures__/upstream.js';
 import { GET } from '../living.js';
 
-const TOKEN = 'ghp_test_not_a_real_token';
+const TOKEN = 'test-token-not-real';
 const HOUR = 'public, s-maxage=3600, stale-while-revalidate=86400';
 const FIVE_MIN = 'public, s-maxage=300, stale-while-revalidate=86400';
 
