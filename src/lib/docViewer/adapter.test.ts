@@ -8,6 +8,7 @@ import {
   collectSheets,
   docBaseUrl,
   getHoistedFontSheet,
+  pinRem,
 } from './adapter';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -204,6 +205,73 @@ test('adaptCssText: vw rewrite leaves px alone', () => {
 test('adaptCssText: vw rewrite leaves var(--vw-ish) alone', () => {
   const result = adaptCssText('h1 { margin: var(--vw-ish); }', new URL('http://localhost/'));
   expect(result.css).toContain('var(--vw-ish)');
+});
+
+// §9.3: doc rem is pinned to --dn-doc-rem (the user's default size), not the site's scaling root
+const LOCAL = new URL('http://localhost/');
+const R = (n: string) => `calc(${n} * var(--dn-doc-rem))`;
+
+test('pinRem: 1.5rem, .5rem, -2rem and 1rem inside calc() become calc(n * var(--dn-doc-rem))', () => {
+  expect(pinRem('p { margin: 1.5rem .5rem -2rem 0; }')).toBe(`p { margin: ${R('1.5')} ${R('.5')} ${R('-2')} 0; }`);
+  expect(pinRem('p { width: calc(1rem + 2px); }')).toBe(`p { width: calc(${R('1')} + 2px); }`);
+  expect(pinRem('p { gap: 2REM; padding: 0 1rem!important; }')).toBe(`p { gap: ${R('2')}; padding: 0 ${R('1')}!important; }`);
+  expect(pinRem('p{font:600 0.75rem/1.2 serif}')).toBe(`p{font:600 ${R('0.75')}/1.2 serif}`);
+  expect(pinRem('p{margin:1rem 1rem}')).toBe(`p{margin:${R('1')} ${R('1')}}`);
+});
+
+test('pinRem: url(), strings, comments, identifiers and px are left alone', () => {
+  for (const css of [
+    'p { background: url(a.rem); }',
+    'p { background: url(img/1rem.png); }',
+    'p { background: url("x/2rem.svg"); }',
+    'p::before { content: "1rem"; }',
+    "p::after { content: '0.5rem wide'; }",
+    'p { animation-name: remark; }',
+    '.remark, .p-1rem, .x2rem, #id1rem { color: red; }',
+    '/* margin: 1rem */ p { margin: 12px; }',
+    'p { margin: var(--gap-1rem); }',
+  ]) {
+    expect(pinRem(css), css).toBe(css);
+  }
+});
+
+test('pinRem: rem in a converted @container query becomes em (var() cannot sit there); @media preludes stay', () => {
+  expect(pinRem('@container doc (max-width: 40rem) { p { margin: 1rem; } }')).toBe(
+    `@container doc (max-width: 40em) { p { margin: ${R('1')}; } }`,
+  );
+  expect(pinRem('@media print and (min-resolution: 2dppx) { p { margin: 1rem; } }')).toBe(
+    `@media print and (min-resolution: 2dppx) { p { margin: ${R('1')}; } }`,
+  );
+  expect(pinRem('@supports (margin: 1rem) { p { margin: 1rem; } }')).toBe(`@supports (margin: 1rem) { p { margin: ${R('1')}; } }`);
+});
+
+test('adaptCssText pins rem in declarations and in converted width queries', () => {
+  const out = adaptCssText('@media (min-width: 40rem) { .card { padding: 1.5rem; } } h1 { font-size: clamp(2.1rem, 1.2rem + 3.4vw, 3.4rem); }', LOCAL).css;
+  expect(out).not.toMatch(/\drem\b/);
+  expect(out).toContain('@container doc (min-width: 40em)');
+  expect(out).toContain(`padding: ${R('1.5')}`);
+  expect(out).toContain(`clamp(${R('2.1')}, ${R('1.2')} + 3.4cqi, ${R('3.4')})`);
+});
+
+test('real Copilot Studio and SLAMWICH sheets: no bare rem left in any adapted declaration', () => {
+  for (const name of ['llm-best-practices-copilot-studio.html', 'slamwich-tasting-report.html']) {
+    const raw = [...new DOMParser().parseFromString(readDoc(name), 'text/html').querySelectorAll('style')]
+      .map((x) => x.textContent ?? '')
+      .join('\n');
+    expect(raw, name).toMatch(/\drem\b/);
+    const adapted = adaptCssText(raw, LOCAL).css;
+    expect(adapted.replace(/\/\*[\s\S]*?\*\//g, ''), name).not.toMatch(/\drem\b/);
+    expect(adapted, name).toContain('var(--dn-doc-rem)');
+  }
+});
+
+test('adaptDoc pins rem in inline style attributes of the doc markup', async () => {
+  stubDoc('<html><body><p style="margin-top:1.6rem">t</p><p style="color:red">u</p></body></html>');
+  const u = new URL('http://localhost:4242/artifact-docs/x.html');
+  const { content } = await adaptDoc(u, { docUrl: u });
+  const [a, b] = [...(content as DocumentFragment).querySelectorAll('p')];
+  expect(a!.getAttribute('style')).toBe(`margin-top:${R('1.6')}`);
+  expect(b!.getAttribute('style')).toBe('color:red');
 });
 
 test('adaptCssText: width-media converts to container', () => {
