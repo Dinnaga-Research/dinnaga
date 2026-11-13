@@ -513,6 +513,7 @@
 .still__box {
   position: relative;
   border: 1px solid var(--dn-rule);
+  overflow: hidden; /* the rotated stamp's empty corners must not widen the page */
   background: var(--dn-bg);
 }
 
