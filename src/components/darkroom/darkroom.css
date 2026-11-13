@@ -332,6 +332,11 @@
   .rail__name {
     font-size: 0.8rem;
   }
+
+  /* Five names share a phone's width: the current one keeps its width (colour and tick mark it). */
+  .rail button.is-on .rail__name {
+    font-stretch: var(--dn-wdth-label);
+  }
 }
 
 /* ── Stage captions: no headings in the run; one shown at a time ────────── */

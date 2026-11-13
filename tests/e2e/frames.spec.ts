@@ -251,11 +251,13 @@ test.describe('/dev/frames at 390x844, DPR 3', () => {
     expect((await stats(page))!.blobBytes).toBeLessThanOrEqual(40e6);
   });
 
-  test('the rail runs across the top and stays inside the viewport', async ({ page }) => {
+  test('the rail runs across the top, its names never overlap, and it stays inside the viewport', async ({ page }) => {
     await open(page);
-    await page.evaluate((y) => window.scrollTo(0, y), await scrollFor(page, 0.3));
+    await page.evaluate((y) => window.scrollTo(0, y), await scrollFor(page, 0.6));
     const nav = page.getByRole('navigation', { name: 'Jump to a method stage' });
-    await expect(nav.getByRole('button', { name: 'Digest' })).toHaveAttribute('aria-current', 'step');
+    await expect(nav.getByRole('button', { name: 'Experiment' })).toHaveAttribute('aria-current', 'step');
+    const names = await nav.locator('.rail__name').evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => [r.left, r.right]));
+    for (let i = 1; i < names.length; i++) expect(names[i]![0]).toBeGreaterThanOrEqual(names[i - 1]![1]);
     for (const b of await nav.getByRole('button').all()) {
       const box = (await b.boundingBox())!;
       expect(box.x).toBeGreaterThanOrEqual(0);
