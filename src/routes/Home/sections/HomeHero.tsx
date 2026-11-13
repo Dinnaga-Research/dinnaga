@@ -11,7 +11,7 @@ export const AFTER_SEQUENCE = 'after-sequence';
 
 // The h1 holds one plain text node: the engine freezes its line breaks before it condenses.
 const heroCopy = (
-  <>
+  <div className="home-hero">
     <h1>{HEADLINE}</h1>
     <p className="home-hero__lede">{LEDE}</p>
     <p className="home-hero__founder">
@@ -20,7 +20,7 @@ const heroCopy = (
     <p className="home-hero__go">
       <Link to="/atisha">Browse the library →</Link>
     </p>
-  </>
+  </div>
 );
 
 export function HomeHero() {
