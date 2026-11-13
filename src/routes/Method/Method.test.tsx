@@ -48,14 +48,18 @@ describe('Method', () => {
       'Dinnaga Research reads the papers, podcasts and vendor docs, tests what they claim, and publishes what holds up.',
     );
     expect(
-      screen.getByText('Every idea goes through the same five stages. Most never reach the last one.'),
+      screen.getByText(
+        'Every idea goes through the same five stages. Most never reach the last one.',
+      ),
     ).toBeInTheDocument();
   });
 
   it('derives the intro’s count from the stages', () => {
     renderMethod(METHOD_STAGES.slice(0, 3));
     expect(
-      screen.getByText('Every idea goes through the same three stages. Most never reach the last one.'),
+      screen.getByText(
+        'Every idea goes through the same three stages. Most never reach the last one.',
+      ),
     ).toBeInTheDocument();
   });
 
@@ -101,7 +105,13 @@ describe('Method', () => {
       obs.intersect(b);
       await vi.waitFor(() => expect(paint.paintStill).toHaveBeenCalledTimes(i + 1));
     }
-    const calls = paint.paintStill.mock.calls as unknown as [unknown, number, number, number, number][];
+    const calls = paint.paintStill.mock.calls as unknown as [
+      unknown,
+      number,
+      number,
+      number,
+      number,
+    ][];
     expect(calls.map((c) => [c[3], c[4]])).toEqual(STILL_P.map((p, i) => [p, i]));
   });
 

@@ -1,0 +1,15 @@
+/* ABOUTME: Colophon (/colophon, #71): four paragraphs of running prose in the grid's content column,
+   ABOUTME: under a hairline, in the body role. */
+
+.colophon__body {
+  margin-top: var(--dn-sp-10);
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--dn-rule);
+}
+
+.colophon__body p {
+  font-size: var(--dn-t-body);
+  line-height: var(--dn-lh-body);
+  color: var(--dn-text);
+  text-wrap: pretty;
+}

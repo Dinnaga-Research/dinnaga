@@ -60,7 +60,8 @@ export function Method({ stages = METHOD_STAGES }: { stages?: MethodStage[] }) {
       <div className="dn-grid method__close">
         <div className="dn-grid__body dn-measure">
           <p>
-            Published documents are in <Link to="/atisha">Atisha</Link>, and each one says how it was tested.
+            Published documents are in <Link to="/atisha">Atisha</Link>, and each one says how it
+            was tested.
           </p>
           {PROJECT_PLANNING_URL && (
             <p className="method__more">
