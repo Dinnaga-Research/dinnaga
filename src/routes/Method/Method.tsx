@@ -7,7 +7,6 @@ import { LEDE } from '../../data/copy';
 import { PROJECT_PLANNING_URL } from '../../data/links';
 import { METHOD_STAGES, type MethodStage } from '../../data/method';
 import { STILL_P, countWord } from '../../lib/darkroom/marks';
-import '../../components/darkroom/darkroom.css';
 import './Method.css';
 
 // "Most die here." is set in paper against the detail's second text colour: contrast, not colour (spec §3.4).

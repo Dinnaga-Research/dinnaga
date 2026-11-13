@@ -2,6 +2,7 @@
 // ABOUTME: within a viewport and again on a width change over 2 px. The painter loads lazily; nothing moves.
 import { useEffect, useRef } from 'react';
 import { Stamp } from './Stamp';
+import './darkroom.css';
 
 export type StillAspect = 'wide' | 'tall' | 'auto';
 
