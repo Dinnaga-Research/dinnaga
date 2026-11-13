@@ -1,6 +1,6 @@
 // ABOUTME: Shadow-DOM doc viewer — mounts static HTML docs in open shadow roots with
 // ABOUTME: adapted CSS (selectors, media, fonts). React renders an empty host div with no JSX children.
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { adaptDoc, type AdaptOptions } from '../lib/docViewer/adapter';
 import { classifyLink } from '../lib/docViewer/links';
@@ -201,6 +201,20 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
     return () => root.removeEventListener('click', handleClick);
   }, [root, docPath]);
 
+  // History moves on this page: apply the hash straight from the URL. A Back that lands before React
+  // commits the previous hash push is batched into "no change" (the committed hash is already the
+  // one Back returns to), so the location effect below would never run for it.
+  useEffect(() => {
+    if (!root) return;
+    const onPopState = () => {
+      const id = window.location.hash.slice(1);
+      if (!id || window.location.pathname !== location.pathname) return;
+      applyAnchorBehavior(root, id, new URL(docPath, window.location.href));
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [root, docPath, location.pathname]);
+
   // Hash on load and on history moves: apply without pushing a new entry.
   useEffect(() => {
     if (!root || !location.hash) return;
@@ -239,9 +253,17 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
       className="doc-host"
       data-doc-host=""
       aria-busy={isLoading}
+      style={HOST_STYLE}
     />
   );
 }
+
+/**
+ * Docs size in rem against the user's default font size, but the site's root scales with the
+ * viewport. The adapter rewrites doc rem to var(--dn-doc-rem); the host sets it to 1em of
+ * `medium`, which the registered length (tokens.css) computes once here and inherits inward.
+ */
+const HOST_STYLE = { fontSize: 'medium', '--dn-doc-rem': '1em' } as CSSProperties;
 
 function decodeURIComponentSafe(id: string): string {
   try {

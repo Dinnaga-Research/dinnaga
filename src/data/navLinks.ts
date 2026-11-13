@@ -1,10 +1,11 @@
-// ABOUTME: Primary navigation model — label + route target for each top-level link.
-// ABOUTME: Order is the on-screen order.
+// ABOUTME: Primary navigation model (#70): label + target for each top-level link, in on-screen order.
+// ABOUTME: Writing is off-site (the Substack); SiteNav marks it with an aria-hidden ↗.
 import type { NavLink } from '../types';
+import { SUBSTACK_URL } from './links';
 
 export const NAV_LINKS: NavLink[] = [
   { label: 'Atisha', to: '/atisha' },
-  { label: 'How we work', to: '/method' },
-  { label: 'Colophon', to: '/colophon' },
-  { label: 'Weekly', to: '/weekly' },
+  { label: 'Building', to: '/building' },
+  { label: 'How we test', to: '/method' },
+  { label: 'Writing', to: SUBSTACK_URL, external: true },
 ];

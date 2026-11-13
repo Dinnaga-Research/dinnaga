@@ -1,86 +1,95 @@
-// ABOUTME: Tests the Atisha Initiative page — mission, validation bar, catalog states.
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+// ABOUTME: Tests /atisha (#63): the h1, lede, bar, state line by published count, the register of
+// ABOUTME: published Docs and the board line; with no published Docs, the empty state and no register.
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import type { AtishaEntry } from '../../types';
+import { describe, expect, it } from 'vitest';
+import { DOCS, publishedDocs } from '../../data/docs';
+import { ATISHA_PROJECT_URL } from '../../data/links';
+import type { DocEntry } from '../../types';
 import { Atisha } from './Atisha';
 
-const FIRST_PARTY_ENTRY: AtishaEntry = {
-  slug: 'arxiv-prospector',
-  title: 'Arxiv Prospector',
-  category: 'tool',
-  oneLiner: 'Daily triage that scores arxiv papers against a research-to-tools rubric.',
-  sourceUrl: 'https://github.com/Dinnaga-Research/atisha/tree/main/validated/arxiv-prospector',
-  validatedOn: '2026-06-01',
-  whyUseful: 'Turns a noisy feed into a short list of papers worth building from.',
-  howValidated: 'Ran it daily for two weeks and shipped tools from its picks.',
-  attribution: '',
+const LEDE = 'The public library. Every document here was tested before it was published, and says how.';
+const BAR =
+  "We only publish what we've used ourselves. When a document relies on someone else's tool, it names the tool and links to it.";
+const STATE_SOME = 'Cheat sheets and reports today. Whitepapers and living documents are planned.';
+const STATE_NONE = 'Nothing is published here yet. Whitepapers and living documents are planned.';
+const BOARD = 'Plans for Atisha are tracked on the public Atisha board.';
+
+// A Doc without `publish: true` stays Behind the scenes.
+const HIDDEN: DocEntry = {
+  slug: 'hidden-fixture',
+  title: 'Hidden fixture',
+  project: 'Fixture',
+  summary: 'A fixture Doc that is not published.',
+  published: '2026-10-01',
+  docPath: '/artifact-docs/hidden-fixture.html',
+  note: '',
 };
 
-const THIRD_PARTY_ENTRY: AtishaEntry = {
-  ...FIRST_PARTY_ENTRY,
-  slug: 'whisper-transcribe',
-  title: 'Whisper Transcribe',
-  oneLiner: 'High-accuracy speech-to-text for meeting notes.',
-  attribution: 'OpenAI',
-};
+function renderAtisha(docs?: DocEntry[]) {
+  return render(
+    <MemoryRouter>
+      <Atisha docs={docs} />
+    </MemoryRouter>,
+  );
+}
+
+const exactText = (s: string) => (_: string, el: Element | null) => el?.textContent === s && el.tagName === 'P';
 
 describe('Atisha', () => {
-  it('renders the heading "Atisha" exactly', () => {
-    render(<MemoryRouter><Atisha /></MemoryRouter>);
-    expect(screen.getByRole('heading', { name: 'Atisha' })).toBeInTheDocument();
+  it('renders the h1, the lede, the bar and the state line verbatim', () => {
+    renderAtisha();
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Atisha');
+    expect(screen.getByText(LEDE).textContent).toBe(LEDE);
+    expect(screen.getByText(BAR).textContent).toBe(BAR);
+    expect(screen.getByText(STATE_SOME).textContent).toBe(STATE_SOME);
+    expect(screen.queryByText(STATE_NONE)).toBeNull();
   });
 
-  it('renders both approved paragraphs verbatim', () => {
-    render(<MemoryRouter><Atisha /></MemoryRouter>);
-    expect(screen.getByText('The public library. Every document here was tested before it was published, and says how.'))
-      .toBeInTheDocument();
-    expect(screen.getByText('We only publish what we\'ve used ourselves. When a document relies on someone else\'s tool, it names the tool and links to it.'))
-      .toBeInTheDocument();
+  it('renders the board line with "Atisha board" linked to the public board', () => {
+    renderAtisha();
+    expect(screen.getByText(exactText(BOARD))).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Atisha board' })).toHaveAttribute('href', ATISHA_PROJECT_URL);
   });
 
-  it('shows the empty-state when the catalog has no entries', () => {
-    render(<MemoryRouter><Atisha /></MemoryRouter>);
-    // ATISHA_CATALOG ships empty at launch.
-    expect(screen.getByText('Nothing is published here yet. Whitepapers and living documents are planned.'))
-      .toBeInTheDocument();
-    expect(screen.queryByText(/Cheat sheets and reports today/i)).not.toBeInTheDocument();
+  it('lists the three published Docs as register rows, each with link, summary, kind and tested line', () => {
+    renderAtisha();
+    const rows = within(screen.getByRole('list')).getAllByRole('listitem');
+    expect(rows).toHaveLength(3);
+    publishedDocs().forEach((doc, i) => {
+      const row = rows[i]!;
+      expect(within(row).getByRole('heading', { level: 2 }).textContent).toBe(doc.title);
+      expect(within(row).getByRole('link', { name: doc.title })).toHaveAttribute('href', `/atisha/${doc.slug}`);
+      expect(within(row).getByText(doc.summary)).toBeInTheDocument();
+      expect(within(row).getByText(doc.kind)).toBeInTheDocument();
+      const tested = row.querySelector('.tested-line')!;
+      expect(tested.textContent).toBe(doc.tested);
+      expect(tested.querySelector('.tested-mark')).toHaveAttribute('aria-hidden', 'true');
+    });
   });
 
-  it('shows the "Cheat sheets and reports today" line when the catalog has entries', () => {
-    render(<MemoryRouter><Atisha entries={[FIRST_PARTY_ENTRY]} /></MemoryRouter>);
-    expect(screen.getByText('Cheat sheets and reports today. Whitepapers and living documents are planned.'))
-      .toBeInTheDocument();
-    expect(screen.queryByText(/Nothing is published here yet/i)).not.toBeInTheDocument();
+  it('never lists a Doc without publish: true', () => {
+    renderAtisha([...DOCS, HIDDEN]);
+    expect(within(screen.getByRole('list')).getAllByRole('listitem')).toHaveLength(3);
+    expect(screen.queryByText('Hidden fixture')).toBeNull();
   });
 
-  it('renders the Atisha board link', () => {
-    render(<MemoryRouter><Atisha /></MemoryRouter>);
-    expect(screen.getByRole('link', { name: /Atisha board/ }))
-      .toHaveAttribute('href', 'https://github.com/orgs/Dinnaga-Research/projects/1');
+  it('with no published Docs shows the empty state line and no register', () => {
+    renderAtisha([HIDDEN]);
+    expect(screen.getByText(STATE_NONE).textContent).toBe(STATE_NONE);
+    expect(screen.queryByText(STATE_SOME)).toBeNull();
+    expect(screen.queryByRole('list')).toBeNull();
+    expect(screen.queryByRole('heading', { level: 2 })).toBeNull();
+    // The rest of the page still stands.
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Atisha');
+    expect(screen.getByText(BAR)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Atisha board' })).toBeInTheDocument();
   });
 
-  it('does not render any open-source or genuinely useful text', () => {
-    render(<MemoryRouter><Atisha /></MemoryRouter>);
-    expect(screen.queryByText(/open-source/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/genuinely useful/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/on the way/i)).not.toBeInTheDocument();
-  });
-
-  it('renders a first-party entry card with no attribution span', () => {
-    render(<MemoryRouter><Atisha entries={[FIRST_PARTY_ENTRY]} /></MemoryRouter>);
-    expect(screen.queryByText(/first validated entries are on the way/i)).not.toBeInTheDocument();
-    expect(screen.getByText(FIRST_PARTY_ENTRY.title)).toBeInTheDocument();
-    expect(screen.getByText(FIRST_PARTY_ENTRY.oneLiner)).toBeInTheDocument();
-    expect(screen.getByText(/How we validated it:/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^source/i }))
-      .toHaveAttribute('href', FIRST_PARTY_ENTRY.sourceUrl);
-    // attribution === '' → no "via" credit span.
-    expect(screen.queryByText(/^via /)).not.toBeInTheDocument();
-  });
-
-  it('renders the "via" attribution span for a third-party entry', () => {
-    render(<MemoryRouter><Atisha entries={[THIRD_PARTY_ENTRY]} /></MemoryRouter>);
-    expect(screen.getByText(`via ${THIRD_PARTY_ENTRY.attribution}`)).toBeInTheDocument();
+  it('puts the board line after the register, so the register comes first when tabbing through the page', () => {
+    renderAtisha();
+    const links = screen.getAllByRole('link');
+    expect(links[0]).toHaveAttribute('href', '/atisha/llm-best-practices-github-copilot');
+    expect(links[links.length - 1]).toHaveAccessibleName('Atisha board');
   });
 });

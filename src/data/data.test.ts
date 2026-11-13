@@ -1,36 +1,29 @@
-// ABOUTME: Tests for all static content data files (practices, surfaceData, etc.).
-// ABOUTME: Verifies shape, length, and category constraints for each data export.
+// ABOUTME: Tests for the small literal data files: the nav model and the method stages (#70, #71).
 import { describe, expect, it } from 'vitest';
-import { PRACTICES } from './practices';
-import { SURFACE_DATA } from './surfaceData';
-import { TICKER_ITEMS } from './tickerItems';
-import { BOOT_LINES } from './bootLines';
 import { NAV_LINKS } from './navLinks';
+import { METHOD_STAGES } from './method';
+import { SUBSTACK_URL } from './links';
 
-describe('content data files', () => {
-  it('ships three practices', () => {
-    expect(PRACTICES).toHaveLength(3);
-    expect(PRACTICES.map((p) => p.icon)).toEqual(['ethos', 'method', 'atisha']);
-  });
-
-  it('ships three surface-data rows', () => {
-    expect(SURFACE_DATA).toHaveLength(3);
-    expect(SURFACE_DATA.map((r) => r.idx)).toEqual(['01', '02', '03']);
-    expect(SURFACE_DATA.map((r) => r.label)).toEqual(['Mission', 'Method', 'Validation bar']);
-  });
-
-  it('ships ticker items, boot lines, and nav links', () => {
-    expect(TICKER_ITEMS.length).toBeGreaterThan(0);
-    expect(BOOT_LINES.length).toBeGreaterThan(0);
-    expect(NAV_LINKS.map((l) => l.to)).toEqual([
-      '/atisha',
-      '/method',
-      '/colophon',
-      '/weekly',
+describe('NAV_LINKS', () => {
+  it('lists Atisha, Building, How we test and Writing, in order', () => {
+    expect(NAV_LINKS).toEqual([
+      { label: 'Atisha', to: '/atisha' },
+      { label: 'Building', to: '/building' },
+      { label: 'How we test', to: '/method' },
+      { label: 'Writing', to: 'https://weytani.substack.com/', external: true },
     ]);
+    expect(SUBSTACK_URL).toBe('https://weytani.substack.com/');
   });
+});
 
-  it('ships exactly four ticker items', () => {
-    expect(TICKER_ITEMS).toHaveLength(4);
+describe('METHOD_STAGES', () => {
+  it('carries the five stages verbatim from #71', () => {
+    expect(METHOD_STAGES).toEqual([
+      { name: 'Read', detail: 'Find interesting papers, posts and releases. Queue them.' },
+      { name: 'Digest', detail: 'Read them. Write up what actually matters.' },
+      { name: 'Ideate', detail: 'Promising ideas get a note worth coming back to.' },
+      { name: 'Experiment', detail: 'Build it, try it, see what happens. Most die here.' },
+      { name: 'Ship', detail: 'What survives becomes a skill, a tool or a workflow, and a candidate for Atisha.' },
+    ]);
   });
 });

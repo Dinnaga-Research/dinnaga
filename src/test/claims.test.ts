@@ -40,6 +40,10 @@ const BANNED_CLAIMS: ClaimEntry[] = [
   { pattern: /dot-live/, scope: 'site', bugId: 'H5' },
   { pattern: /GitHub Pages/i, scope: 'site', bugId: 'H6' },
   { pattern: /404\.html/, scope: 'site+docs', bugId: 'H6' },
+  // Darkroom (2026-11-13): merging to main deploys (Vercel Git) since 2026-10-25, and the terminal
+  // and its unlock phrase are gone; /backstage is an unlisted URL.
+  { pattern: /deployed by hand/i, scope: 'site+docs', bugId: '#71' },
+  { pattern: /show me what you got/i, scope: 'site+docs', bugId: '#64' },
 ];
 
 function getSiteFiles(): string[] {

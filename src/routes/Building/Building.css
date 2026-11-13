@@ -1,0 +1,52 @@
+/* ABOUTME: /building (#66): three register columns, Repositories, Writing and Gists. Stacked in the
+   ABOUTME: grid's content column below 1100 px; from 1100 px one row of three across the page. */
+
+.building__col {
+  margin-top: var(--dn-section-space);
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--dn-rule);
+}
+
+.building__h {
+  margin-bottom: var(--dn-sp-6);
+}
+
+.building__state {
+  color: var(--dn-text-2);
+}
+
+/* 760-1099 px: each column a section whose content lines up with the h1 in the grid's column 2. */
+@media (min-width: 760px) {
+  .building__col {
+    padding-left: var(--dn-col-label);
+  }
+}
+
+/* ≥ 1100 px: the three share one row under one hairline, divided by vertical rules (C's spread). */
+@media (min-width: 1100px) {
+  .building__cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    margin-top: var(--dn-section-space);
+    border-top: 1px solid var(--dn-rule);
+  }
+
+  /* The vertical rules run from the hairline down. */
+  .building__col {
+    margin-top: 0;
+    padding: 1.3rem var(--dn-sp-8) 0;
+    border-top: 0;
+    border-left: 1px solid var(--dn-rule);
+    align-self: stretch;
+  }
+
+  .building__col:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .building__col:last-child {
+    padding-right: 0;
+  }
+}

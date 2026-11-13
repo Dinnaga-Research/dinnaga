@@ -1,74 +1,63 @@
-Font files and their upstream sources, instances, unicode ranges, and measured byte sizes.
-Spec: docs/superpowers/specs/2026-10-18-visual-system.md §5.2
+Font files, their upstream sources, instances, unicode ranges and measured byte sizes.
+Spec: docs/superpowers/specs/2026-11-12-darkroom.md §4.1-4.2. Build: bun run fonts (scripts/fonts/build.sh).
+Every face is OFL 1.1 with no Reserved Font Name; the licence for each is OFL-<Family>.txt here.
 
-archivo-expanded-800.woff2
-  Family: Archivo Expanded
+Ranges
+  LATIN   U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,
+          U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD
+  EXTA    U+0100-017F (Latin Extended-A, for the IAST macron letters)
+  ARROWS  U+2190-2199 (Archivo's cmap carries them, so no Chivo Mono fallback is needed on the site)
+  IAST-GREEK  U+0323,U+0391-03A9,U+03B1-03C9 and the IAST dot-below letters
+
+The "static subsets" rule is relaxed for Archivo only (Darkroom, 2026-11-12): the width axis is
+the site's voice switch (labels at wdth 62, display at 125), and one variable file is smaller than
+the five static instances it replaces. Latin Extended-A would take that file to about 115 KB, over
+the 95 KB budget, so it ships as a second variable file that loads only when a page uses one of
+its letters (unicode-range).
+
+archivo-var.woff2  (Darkroom, built 2026-11-12, preloaded on every page)
+  Family: Archivo
   Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/archivo/Archivo[wdth,wght].ttf
-  Instance: wdth=125 wght=800
-  Ranges: LATIN + EXTA (Latin Extended-A for IAST letters)
-  Bytes: 17704
+  Instance: fonttools varLib.instancer wdth=62:125 wght=400:800 (both axes kept)
+  Ranges: LATIN + ARROWS
+  Bytes: 90100
 
-atkinson-next-400.woff2
-  Family: Atkinson Hyperlegible Next
-  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/atkinsonhyperlegiblenext/AtkinsonHyperlegibleNext[wght].ttf
-  Instance: wght=400
-  Ranges: LATIN + EXTA
-  Bytes: 14272
+archivo-var-exta.woff2  (Darkroom, built 2026-11-12, on demand)
+  Family: Archivo
+  Source: as above, same instance
+  Ranges: EXTA
+  Bytes: 43288
 
-atkinson-next-500.woff2
-  Family: Atkinson Hyperlegible Next
-  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/atkinsonhyperlegiblenext/AtkinsonHyperlegibleNext[wght].ttf
-  Instance: wght=500
-  Ranges: LATIN + EXTA
-  Bytes: 14912
-
-atkinson-next-400-italic.woff2
-  Family: Atkinson Hyperlegible Next
-  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/atkinsonhyperlegiblenext/AtkinsonHyperlegibleNext-Italic[wght].ttf
-  Instance: wght=400
-  Ranges: LATIN + EXTA
-  Bytes: 16632
-
-atkinson-next-500-italic.woff2
-  Family: Atkinson Hyperlegible Next
-  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/atkinsonhyperlegiblenext/AtkinsonHyperlegibleNext-Italic[wght].ttf
-  Instance: wght=500
-  Ranges: LATIN + EXTA
-  Bytes: 16920
-
-jetbrains-mono-400.woff2
-  Family: JetBrains Mono
-  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/jetbrainsmono/JetBrainsMono[wght].ttf
+chivo-mono-400.woff2  (Darkroom, built 2026-11-12, doc code only)
+  Family: Chivo Mono
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/chivomono/ChivoMono[wght].ttf
   Instance: wght=400
   Ranges: LATIN + ARROWS
-  Bytes: 21108
+  Bytes: 12460
 
-jetbrains-mono-500.woff2
-  Family: JetBrains Mono
-  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/jetbrainsmono/JetBrainsMono[wght].ttf
+chivo-mono-500.woff2  (Darkroom, built 2026-11-12, doc code only)
+  Family: Chivo Mono
+  Source: as above
   Instance: wght=500
   Ranges: LATIN + ARROWS
-  Bytes: 21700
+  Bytes: 12244
 
-departure-mono-400.woff2
-  Family: Departure Mono
-  Source: rektdeckard/departure-mono v1.500 DepartureMono-Regular
-  Instance: Regular (static)
-  Ranges: LATIN + ARROWS + BOX
-  Bytes: 8612
+atkinson-next-400.woff2, -500, -400-italic, -500-italic  (unchanged, doc body only)
+  Family: Atkinson Hyperlegible Next
+  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33
+          ofl/atkinsonhyperlegiblenext/AtkinsonHyperlegibleNext[wght].ttf and -Italic[wght].ttf
+  Instance: wght=400 / 500
+  Ranges: LATIN + EXTA
+  Bytes: 14568, 15184, 16804, 17156
 
-noto-sans-iast-greek-400.woff2
+noto-sans-iast-greek-400.woff2, -500  (unchanged, fallback on demand)
   Family: Noto Sans
   Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/notosans/NotoSans[wdth,wght].ttf
-  Instance: wdth=100 wght=400
+  Instance: wdth=100 wght=400 / 500
   Ranges: IAST-GREEK
-  Bytes: 7948
+  Bytes: 8132, 8220
 
-noto-sans-iast-greek-500.woff2
-  Family: Noto Sans
-  Source: google/fonts 47d54ca1ebb14fd864695f1d39dc734f39017c33 ofl/notosans/NotoSans[wdth,wght].ttf
-  Instance: wdth=100 wght=500
-  Ranges: IAST-GREEK
-  Bytes: 7972
+Removed 2026-11-12: archivo-expanded-800, jetbrains-mono-400/500, departure-mono-400 and their
+licence files.
 
-Total measured: 147,780 bytes
+Total: 238,156 bytes (the homepage loads archivo-var.woff2 only: 90,100 bytes)

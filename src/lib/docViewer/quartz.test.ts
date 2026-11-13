@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { adaptDoc } from './adapter';
 import {
+  CALLOUT_CSS,
   extractArticle,
   isQuartzDoc,
   prepareCallouts,
@@ -203,5 +204,19 @@ describe('collapsible callouts (#51)', () => {
     expect(fold).toBeGreaterThan(override);
     expect(focus).toBeGreaterThan(override);
     expect(texts.length - 1 - focus).toBeLessThan(2);
+  });
+});
+
+describe('callout colours (Darkroom: red means tested, everything else is neutral)', () => {
+  test('every callout type takes its colour, border and ground from the neutral doc tokens', () => {
+    const rule = CALLOUT_CSS.find((r) => r.startsWith('.callout[data-callout]'));
+    expect(rule).toBeDefined();
+    expect(rule).toMatch(/--color:\s*var\(--doc-accent\)\s*!important/);
+    expect(rule).toMatch(/--border:\s*var\(--doc-line\)\s*!important/);
+    expect(rule).toMatch(/--bg:\s*var\(--doc-surface\)\s*!important/);
+  });
+
+  test('the callout rules name no colour of their own', () => {
+    for (const rule of CALLOUT_CSS) expect(rule).not.toMatch(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|oklch\(/i);
   });
 });

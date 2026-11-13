@@ -1,0 +1,41 @@
+/* ABOUTME: The homepage's living sections (#69), What we're building and Writing: the §5 section grid
+   ABOUTME: (h2 and its one-line intro in column 1), and the two short lists side by side from 900 px. */
+
+.home-living__intro {
+  margin-top: var(--dn-sp-4);
+  color: var(--dn-text-2);
+}
+
+/* In the 12rem label column (760-1099 px) a long word must not push into column 2. */
+.home-living h2 {
+  overflow-wrap: break-word;
+}
+
+.home-living__sub {
+  margin-bottom: var(--dn-sp-3);
+}
+
+.home-living__pair {
+  display: grid;
+  gap: var(--dn-sp-9);
+}
+
+@media (min-width: 900px) {
+  .home-living__pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    column-gap: var(--dn-sp-8);
+  }
+
+  /* With one list left, it keeps its half rather than stretching across both. */
+  .home-living__pair > :only-child {
+    grid-column: 1;
+  }
+}
+
+/* A register that opens column 2 sits on the section's hairline: no second rule, and its first
+   title lines up with the h2. */
+.home-living .dn-grid__body > .living-rows:first-child > .living-row:first-child {
+  padding-top: 0;
+  border-top: 0;
+}

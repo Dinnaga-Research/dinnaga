@@ -41,8 +41,16 @@ export const QUARTZ_OVERRIDE_CSS = [
   '@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}',
 ];
 
-/** Callout rules, appended after the overrides. Quartz folded with script-set heights. */
+/**
+ * Callout rules, appended after the overrides. Quartz folded with script-set heights.
+ * Quartz paints each callout type its own hue (blue notes, teal tips, red bugs). On Darkroom red
+ * means tested and nothing else, so every type takes the neutral doc tokens; the icon and the
+ * title still say which kind it is.
+ */
 export const CALLOUT_CSS = [
+  // Quartz's own callout variables, and Obsidian's (the exported vault theme mixes its border and
+  // ground from --callout-color); the explicit border and ground win over either theme's mixes.
+  '.callout[data-callout] { --color: var(--doc-accent) !important; --border: var(--doc-line) !important; --bg: var(--doc-surface) !important; --callout-color: var(--doc-accent) !important; border-color: var(--doc-line) !important; background-color: var(--doc-surface) !important }',
   '.callout.is-collapsed > .callout-content { display: none }',
   '.callout-title[role="button"]:focus-visible { outline: 2px solid currentColor; outline-offset: 2px }',
 ];

@@ -1,53 +1,42 @@
-// ABOUTME: Atisha public library route (/atisha) — the validated-reference front door.
-// ABOUTME: Renders mission, the state line based on catalog, and the catalog (or an honest empty-state).
-import { ATISHA_CATALOG } from '../../data/atishaCatalog';
+// ABOUTME: Atisha (/atisha, #63): the public library. Page head, then the bar, the state line and the
+// ABOUTME: board line as marginalia in column 1, and the register of published Docs in column 2.
+import { LibraryRegister } from '../../components/LibraryRegister/LibraryRegister';
+import { PageHead } from '../../components/PageHead';
+import { DOCS, publishedDocs } from '../../data/docs';
 import { ATISHA_PROJECT_URL } from '../../data/links';
-import type { AtishaEntry } from '../../types';
+import type { DocEntry } from '../../types';
+import './Atisha.css';
 
-export function Atisha({ entries = ATISHA_CATALOG }: { entries?: AtishaEntry[] } = {}) {
+export function Atisha({ docs = DOCS }: { docs?: DocEntry[] }) {
+  const published = publishedDocs(docs);
   return (
-    <section className="section" id="atisha" data-screen-label="Atisha">
-      <header className="section-head">
-        <span className="section-eye">The public library</span>
-        <h1 className="section-title">Atisha</h1>
-      </header>
-      <p className="panel-body">
-        The public library. Every document here was tested before it was published, and says how.
-      </p>
-      <p className="panel-body">
-        We only publish what we've used ourselves. When a document relies on someone else's tool, it
-        names the tool and links to it.
-      </p>
-
-      <p className="panel-body">
-        {entries.length === 0
-          ? 'Nothing is published here yet. Whitepapers and living documents are planned.'
-          : 'Cheat sheets and reports today. Whitepapers and living documents are planned.'}
-      </p>
-
-      <p className="panel-body">
-        Plans for Atisha are tracked on the public{' '}
-        <a href={ATISHA_PROJECT_URL}>Atisha board</a>.
-      </p>
-
-      {entries.length > 0 && (
-        <ul className="atisha-catalog">
-          {entries.map((e) => (
-            <li className="atisha-entry" key={e.slug}>
-              <span className="atisha-cat">{e.category}</span>
-              <h3 className="atisha-title">{e.title}</h3>
-              <p className="atisha-oneliner">{e.oneLiner}</p>
-              <p className="atisha-why">{e.whyUseful}</p>
-              <p className="atisha-howvalidated">How we validated it: {e.howValidated}</p>
-              <footer className="atisha-foot">
-                <a href={e.sourceUrl}>source →</a>
-                {e.attribution && <span className="atisha-attr">via {e.attribution}</span>}
-                <span className="atisha-date">validated {e.validatedOn}</span>
-              </footer>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+    <div className="atisha dn-page">
+      <PageHead
+        title="Atisha"
+        lede="The public library. Every document here was tested before it was published, and says how."
+      />
+      <div className="atisha__body dn-grid dn-section">
+        <div className="atisha__notes dn-grid__label">
+          <p className="atisha__bar">
+            We only publish what we've used ourselves. When a document relies on someone else's tool, it names the
+            tool and links to it.
+          </p>
+          <p className="atisha__note">
+            {published.length === 0
+              ? 'Nothing is published here yet. Whitepapers and living documents are planned.'
+              : 'Cheat sheets and reports today. Whitepapers and living documents are planned.'}
+          </p>
+        </div>
+        {published.length > 0 && (
+          <div className="atisha__register dn-grid__body">
+            <LibraryRegister docs={published} headingLevel={2} />
+          </div>
+        )}
+        {/* After the register in reading order; from 760 px it sits under the other notes in column 1. */}
+        <p className="atisha__board atisha__note dn-grid__label">
+          Plans for Atisha are tracked on the public <a href={ATISHA_PROJECT_URL}>Atisha board</a>.
+        </p>
+      </div>
+    </div>
   );
 }

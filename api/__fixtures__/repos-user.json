@@ -1,0 +1,198 @@
+[
+  {
+    "name": "living-graph",
+    "full_name": "weytani/living-graph",
+    "private": false,
+    "fork": false,
+    "archived": false,
+    "html_url": "https://github.com/weytani/living-graph",
+    "description": "Alfred-inspired agentic maintenance system for Obsidian graphs",
+    "pushed_at": "2026-10-18T14:33:49Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "sf-pi",
+    "full_name": "weytani/sf-pi",
+    "private": false,
+    "fork": true,
+    "archived": false,
+    "html_url": "https://github.com/weytani/sf-pi",
+    "description": null,
+    "pushed_at": "2026-09-11T05:51:27Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "d3-lwc-graphql",
+    "full_name": "weytani/d3-lwc-graphql",
+    "private": false,
+    "fork": false,
+    "archived": false,
+    "html_url": "https://github.com/weytani/d3-lwc-graphql",
+    "description": "Standalone D3.js chart LWCs for Salesforce — GraphQL wire only, zero dependencies beyond the d3 static resource",
+    "pushed_at": "2026-08-05T06:23:06Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "d3-lwc-soql",
+    "full_name": "weytani/d3-lwc-soql",
+    "private": false,
+    "fork": false,
+    "archived": false,
+    "html_url": "https://github.com/weytani/d3-lwc-soql",
+    "description": "40 D3.js chart LWCs for Salesforce — shared-module architecture, Apex/SOQL data layer",
+    "pushed_at": "2026-08-03T09:18:20Z",
+    "stargazers_count": 1,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "d3-lwc",
+    "full_name": "weytani/d3-lwc",
+    "private": false,
+    "fork": false,
+    "archived": true,
+    "html_url": "https://github.com/weytani/d3-lwc",
+    "description": "D3js.org charts wrapped in LWCs",
+    "pushed_at": "2026-08-02T19:38:16Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "sf-skills",
+    "full_name": "weytani/sf-skills",
+    "private": false,
+    "fork": true,
+    "archived": false,
+    "html_url": "https://github.com/weytani/sf-skills",
+    "description": "Salesforce Skills for Agentic Coding Tools — AI-powered Apex, Flow, LWC, SOQL, Agentforce, and more for Claude Code. 14 skills, 420+ validation points, LSP integration.",
+    "pushed_at": "2026-07-12T16:52:53Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "mythical-python",
+    "full_name": "weytani/mythical-python",
+    "private": false,
+    "fork": false,
+    "archived": false,
+    "html_url": "https://github.com/weytani/mythical-python",
+    "description": "Python TDD repo for learning OOP",
+    "pushed_at": "2026-05-06T00:57:28Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "devreap",
+    "full_name": "weytani/devreap",
+    "private": false,
+    "fork": true,
+    "archived": false,
+    "html_url": "https://github.com/weytani/devreap",
+    "description": "Automatically detect and kill orphaned developer processes. Multi-signal scoring, zero config, macOS LaunchAgent.",
+    "pushed_at": "2026-03-13T04:57:17Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "nanoclaw",
+    "full_name": "weytani/nanoclaw",
+    "private": false,
+    "fork": true,
+    "archived": false,
+    "html_url": "https://github.com/weytani/nanoclaw",
+    "description": "A lightweight alternative to OpenClaw that runs in containers for security. Connects to WhatsApp, Telegram, Slack, Discord, Gmail and other messaging apps,, has memory, scheduled jobs, and runs directly on Anthropic's Agents SDK",
+    "pushed_at": "2026-03-10T00:25:58Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "HMLR-Agentic-AI-Memory-System",
+    "full_name": "weytani/HMLR-Agentic-AI-Memory-System",
+    "private": false,
+    "fork": true,
+    "archived": false,
+    "html_url": "https://github.com/weytani/HMLR-Agentic-AI-Memory-System",
+    "description": "Living memory for AI",
+    "pushed_at": "2026-03-04T23:04:40Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "clank",
+    "full_name": "weytani/clank",
+    "private": false,
+    "fork": true,
+    "archived": false,
+    "html_url": "https://github.com/weytani/clank",
+    "description": null,
+    "pushed_at": "2026-03-04T23:02:48Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "mythical-go",
+    "full_name": "weytani/mythical-go",
+    "private": false,
+    "fork": false,
+    "archived": false,
+    "html_url": "https://github.com/weytani/mythical-go",
+    "description": "A TDD curriculum for learning Go through mythical creatures — structs, interfaces, composition, error handling, and concurrency",
+    "pushed_at": "2026-02-19T20:11:18Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "mythical-swift",
+    "full_name": "weytani/mythical-swift",
+    "private": false,
+    "fork": false,
+    "archived": false,
+    "html_url": "https://github.com/weytani/mythical-swift",
+    "description": "TDD curriculum for learning Swift through mythical creatures",
+    "pushed_at": "2026-02-19T04:29:42Z",
+    "stargazers_count": 0,
+    "owner": {
+      "login": "weytani"
+    }
+  },
+  {
+    "name": "sf-claude-skills",
+    "full_name": "weytani/sf-claude-skills",
+    "private": false,
+    "fork": false,
+    "archived": false,
+    "html_url": "https://github.com/weytani/sf-claude-skills",
+    "description": "Salesforce platform reference skills for Claude Code — dense, searchable skill files covering Apex, SOQL, LWC, Flows, Metadata API, SF CLI, SLDS 2, Aura, and Visualforce",
+    "pushed_at": "2026-02-13T21:02:15Z",
+    "stargazers_count": 1,
+    "owner": {
+      "login": "weytani"
+    }
+  }
+]

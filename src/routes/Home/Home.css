@@ -1,0 +1,106 @@
+/* ABOUTME: The homepage (#67, #68): the hero copy inside the run's stage (C's thesis, then the founder line and
+   ABOUTME: the one link), the library hand-off and How we test. The run's own surface lives in darkroom.css. */
+
+/* Reduced motion: no stage, so the copy sits where every page head does (§7.8). */
+.run--still .home-hero {
+  padding-top: var(--dn-sp-10);
+}
+
+@media (min-width: 760px) {
+  .run--still .home-hero {
+    padding-top: var(--dn-sp-11);
+  }
+}
+
+/* ── Hero copy: lede role, C's 30rem thesis measure ─────────────────────── */
+.home-hero__lede,
+.home-hero__founder {
+  max-width: 30rem;
+  font-size: var(--dn-t-lede);
+  line-height: var(--dn-lh-lede);
+  color: var(--dn-text-2);
+  text-wrap: pretty;
+}
+
+.home-hero__lede {
+  margin-top: 1.3rem;
+}
+
+.home-hero__founder {
+  margin-top: var(--dn-sp-3);
+}
+
+.home-hero__go {
+  margin-top: var(--dn-sp-5);
+  font-size: var(--dn-t-lede);
+  line-height: var(--dn-lh-lede);
+}
+
+@media (min-width: 760px) {
+  .home-hero__lede {
+    margin-top: var(--dn-sp-7);
+  }
+
+  .home-hero__go {
+    margin-top: var(--dn-sp-6);
+  }
+}
+
+/* ── Sections after the run: the §5 grid, h2 and its one line in column 1 ─ */
+.home-section__intro {
+  margin-top: var(--dn-sp-4);
+  color: var(--dn-text-2);
+}
+
+.home-section__more {
+  margin-top: var(--dn-sp-6);
+}
+
+/* In the 12rem label column (760-1099 px) a long word must not push into column 2. */
+.home-library h2,
+.home-method h2 {
+  overflow-wrap: break-word;
+}
+
+/* How we test: two sentences of approved copy in the lede role, on the measure. */
+.home-method__body {
+  max-width: var(--dn-measure);
+  font-size: var(--dn-t-lede);
+  line-height: var(--dn-lh-lede);
+  text-wrap: pretty;
+}
+
+/* ── The library without the whole run (operator answer 2) ─────────────────
+   From 760 px the run's skip link stays on screen while the run plays, as the last chapter mark: bottom right,
+   over the frame counter, shown with the rail (p > 0.035) and always when focused. On phones it stays
+   focus-only; "Browse the library →" is the pointer route there. */
+@media (min-width: 760px) {
+  .stage:has(.home-hero) .run__skip {
+    left: auto;
+    top: auto;
+    right: var(--dn-gut);
+    bottom: calc(1.7rem + 1.6rem);
+    padding: var(--dn-sp-1) 0;
+    background: none;
+    color: var(--dn-text-2);
+    font-size: var(--dn-t-nav);
+    font-stretch: var(--dn-wdth-ui);
+    font-weight: 500;
+    line-height: var(--dn-lh-nav);
+    text-decoration-line: underline;
+    transform: none;
+    opacity: var(--dn-rail-a, 0);
+    transition:
+      opacity 400ms linear,
+      color var(--dn-dur-1) var(--dn-ease);
+  }
+
+  .stage:has(.home-hero) .run__skip:hover,
+  .stage:has(.home-hero) .run__skip:focus-visible {
+    color: var(--dn-text);
+  }
+
+  .stage:has(.home-hero) .run__skip:focus-visible {
+    opacity: 1;
+  }
+}

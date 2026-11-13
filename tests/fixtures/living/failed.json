@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-11-12T12:00:00.000Z",
+  "repos": {
+    "ok": false,
+    "items": []
+  },
+  "gists": {
+    "ok": false,
+    "items": []
+  },
+  "posts": {
+    "ok": true,
+    "items": [
+      {
+        "title": "The coming storm",
+        "url": "https://weytani.substack.com/p/the-coming-storm",
+        "publishedAt": "2026-10-11T05:39:24.000Z"
+      },
+      {
+        "title": "The conversation has shifted",
+        "url": "https://weytani.substack.com/p/the-conversation-has-shifted",
+        "publishedAt": "2026-02-20T14:45:25.000Z"
+      },
+      {
+        "title": "Just the beginning...",
+        "url": "https://weytani.substack.com/p/just-the-beginning",
+        "publishedAt": "2024-12-18T05:20:21.000Z"
+      }
+    ]
+  }
+}

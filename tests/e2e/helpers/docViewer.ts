@@ -1,25 +1,25 @@
 // ABOUTME: E2E test helpers for doc viewer — routes, host locator, overflow check.
-// ABOUTME: Shared utilities for artifacts, weekly, and doc-viewer specs.
+// ABOUTME: Shared utilities for the doc-viewer, doc-theme and responsive specs.
 
 import { Page, expect } from '@playwright/test';
 
 /**
- * All 11 doc routes (3 artifacts + 8 weekly)
+ * All 11 doc routes (3 on Atisha + 8 weekly reports Behind the scenes)
  */
 export const DOC_ROUTES = [
-  // Artifacts (3)
-  '/artifacts/llm-best-practices-github-copilot',
-  '/artifacts/llm-best-practices-copilot-studio',
-  '/artifacts/slamwich-tasting-report',
+  // Atisha (3)
+  '/atisha/llm-best-practices-github-copilot',
+  '/atisha/llm-best-practices-copilot-studio',
+  '/atisha/slamwich-tasting-report',
   // Weekly reports (8)
-  '/weekly/2026-08-08',
-  '/weekly/2026-08-15',
-  '/weekly/2026-08-22',
-  '/weekly/2026-08-29',
-  '/weekly/2026-09-05',
-  '/weekly/2026-09-12',
-  '/weekly/2026-09-19',
-  '/weekly/2026-09-26',
+  '/backstage/weekly/2026-08-08',
+  '/backstage/weekly/2026-08-15',
+  '/backstage/weekly/2026-08-22',
+  '/backstage/weekly/2026-08-29',
+  '/backstage/weekly/2026-09-05',
+  '/backstage/weekly/2026-09-12',
+  '/backstage/weekly/2026-09-19',
+  '/backstage/weekly/2026-09-26',
 ];
 
 /**
@@ -149,8 +149,8 @@ export const THEME_ROLES: Record<
 };
 
 export const DOC_ROUTE_FAMILY: Record<string, ThemeFamily> = {
-  '/artifacts/llm-best-practices-github-copilot': 'copilot',
-  '/artifacts/llm-best-practices-copilot-studio': 'copilot',
-  '/artifacts/slamwich-tasting-report': 'slamwich',
-  ...Object.fromEntries(DOC_ROUTES.filter((r) => r.startsWith('/weekly/')).map((r) => [r, 'weekly' as const])),
+  '/atisha/llm-best-practices-github-copilot': 'copilot',
+  '/atisha/llm-best-practices-copilot-studio': 'copilot',
+  '/atisha/slamwich-tasting-report': 'slamwich',
+  ...Object.fromEntries(DOC_ROUTES.filter((r) => r.startsWith('/backstage/weekly/')).map((r) => [r, 'weekly' as const])),
 };

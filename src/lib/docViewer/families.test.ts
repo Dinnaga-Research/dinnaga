@@ -194,6 +194,17 @@ describe('font mapping (#52)', () => {
     expect(mapFontStack('monospace')).toBe('var(--doc-font-mono)');
   });
 
+  test('mapFontStack: any named mono or code face first maps to the mono role, without a list of brands', () => {
+    expect(mapFontStack("'Berkeley Mono', monospace")).toBe('var(--doc-font-mono)');
+    expect(mapFontStack('"IBM Plex Mono", ui-monospace, monospace')).toBe('var(--doc-font-mono)');
+    expect(mapFontStack('"Chivo Mono", monospace')).toBe('var(--doc-font-mono)');
+    expect(mapFontStack("'Fira Code', monospace")).toBe('var(--doc-font-mono)');
+    expect(mapFontStack('Cascadia Code, Consolas, monospace')).toBe('var(--doc-font-mono)');
+    expect(mapFontStack("'Courier New', Courier, monospace")).toBe('var(--doc-font-mono)');
+    // a word that merely starts with "mono" is not a monospace face
+    expect(mapFontStack("'Monotype Corsiva', cursive")).toBe('var(--doc-font-body)');
+  });
+
   test('mapFontStack: inherit and other CSS-wide keywords, var() stacks and KaTeX faces are left alone', () => {
     expect(mapFontStack('inherit')).toBeNull();
     expect(mapFontStack('initial')).toBeNull();
@@ -283,19 +294,21 @@ describe('theme rule (#52, #53 §13.3)', () => {
     }
   });
 
-  test('the same block sets h1 to the display face with !important', async () => {
+  test('the same block sets h1 to the display face and display stretch with !important (Darkroom §9.2)', async () => {
     const { sheet } = await adaptReal('weekly/2026-08-08.html');
     expect(norm(themeRule(sheet)!)).toMatch(/h1 \{ font-family: var\(--doc-font-display\)/);
+    expect(norm(themeRule(sheet)!)).toMatch(/font-stretch: var\(--doc-display-stretch\)/);
     // jsdom drops the priority when serialising; the generated text is the contract
     expect(norm(buildThemeRule('weekly', { selection: false }))).toContain(
-      'h1 { font-family: var(--doc-font-display) !important; }',
+      'h1 { font-family: var(--doc-font-display) !important; font-stretch: var(--doc-display-stretch) !important; }',
     );
   });
 
-  test('docs without their own ::selection get the neutral selection rule', async () => {
+  test('docs without their own ::selection get the paper selection rule, rgba(236, 228, 211, 0.22) (§9.2)', async () => {
     const { sheet } = await adaptReal('llm-best-practices-copilot-studio.html');
     const rule = norm(themeRule(sheet)!);
-    expect(rule).toMatch(/::selection \{ background: rgba\(232,232,232,0\.22\)/);
+    expect(rule).toMatch(/::selection \{ background: rgba\(236,228,211,0\.22\)/);
+    expect(buildThemeRule('copilot', { selection: true })).toContain('::selection { background: rgba(236, 228, 211, 0.22); }');
   });
 
   test("SLAMWICH keeps its own ::selection and gets no second one", async () => {

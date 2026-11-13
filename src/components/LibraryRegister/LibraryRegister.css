@@ -1,0 +1,66 @@
+/* ABOUTME: The library register's row layout (spec §7.3) on top of layout.css's .dn-register primitives:
+   ABOUTME: date | title, summary, tested line | kind from 760 px; one "date · kind" line above the title below. */
+
+.library-register {
+  list-style: none;
+}
+
+/* < 760 px: `9 Sep 2026 · Cheat sheet`, then the title, summary and tested line. */
+.library-register__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.45em;
+  margin-bottom: var(--dn-sp-3);
+}
+
+.library-register .tested-line {
+  margin-top: var(--dn-sp-4);
+}
+
+@media (min-width: 760px) {
+  .library-register__row {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr) auto;
+    column-gap: var(--dn-sp-5);
+    align-items: baseline;
+  }
+
+  /* The meta line dissolves so its date and kind sit in the row's outer columns. */
+  .library-register__meta {
+    display: contents;
+  }
+
+  .library-register__sep {
+    display: none;
+  }
+
+  .library-register__date {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .library-register__main {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .library-register__kind {
+    grid-column: 3;
+    grid-row: 1;
+    text-align: right;
+  }
+
+  /* Inside a §5 section the section's hairline is the first row's rule (no doubled line). */
+  .dn-section .library-register__row:first-child {
+    border-top: 0;
+    padding-top: var(--dn-sp-2);
+  }
+}
+
+@media (min-width: 1100px) {
+  .library-register__row {
+    grid-template-columns: 8rem minmax(0, 1fr) auto;
+    column-gap: var(--dn-sp-7);
+  }
+}
