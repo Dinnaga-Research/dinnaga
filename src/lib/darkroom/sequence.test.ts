@@ -115,6 +115,30 @@ describe('mountSequence', () => {
     expect(els.counter.textContent).toBe('Frame 001 / 12');
   });
 
+  it('keeps JPEG quality at 0.78 while the projected bytes fit the budget', async () => {
+    const els = build();
+    handle = mountSequence({ ...els, frames: 12, dpr: 1, byteBudget: 1e6 });
+    roCallbacks[0]!([], {} as ResizeObserver);
+    await settle(500);
+    const qs = vi.mocked(HTMLCanvasElement.prototype.toBlob).mock.calls.map((c) => c[2]);
+    expect(new Set(qs)).toEqual(new Set([0.78]));
+    expect(handle.stats().quality).toBe(0.78);
+  });
+
+  it('steps JPEG quality down when the projected bytes exceed the budget, never below 0.4', async () => {
+    const els = build();
+    // 100-byte frames: 12 frames project to 1200 bytes against a 600-byte budget.
+    handle = mountSequence({ ...els, frames: 12, dpr: 1, byteBudget: 600 });
+    roCallbacks[0]!([], {} as ResizeObserver);
+    await settle(500);
+    const qs = vi.mocked(HTMLCanvasElement.prototype.toBlob).mock.calls.map((c) => c[2] as number);
+    expect(qs[0]).toBe(0.78);
+    for (let i = 1; i < qs.length; i++) expect(qs[i]).toBeLessThanOrEqual(qs[i - 1]!);
+    expect(qs.at(-1)).toBeLessThan(0.78);
+    expect(Math.min(...qs)).toBeGreaterThanOrEqual(0.4);
+    expect(handle.stats().quality).toBe(qs.at(-1));
+  });
+
   it('pauses baking while the document is hidden', async () => {
     const els = build();
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });

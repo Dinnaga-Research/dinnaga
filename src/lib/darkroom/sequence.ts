@@ -27,8 +27,10 @@ export interface SequenceOptions {
   onStage?: (k: number) => void;
   frames?: number;
   seed?: number;
-  /** JPEG quality of baked frames. */
+  /** Starting JPEG quality of baked frames. */
   quality?: number;
+  /** Bytes the 180 frame blobs may take; the bake lowers JPEG quality to stay under it (spec §8.4: 40 MB). */
+  byteBudget?: number;
   dpr?: number;
   /** Rail jump duration in ms (0 under reduced motion). */
   jumpMs?: number;
@@ -42,6 +44,8 @@ export interface SequenceStats extends StoreStats {
   scale: number;
   canvas: { w: number; h: number };
   p: number;
+  /** JPEG quality the bake is using now. */
+  quality: number;
   paints: number;
   paintMedianMs: number | null;
   livePaints: number;
@@ -61,6 +65,10 @@ export interface SequenceHandle {
 }
 
 const NARROW_BELOW = 760;
+/** 40 MB less headroom: WebKit's encoder makes grainy frames twice the size Chromium's does. */
+const BYTE_BUDGET = 37e6;
+const MIN_QUALITY = 0.4;
+const QUALITY_STEP = 0.05;
 const REBUILD_MS = 220;
 const IGNORE_HEIGHT_BELOW = 120;
 const median = (xs: number[]) => {
@@ -75,6 +83,8 @@ export function mountSequence(opts: SequenceOptions): SequenceHandle {
   const N = opts.frames ?? N_FRAMES;
   const seed = opts.seed ?? SEED;
   const quality = opts.quality ?? 0.78;
+  const byteBudget = opts.byteBudget ?? BYTE_BUDGET;
+  let bakeQuality = quality;
   const jumpMs = opts.jumpMs ?? 1300;
   const h1 = hero?.querySelector('h1') ?? null;
   const h1Text = h1 && h1.childElementCount === 0 ? h1.textContent : null;
@@ -210,7 +220,7 @@ export function mountSequence(opts: SequenceOptions): SequenceHandle {
         resolve();
       }, { once: true });
     });
-  const toBlob = (c: HTMLCanvasElement) => new Promise<Blob | null>((resolve) => c.toBlob(resolve, 'image/jpeg', quality));
+  const toBlob = (c: HTMLCanvasElement, q: number) => new Promise<Blob | null>((resolve) => c.toBlob(resolve, 'image/jpeg', q));
 
   async function bake(tk: number) {
     const S0 = scene!;
@@ -226,6 +236,12 @@ export function mountSequence(opts: SequenceOptions): SequenceHandle {
     if (!c) return;
     let haveFirst = false;
     let haveLast = false;
+    // Adaptive quality: after a few frames at one quality, project the total; step down while it is over budget.
+    let q = (bakeQuality = quality);
+    let bytes = 0;
+    let done = 0;
+    let sumAtQ = 0;
+    let nAtQ = 0;
     for (const i of bakeOrder(N)) {
       while (document.hidden && tk === token && !dead) await whenVisible(); // pause while the tab is hidden
       if (tk !== token || dead) return;
@@ -233,9 +249,18 @@ export function mountSequence(opts: SequenceOptions): SequenceHandle {
       const t = performance.now();
       paintFrame(c, S0, N > 1 ? i / (N - 1) : 0, i, pal0, film0);
       paintMs.push(performance.now() - t);
-      const blob = await toBlob(off);
+      const blob = await toBlob(off, q);
       if (tk !== token || dead || !blob) return;
       st.put(i, blob);
+      bytes += blob.size;
+      done++;
+      sumAtQ += blob.size;
+      nAtQ++;
+      if (done < N && nAtQ >= 3 && q > MIN_QUALITY + 1e-9 && bytes + (sumAtQ / nAtQ) * (N - done) > byteBudget) {
+        q = bakeQuality = Math.max(MIN_QUALITY, Math.round((q - QUALITY_STEP) * 100) / 100);
+        sumAtQ = 0;
+        nAtQ = 0;
+      }
       if (i === 0) haveFirst = true;
       if (i === N - 1) haveLast = true;
       if (firstLastMs == null && haveFirst && haveLast) firstLastMs = performance.now() - t0;
@@ -385,6 +410,7 @@ export function mountSequence(opts: SequenceOptions): SequenceHandle {
         scale: s,
         canvas: { w: plate.width, h: plate.height },
         p: prog,
+        quality: bakeQuality,
         paints: paintMs.length,
         paintMedianMs: median(paintMs),
         livePaints,
