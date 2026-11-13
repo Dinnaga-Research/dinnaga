@@ -1,60 +1,36 @@
 // ABOUTME: Shared TypeScript types for Dinnaga site content.
 // ABOUTME: Consumed by data files in src/data/ and the components that render them.
 
-export type PracticeIconName = 'ethos' | 'method' | 'atisha';
-
-export interface Practice {
-  num: string;
-  title: string;
-  icon: PracticeIconName;
-  summary: string;
-  body: string;
-  meta: string;
-}
-
-export interface DataRow {
-  idx: string;
-  label: string;
-  value: string;
-}
-
-export interface BootLine {
-  text: string;
-  delay: number;
-}
-
 export interface NavLink {
   label: string;
   to: string;
+  // An off-site link: rendered as a plain <a> with an aria-hidden ↗ after the label.
+  external?: boolean;
 }
 
-export type AtishaCategory = 'skill' | 'tool' | 'method' | 'paper';
+export type DocKind = 'Cheat sheet' | 'Report' | 'Living document';
 
-export interface AtishaEntry {
-  slug: string;
-  title: string;
-  category: AtishaCategory;
-  oneLiner: string;
-  sourceUrl: string;
-  validatedOn: string;
-  whyUseful: string;
-  howValidated: string;
-  // '' = first-party / no credit; non-empty = the third-party owner to credit.
-  attribution: string;
-}
-
-export interface ArtifactEntry {
+/** One Doc in the catalogue. Without `publish: true` it lives Behind the scenes (#26, #63). */
+export interface DocEntry {
   slug: string;
   title: string;
   project: string;
-  oneLiner: string;
+  // One sentence: the row summary on Atisha, the one-liner Behind the scenes, the route description.
+  summary: string;
   // ISO date string (YYYY-MM-DD).
   published: string;
   // Root-relative URL of the static doc under public/.
   docPath: string;
-  // '' = no caveat; non-empty = a free-text caveat shown on the viewer page.
+  // '' = no caveat; non-empty = a caveat shown in the reader's colophon.
   note: string;
+  publish?: true;
+  kind?: DocKind;
+  // What the doc was checked against, shown after the tested mark.
+  tested?: string;
 }
+
+/** A Doc on Atisha: published, with its kind and tested line. */
+export type PublishedDoc = DocEntry & { publish: true; kind: DocKind; tested: string };
 
 export interface WeeklyRun {
   // ISO date string (YYYY-MM-DD) of the Saturday run — the unique key.
@@ -68,4 +44,3 @@ export interface WeeklyRun {
   // Root-relative URL of the static report under public/.
   docPath: string;
 }
-
