@@ -20,6 +20,12 @@
   }
 }
 
+.run--live .stage {
+  position: relative;
+  height: calc(100svh - var(--dn-nav-h));
+  overflow: hidden;
+}
+
 /* Motion is checked in JS (useReducedMotion) and here: the run only scrubs with no-preference. */
 @media (prefers-reduced-motion: no-preference) {
   .run--live {
@@ -30,12 +36,6 @@
     position: sticky;
     top: var(--dn-nav-h);
   }
-}
-
-.run--live .stage {
-  position: relative;
-  height: calc(100svh - var(--dn-nav-h));
-  overflow: hidden;
 }
 
 .run--live .plate {
