@@ -2,13 +2,14 @@
 // ABOUTME: An unknown slug, or one without publish: true, renders the 404 and keeps the URL.
 import { useParams } from 'react-router-dom';
 import { DocFrame } from '../../components/DocFrame';
-import { docBySlug, isPublished } from '../../data/docs';
+import { DOCS, docBySlug, isPublished } from '../../data/docs';
 import { formatPausedSince } from '../../lib/dateFormat';
+import type { DocEntry } from '../../types';
 import { NotFound } from '../NotFound/NotFound';
 
-export function AtishaDoc() {
+export function AtishaDoc({ docs = DOCS }: { docs?: DocEntry[] }) {
   const { slug } = useParams();
-  const doc = docBySlug(slug);
+  const doc = docBySlug(slug, docs);
   if (!doc || !isPublished(doc)) return <NotFound />;
   return (
     <DocFrame
