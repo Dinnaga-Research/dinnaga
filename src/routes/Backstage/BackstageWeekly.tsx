@@ -20,18 +20,20 @@ export function BackstageWeekly() {
         </div>
       )}
       <div className="dn-grid dn-section">
-        <ul className="dn-grid__body dn-register">
-          {WEEKLY_RUNS.map((r) => (
-            <li className="dn-register__row" key={r.date}>
-              <h2 className="dn-register__title">
-                <Link to={`/backstage/weekly/${r.date}`}>
-                  {`Week in review, ${formatDateRange(r.windowStart, r.date)}`}
-                </Link>
-              </h2>
-              <p className="dn-register__summary">{r.summary}</p>
-            </li>
-          ))}
-        </ul>
+        <div className="dn-grid__body">
+          <ul className="dn-register">
+            {WEEKLY_RUNS.map((r) => (
+              <li className="dn-register__row" key={r.date}>
+                <h2 className="dn-register__title">
+                  <Link to={`/backstage/weekly/${r.date}`}>
+                    {`Week in review, ${formatDateRange(r.windowStart, r.date)}`}
+                  </Link>
+                </h2>
+                <p className="dn-register__summary">{r.summary}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
