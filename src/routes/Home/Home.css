@@ -1,0 +1,36 @@
+/* ABOUTME: The homepage (#67, #68): the hero copy inside the run's stage (C's thesis, then the founder line and
+   ABOUTME: the one link), the library hand-off and How we test. The run's own surface lives in darkroom.css. */
+
+/* ── Hero copy: lede role, C's 30rem thesis measure ─────────────────────── */
+.home-hero__lede,
+.home-hero__founder {
+  max-width: 30rem;
+  font-size: var(--dn-t-lede);
+  line-height: var(--dn-lh-lede);
+  color: var(--dn-text-2);
+  text-wrap: pretty;
+}
+
+.home-hero__lede {
+  margin-top: 1.3rem;
+}
+
+.home-hero__founder {
+  margin-top: var(--dn-sp-3);
+}
+
+.home-hero__go {
+  margin-top: var(--dn-sp-5);
+  font-size: var(--dn-t-lede);
+  line-height: var(--dn-lh-lede);
+}
+
+@media (min-width: 760px) {
+  .home-hero__lede {
+    margin-top: var(--dn-sp-7);
+  }
+
+  .home-hero__go {
+    margin-top: var(--dn-sp-6);
+  }
+}
