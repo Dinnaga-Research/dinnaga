@@ -2,6 +2,7 @@
 // ABOUTME: (same tab) and `Updated <date>`.
 import type { LivingGist } from '../../lib/living/contract';
 import { livingDate } from './format';
+import './LivingRows.css';
 
 export function GistRow({ gist }: { gist: LivingGist }) {
   return (

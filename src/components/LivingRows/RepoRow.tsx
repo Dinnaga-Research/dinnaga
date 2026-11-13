@@ -2,6 +2,7 @@
 // ABOUTME: weytani, the name linking to GitHub (same tab), the description and the meta line.
 import type { LivingRepo } from '../../lib/living/contract';
 import { repoMeta } from './format';
+import './LivingRows.css';
 
 export function RepoRow({ repo }: { repo: LivingRepo }) {
   return (

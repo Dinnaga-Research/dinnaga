@@ -2,6 +2,7 @@
 // ABOUTME: (same tab) and its date.
 import type { LivingPost } from '../../lib/living/contract';
 import { livingDate } from './format';
+import './LivingRows.css';
 
 export function PostRow({ post }: { post: LivingPost }) {
   return (

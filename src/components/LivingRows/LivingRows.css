@@ -1,0 +1,35 @@
+/* ABOUTME: The living rows (#66, #69): api/living's repositories, gists and posts in the register
+   ABOUTME: style (spec §7.3), a little tighter than the library's, plus the closing "→" link. */
+
+.living-row {
+  padding: 1.15rem 0 1.3rem;
+}
+
+.living-row__owner {
+  margin-bottom: var(--dn-sp-1);
+}
+
+.living-row__title {
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.living-row__summary {
+  max-width: var(--dn-measure);
+  margin-top: var(--dn-sp-2);
+  color: var(--dn-text-2);
+  overflow-wrap: anywhere;
+}
+
+.living-row__meta {
+  margin-top: var(--dn-sp-2);
+  font-size: var(--dn-t-meta);
+  line-height: var(--dn-lh-meta);
+  color: var(--dn-text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The link to where the data lives, after the rows or the state line. */
+.living-more {
+  margin-top: var(--dn-sp-6);
+}
