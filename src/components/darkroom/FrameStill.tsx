@@ -44,8 +44,15 @@ export function FrameStill({ p, index, label, aspect, stamp = false }: Props) {
       paintedW = w;
       const h = stillHeight(w, aspect);
       canvas.style.height = `${h}px`;
-      const { paintStill } = await loadPainter();
+      let painter: Awaited<ReturnType<typeof loadPainter>>;
+      try {
+        painter = await loadPainter();
+      } catch {
+        paintedW = 0; // the chunk failed (stale after a deploy, or the page left): blank, a resize retries
+        return;
+      }
       if (!live) return;
+      const { paintStill } = painter;
       const res = paintStill(canvas, w, h, p, index, window.devicePixelRatio || 1);
       const st = stampRef.current;
       if (res && st) {

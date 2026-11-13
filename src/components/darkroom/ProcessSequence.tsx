@@ -96,6 +96,9 @@ function LiveRun({ stages, sources, hero, afterId, onRuntime }: ProcessSequenceP
         onStage: setCurrent,
       });
       onRuntimeRef.current?.(handleRef.current);
+    }).catch(() => {
+      // The runtime chunk failed (stale after a deploy, or the page left mid-import). The hero, the
+      // captions and the figure text are all in the DOM, so the run stays readable without frames.
     });
     return () => {
       cancelled = true;
