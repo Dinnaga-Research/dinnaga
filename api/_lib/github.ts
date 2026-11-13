@@ -18,6 +18,12 @@ function headers(): Record<string, string> {
   return token ? { ...base, Authorization: `Bearer ${token}` } : base;
 }
 
+/** `message` with the token, if one is set and the message happens to quote it, blanked out. */
+export function redactToken(message: string): string {
+  const token = process.env.GITHUB_TOKEN?.trim();
+  return token ? message.split(token).join('[redacted]') : message;
+}
+
 /** GET a GitHub path expecting a JSON array; anything else (non-2xx, not JSON, not a list) throws. */
 async function getList(path: string): Promise<unknown[]> {
   const reply = await fetchText(`${API}${path}`, headers());

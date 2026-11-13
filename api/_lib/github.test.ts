@@ -3,29 +3,9 @@
 // ABOUTME: release lookups (404 and failures become null), and when a whole source fails.
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fixtureJson, RECORDED_AT } from '../__fixtures__/index.js';
-import { fail, json, stubFetch, text, type Route } from '../__fixtures__/fetchStub.js';
+import { fail, json, stubFetch, text } from '../__fixtures__/fetchStub.js';
+import { githubRoutes, GISTS, ORG_REPOS, release, USER_REPOS } from '../__fixtures__/upstream.js';
 import { loadGists, loadRepos } from './github.js';
-
-const USER_REPOS = 'https://api.github.com/users/weytani/repos?type=owner&sort=pushed&per_page=100';
-const ORG_REPOS =
-  'https://api.github.com/orgs/Dinnaga-Research/repos?type=public&sort=pushed&per_page=100';
-const GISTS = 'https://api.github.com/users/weytani/gists?per_page=100';
-const release = (slug: string) => `https://api.github.com/repos/${slug}/releases/latest`;
-
-const userRepos = fixtureJson('repos-user.json');
-const orgRepos = fixtureJson('repos-org.json');
-const rel200 = fixtureJson('release-latest-200.json');
-const rel404 = fixtureJson('release-latest-404.json');
-
-// The four repos that survive the filter at RECORDED_AT, each with its releases/latest answer.
-const okRoutes = (): Record<string, Route> => ({
-  [USER_REPOS]: json(userRepos),
-  [ORG_REPOS]: json(orgRepos),
-  [release('Dinnaga-Research/dinnaga')]: json(rel404, 404),
-  [release('weytani/living-graph')]: json(rel404, 404),
-  [release('weytani/d3-lwc-graphql')]: json(rel200),
-  [release('weytani/d3-lwc-soql')]: json({ ...(rel200 as object), tag_name: 'v1.0.0' }),
-});
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -34,13 +14,14 @@ afterEach(() => {
 
 describe('loadRepos', () => {
   it('lists the user and the org, then asks each kept repo for its latest release', async () => {
-    const { calls } = stubFetch(okRoutes());
+    const { calls } = stubFetch(githubRoutes());
     await loadRepos(RECORDED_AT);
-    expect(calls.map((c) => c.url).sort()).toEqual(Object.keys(okRoutes()).sort());
+    const expected = Object.keys(githubRoutes()).filter((url) => url !== GISTS);
+    expect(calls.map((c) => c.url).sort()).toEqual(expected.sort());
   });
 
   it('returns the contract rows, newest push first, with the release tag or null on a 404', async () => {
-    stubFetch(okRoutes());
+    stubFetch(githubRoutes());
     const repos = await loadRepos(RECORDED_AT);
     expect(repos.map((r) => [`${r.owner}/${r.name}`, r.release])).toEqual([
       ['Dinnaga-Research/dinnaga', null],
@@ -61,7 +42,7 @@ describe('loadRepos', () => {
 
   it('only sets release to null when one lookup fails; the repo and the others stay', async () => {
     stubFetch({
-      ...okRoutes(),
+      ...githubRoutes(),
       [release('weytani/living-graph')]: json({ message: 'boom' }, 500),
       [release('weytani/d3-lwc-soql')]: fail(),
       [release('Dinnaga-Research/dinnaga')]: text('<html>not json</html>'),
@@ -82,12 +63,15 @@ describe('loadRepos', () => {
     ['a listing is not JSON', { [ORG_REPOS]: text('<html>') }],
     ['a listing is not an array', { [ORG_REPOS]: json({ items: [] }) }],
   ])('rejects when %s, so the whole source fails', async (_name, override) => {
-    stubFetch({ ...okRoutes(), ...override });
+    stubFetch({ ...githubRoutes(), ...override });
     await expect(loadRepos(RECORDED_AT)).rejects.toThrow();
   });
 
   it('measures the 183 days from the date it is given', async () => {
-    const { calls } = stubFetch({ [USER_REPOS]: json(userRepos), [ORG_REPOS]: json(orgRepos) });
+    const { calls } = stubFetch({
+      [USER_REPOS]: json(fixtureJson('repos-user.json')),
+      [ORG_REPOS]: json(fixtureJson('repos-org.json')),
+    });
     // 300 days on, nothing in the fixtures is recent enough: no release lookups at all.
     const later = new Date(RECORDED_AT.getTime() + 300 * 86_400_000);
     expect(await loadRepos(later)).toEqual([]);
@@ -123,7 +107,7 @@ describe('loadGists', () => {
 
 describe('GitHub request headers', () => {
   const sent = async () => {
-    const { calls } = stubFetch({ ...okRoutes(), [GISTS]: json(fixtureJson('gists.json')) });
+    const { calls } = stubFetch(githubRoutes());
     await Promise.all([loadRepos(RECORDED_AT), loadGists()]);
     return calls;
   };
