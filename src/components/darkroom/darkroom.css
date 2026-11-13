@@ -517,6 +517,7 @@
 /* ── A still: one canvas, its height set from its width (C's aspect) ─────── */
 .still__box {
   position: relative;
+  container-type: inline-size; /* for the auto aspect below */
   border: 1px solid var(--dn-rule);
   overflow: hidden; /* the rotated stamp's empty corners must not widen the page */
   background: var(--dn-bg);
@@ -530,6 +531,14 @@
 
 .still[data-aspect="wide"] canvas {
   aspect-ratio: 1 / 0.62;
+}
+
+/* auto is C's rule, wide above 560 px (stillHeight in FrameStill.tsx). The box is the container, so a
+   still holds its painted height before it paints and nothing below it shifts when it does. */
+@container (width > 560px) {
+  .still[data-aspect="auto"] canvas {
+    aspect-ratio: 1 / 0.62;
+  }
 }
 
 .still__box .stamp {

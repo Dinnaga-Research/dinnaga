@@ -130,3 +130,21 @@ test.describe('/method stills', () => {
     expect(still).toEqual(moving);
   });
 });
+
+for (const width of [1440, 760, 390]) {
+  test(`/method stills keep their height when they paint, so nothing shifts (${width}px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/method');
+    await page.waitForLoadState('networkidle');
+    const heights = () =>
+      page.evaluate(() =>
+        [...document.querySelectorAll('.method-stage canvas')].map((c) => Math.round(c.getBoundingClientRect().height)),
+      );
+    const before = await heights();
+    for (let i = 0; i < STAGES.length; i++) {
+      await page.locator('.method-stage canvas').nth(i).scrollIntoViewIfNeeded();
+      await expect.poll(() => painted(page, i)).toBe(true);
+    }
+    expect(await heights()).toEqual(before);
+  });
+}
