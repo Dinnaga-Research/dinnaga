@@ -1,0 +1,89 @@
+/* ABOUTME: How we test (/method, #71): the five stages as a contact sheet (spec §8.3). Each row: number and name
+   ABOUTME: in the stage role, detail in body, its still beside it from 900 px (C's still layout), stacked below. */
+
+.method__intro {
+  margin-top: var(--dn-sp-6);
+  max-width: var(--dn-measure);
+  color: var(--dn-text);
+}
+
+.method__sheet {
+  margin-top: var(--dn-sp-11);
+}
+
+/* One row per stage: a hairline across the page, then the text and its still. */
+.method-stage {
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--dn-rule);
+}
+
+.method-stage + .method-stage {
+  margin-top: var(--dn-sp-10);
+}
+
+.method-stage__name {
+  font-size: var(--dn-t-stage);
+  font-stretch: var(--dn-wdth-label);
+  font-weight: 800;
+  line-height: var(--dn-lh-stage);
+  letter-spacing: var(--dn-ls-stage);
+}
+
+/* The number is derived from order (spec §4.5 rule 4) and sits on its own line above the name. */
+.method-stage__n {
+  display: block;
+  margin-bottom: 0.12em;
+  color: var(--dn-text-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.method-stage__detail {
+  max-width: 22rem;
+  margin-top: 0.7rem;
+  color: var(--dn-text-2);
+  text-wrap: pretty;
+}
+
+.method-stage__die {
+  color: var(--dn-text);
+}
+
+.method-stage .still {
+  margin-top: var(--dn-sp-6);
+}
+
+/* From 900 px: C's still layout, the stage text in a 20rem column and the still beside it. */
+@media (min-width: 900px) {
+  .method-stage {
+    display: grid;
+    grid-template-columns: 20rem minmax(0, 1fr);
+    column-gap: var(--dn-sp-9);
+    align-items: start;
+  }
+
+  .method-stage .still {
+    margin-top: 0;
+  }
+}
+
+/* From 1100 px the text column is the site's label column, so each still lines up with the h1. */
+@media (min-width: 1100px) {
+  .method-stage {
+    grid-template-columns: var(--dn-col-label) minmax(0, 1fr);
+    column-gap: 0;
+  }
+
+  .method-stage__text {
+    padding-right: var(--dn-sp-7);
+  }
+}
+
+.method__close {
+  margin-top: var(--dn-sp-11);
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--dn-rule);
+}
+
+.method__more {
+  margin-top: var(--dn-sp-4);
+}
