@@ -1,6 +1,8 @@
-// ABOUTME: Dev-only Vite plugin: serves /api/<name> from api/<name>.ts's exported GET handler,
-// ABOUTME: loaded through the dev server (ssrLoadModule), so `bun run dev` answers like Vercel does.
+// ABOUTME: Dev-only Vite plugin: serves /api/<name> from api/<name>.ts's exported GET handler (like Vercel).
+// ABOUTME: Test mode: with API_FIXTURES=<dir> it answers <dir>/<name>/full.json and never calls a live API.
+import { readFile } from 'node:fs/promises';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { join, resolve } from 'node:path';
 import type { Plugin, ViteDevServer } from 'vite';
 
 type Handler = (request: Request) => Promise<Response> | Response;
@@ -28,6 +30,22 @@ async function send(res: ServerResponse, response: Response): Promise<void> {
   res.end(Buffer.from(await response.arrayBuffer()));
 }
 
+/**
+ * The e2e server sets API_FIXTURES (playwright.config.ts), so no test reaches GitHub or the Substack.
+ * A missing fixture is a 404: test mode never falls through to the live handler.
+ */
+async function fixtureResponse(dir: string, name: string): Promise<Response> {
+  try {
+    const body = await readFile(join(resolve(dir), name, 'full.json'));
+    return new Response(body, { headers: { 'Content-Type': 'application/json' } });
+  } catch {
+    return new Response(JSON.stringify({ error: `no fixture for /api/${name}` }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+
 export function apiDev(): Plugin {
   return {
     name: 'dinnaga-api-dev',
@@ -36,8 +54,16 @@ export function apiDev(): Plugin {
       server.middlewares.use(async (req, res, next) => {
         const match = /^\/api\/([a-z0-9-]+)\/?(?:\?.*)?$/.exec(req.url ?? '');
         if (!match) return next();
+        const fixtures = process.env.API_FIXTURES;
+        if (fixtures) {
+          await send(res, await fixtureResponse(fixtures, match[1]));
+          return;
+        }
         try {
-          const mod = (await server.ssrLoadModule(`/api/${match[1]}.ts`)) as Record<string, unknown>;
+          const mod = (await server.ssrLoadModule(`/api/${match[1]}.ts`)) as Record<
+            string,
+            unknown
+          >;
           const handler = mod[req.method ?? 'GET'] as Handler | undefined;
           if (typeof handler !== 'function') {
             res.statusCode = 405;

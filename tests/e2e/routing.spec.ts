@@ -1,6 +1,9 @@
 // ABOUTME: E2E for the route table: every page deep-links on a hard load (SPA fallback), unknown
 // ABOUTME: paths and unpublished or unknown slugs show the 404 and keep their URL, old URLs redirect.
 import { expect, test } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+
+const fullFixture: unknown = JSON.parse(readFileSync('tests/fixtures/living/full.json', 'utf8'));
 
 const PAGES: { path: string; heading: string | RegExp }[] = [
   { path: '/', heading: 'Living documents for engineers who code with AI' },
@@ -60,4 +63,12 @@ test('the dev API answers /api/living with contract JSON, not the SPA shell', as
   expect(res.headers()['content-type']).toContain('application/json');
   const body = await res.json();
   expect(Object.keys(body).sort()).toEqual(['generatedAt', 'gists', 'posts', 'repos']);
+});
+
+test('the e2e server answers /api/living from the fixture, never the live APIs', async ({ request }) => {
+  // playwright.config.ts starts Vite with API_FIXTURES, so no spec reaches GitHub or the Substack.
+  // A reused dev server started without it fails here instead of rate-limiting the suite.
+  const res = await request.get('/api/living');
+  expect(res.status()).toBe(200);
+  expect(await res.json()).toEqual(fullFixture);
 });

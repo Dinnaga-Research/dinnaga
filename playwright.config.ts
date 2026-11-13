@@ -1,5 +1,6 @@
 // ABOUTME: Playwright config: runs e2e specs against the Vite dev server on PORT (default 4242),
 // ABOUTME: so parallel worktrees each test their own server. Firefox and WebKit run the listed specs.
+// ABOUTME: The server runs with API_FIXTURES, so /api/* answers from tests/fixtures and never goes live.
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = Number(process.env.PORT ?? 4242);
@@ -35,6 +36,9 @@ export default defineConfig({
   ],
   webServer: {
     command: `bunx vite --port ${PORT} --strictPort`,
+    // scripts/vite-api-dev.ts serves /api/<name> from tests/fixtures/<name>/full.json in this mode.
+    // Specs that need another state still page.route() it. routing.spec checks the server honours it.
+    env: { API_FIXTURES: 'tests/fixtures' },
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
