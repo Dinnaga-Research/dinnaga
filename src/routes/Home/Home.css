@@ -50,3 +50,11 @@
 .home-method h2 {
   overflow-wrap: break-word;
 }
+
+/* How we test: two sentences of approved copy in the lede role, on the measure. */
+.home-method__body {
+  max-width: var(--dn-measure);
+  font-size: var(--dn-t-lede);
+  line-height: var(--dn-lh-lede);
+  text-wrap: pretty;
+}
