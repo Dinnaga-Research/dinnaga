@@ -155,6 +155,41 @@ test('Tab from the bar into the article reaches the first article link with a vi
 });
 
 // ---------- #51: callouts ----------
+for (const build of ['build-a', 'build-b'] as Build[]) {
+  test(`${build}: every callout is neutral (title, icon, border, ground), never blue, teal or red`, async ({
+    page,
+    context,
+  }) => {
+    await serveQuartz(context);
+    await open(page, harnessUrl(build, 'index.html'));
+    const callouts = await hostLocator(page).evaluate((el) =>
+      [...el.shadowRoot!.querySelectorAll<HTMLElement>('.callout[data-callout]')].map((c) => {
+        const title = c.querySelector<HTMLElement>(':scope > .callout-title')!;
+        const icon = title.querySelector<HTMLElement>('.callout-icon');
+        const cs = getComputedStyle(c);
+        return {
+          type: c.dataset.callout,
+          title: getComputedStyle(title).color,
+          icon: icon ? getComputedStyle(icon).backgroundColor : null,
+          border: cs.borderTopColor,
+          ground: cs.backgroundColor,
+        };
+      }),
+    );
+    expect(new Set(callouts.map((c) => c.type))).toEqual(new Set(['note', 'tip', 'warning']));
+    for (const c of callouts) {
+      // --doc-accent (paper), --doc-line (rule-strong), --doc-surface (raised): spec §9.1
+      expect(c, c.type).toEqual({
+        type: c.type,
+        title: 'rgb(236, 228, 211)',
+        icon: 'rgb(236, 228, 211)',
+        border: 'rgb(74, 69, 62)',
+        ground: 'rgb(21, 19, 17)',
+      });
+    }
+  });
+}
+
 for (const vp of VIEWPORTS) {
   test.describe(`callouts @ ${vp.name}px`, () => {
     test.use({ viewport: { width: vp.width, height: vp.height } });
