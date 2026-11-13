@@ -1,5 +1,5 @@
-// ABOUTME: A weekly report (/backstage/weekly/:date) in the reader frame; unknown dates render the 404.
-// ABOUTME: Moved from /weekly/:date by the Darkroom foundation.
+// ABOUTME: A weekly report (/backstage/weekly/:date, #64) in the reader frame, with the Weekly reports
+// ABOUTME: back link; a date that is not a run renders the 404. Moved here from /weekly/:date.
 import { useParams } from 'react-router-dom';
 import { DocFrame } from '../../components/DocFrame';
 import { weeklyRunByDate } from '../../data/weeklyRuns';
