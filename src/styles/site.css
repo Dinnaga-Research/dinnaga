@@ -5,7 +5,7 @@
   background: var(--dn-bg);
   color: var(--dn-text);
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip; /* clip, not hidden: hidden makes .site a scroll container and breaks sticky nav and Doc bar */
   cursor: auto;
 }
 .site a, .site button, .site [role="button"], .site .practice, .site .note, .site .filter-chip {

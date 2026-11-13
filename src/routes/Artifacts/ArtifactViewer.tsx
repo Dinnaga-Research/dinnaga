@@ -1,5 +1,5 @@
-// ABOUTME: Artifact viewer route (/artifacts/:slug) — compact header strip over a
-// ABOUTME: full-bleed iframe rendering the static doc; unknown slugs render NotFound.
+// ABOUTME: Artifact viewer route (/artifacts/:slug) — reader frame (bar, doc, colophon) around a
+// ABOUTME: shadow-DOM viewer rendering the static doc; unknown slugs render NotFound.
 import { useParams } from 'react-router-dom';
 import { DocFrame } from '../../components/DocFrame';
 import { ARTIFACTS } from '../../data/artifacts';
@@ -11,12 +11,13 @@ export function ArtifactViewer() {
   if (!artifact) return <NotFound />;
   return (
     <DocFrame
-      eyebrow={artifact.project}
-      title={artifact.title}
-      meta={`published ${artifact.published}`}
+      backHref="/artifacts"
+      backLabel="Behind the scenes"
+      kind={`Doc \u00b7 ${artifact.project}`}
+      colophonTitle={artifact.title}
+      dateLine={`Published ${artifact.published}`}
       note={artifact.note || undefined}
       docPath={artifact.docPath}
-      screenLabel={artifact.project}
     />
   );
 }

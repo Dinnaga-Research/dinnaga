@@ -1,5 +1,6 @@
 // ABOUTME: Root application component — defines the route table and renders the router.
 // ABOUTME: Shared chrome lives in Layout; each route renders only its own content.
+import { Suspense, lazy } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Home } from './routes/Home/Home';
@@ -11,6 +12,12 @@ import { ArtifactViewer } from './routes/Artifacts/ArtifactViewer';
 import { WeeklyLog } from './routes/Weekly/WeeklyLog';
 import { WeeklyViewer } from './routes/Weekly/WeeklyViewer';
 import { NotFound } from './routes/NotFound/NotFound';
+
+// Dev-only harness for Quartz pages. The DEV check is a build-time constant, so Vite drops the
+// route and the lazy import from production.
+const DevDoc = import.meta.env.DEV
+  ? lazy(() => import('./routes/Dev/DevDoc').then((m) => ({ default: m.DevDoc })))
+  : null;
 
 const router = createBrowserRouter([
   {
@@ -25,6 +32,18 @@ const router = createBrowserRouter([
       { path: 'artifacts/:slug', element: <ArtifactViewer /> },
       { path: 'weekly', element: <WeeklyLog /> },
       { path: 'weekly/:date', element: <WeeklyViewer /> },
+      ...(DevDoc
+        ? [
+            {
+              path: 'dev/doc',
+              element: (
+                <Suspense fallback={null}>
+                  <DevDoc />
+                </Suspense>
+              ),
+            },
+          ]
+        : []),
       { path: '*', element: <NotFound /> },
     ],
   },

@@ -1,6 +1,6 @@
-// ABOUTME: Tests the /weekly/:date viewer — DocFrame strip metadata, the report iframe's
-// ABOUTME: src/title attributes (jsdom never loads iframes), and NotFound on unknown dates.
-import { render, screen } from '@testing-library/react';
+// ABOUTME: Tests the /weekly/:date viewer — DocFrame strip metadata, the report viewer
+// ABOUTME: in shadow DOM, and NotFound on unknown dates.
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { WeeklyViewer } from './WeeklyViewer';
@@ -16,24 +16,28 @@ function renderViewer(date: string) {
 }
 
 describe('WeeklyViewer', () => {
-  it('renders the header strip for a valid date', () => {
+  it('renders the reader frame for a valid date', () => {
     renderViewer('2026-08-08');
-    expect(screen.getByText('Week in review')).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: '3–8 Aug 2026' }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/run 2026-08-08/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /open standalone/i })).toHaveAttribute(
+    const bar = screen.getByRole('navigation', { name: 'Doc' });
+    expect(within(bar).getByRole('link', { name: '\u2190 Weekly reports' })).toHaveAttribute('href', '/weekly');
+    expect(within(bar).getByText('Weekly report')).toBeInTheDocument();
+    expect(within(bar).getByRole('link', { name: 'Open standalone' })).toHaveAttribute(
       'href',
       '/artifact-docs/weekly/2026-08-08.html',
     );
+    const colophon = screen.getByRole('heading', { level: 2, name: 'About this doc' }).closest('footer')!;
+    expect(within(colophon).getByRole('heading', { level: 2, name: 'About this doc' })).toBeInTheDocument();
+    expect(within(colophon).getByText('Weekly report').tagName).toBe('STRONG');
+    expect(within(colophon).getByText('Run 2026-08-08, covering 2026-08-03 to 2026-08-08')).toBeInTheDocument();
+    // Weekly reports carry no note
+    expect(colophon.querySelector('.doc-colophon-note')).toBeNull();
+    expect(screen.queryByRole('heading', { level: 1 })).toBeNull();
   });
 
-  it('renders the report iframe with the date range title and docPath src', () => {
-    renderViewer('2026-08-08');
-    const frame = screen.getByTitle('3–8 Aug 2026');
-    expect(frame.tagName).toBe('IFRAME');
-    expect(frame).toHaveAttribute('src', '/artifact-docs/weekly/2026-08-08.html');
+  it('renders the report viewer with shadow DOM mounting', () => {
+    const { container } = renderViewer('2026-08-08');
+    const host = container.querySelector('[data-doc-host]');
+    expect(host).toBeInTheDocument();
   });
 
   it('renders NotFound content for an unknown date', () => {
