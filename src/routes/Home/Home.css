@@ -34,3 +34,19 @@
     margin-top: var(--dn-sp-6);
   }
 }
+
+/* ── Sections after the run: the §5 grid, h2 and its one line in column 1 ─ */
+.home-section__intro {
+  margin-top: var(--dn-sp-4);
+  color: var(--dn-text-2);
+}
+
+.home-section__more {
+  margin-top: var(--dn-sp-6);
+}
+
+/* In the 12rem label column (760-1099 px) a long word must not push into column 2. */
+.home-library h2,
+.home-method h2 {
+  overflow-wrap: break-word;
+}
