@@ -1,15 +1,18 @@
-Static site content: TypeScript modules exporting typed arrays/objects consumed
-directly by components. Most files (`bootLines.ts`, `unlockLines.ts`,
-`links.ts`, `method.ts`, `navLinks.ts`, `practices.ts`, `surfaceData.ts`,
-`tickerItems.ts`, `atishaCatalog.ts`, `artifacts.ts`) are plain literal data —
-their only contract is the matching type in `../types.ts`. (`artifacts.test.ts`
-additionally checks each entry's `docPath` resolves to a real file under
-`public/`.)
+Static site content: typed modules consumed directly by components. Their contract is the type in
+`../types.ts` plus the tests beside them.
 
-**`weeklyRuns.json`** is a vendored snapshot appended by the Saturday
-week-in-review publish step in `~/.claude/week-in-review/` (sanitize-gated,
-fail-closed); nothing here calls it live. `weeklyRuns.ts` loads it with an
-unchecked cast and sorts newest-first; `weeklyRuns.schema.test.ts` is the
-guard: non-empty fields, ISO dates, unique dates, sortedness, docPath
-resolving to a real file under `public/` and outside the `/weekly/` +
-`/artifacts/` route namespaces.
+- `docs.ts` — the doc catalogue (`DocEntry`). Only entries with `publish: true` appear in Atisha;
+  `publishedDocs()` sorts newest first, `unpublishedDocs()` feeds `/backstage`, `docBySlug()` looks
+  one up. A published doc needs `kind` and `tested` (its tested line). `docs.test.ts` checks that
+  each `docPath` resolves under `public/` and outside the route namespaces.
+- `copy.ts` — the headline and lede, defined once. The lede shows only on `/` and `/method`.
+- `method.ts` — the five method stages. They carry no numbers: `/method`, the homepage run and the
+  `See the five stages →` count all derive the number from array order.
+- `links.ts` — external URLs (source repo, Atisha board, Substack, GitHub profile, gists).
+- `navLinks.ts` — the four nav links in order.
+
+**`weeklyRuns.json`** is a vendored snapshot appended by the Saturday week-in-review publish step
+in `~/.claude/week-in-review/` (sanitize-gated, fail-closed; paused since 2026-09-26); nothing calls
+it live. `weeklyRuns.ts` loads it with an unchecked cast and sorts newest first;
+`weeklyRuns.schema.test.ts` guards it: non-empty fields, ISO dates, unique and sorted dates,
+`docPath` resolving under `public/` and outside the route namespaces.

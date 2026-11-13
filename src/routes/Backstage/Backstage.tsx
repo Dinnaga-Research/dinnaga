@@ -1,5 +1,5 @@
 // ABOUTME: Behind the scenes (/backstage, #64): the docs not published to Atisha, then the paused
-// ABOUTME: weekly archive. Unlisted: reached by URL only, with no unlock and no link from the site.
+// ABOUTME: weekly archive. Unlisted: reached by URL only, with no link from the site.
 import { Link } from 'react-router-dom';
 import { PageHead } from '../../components/PageHead';
 import { unpublishedDocs } from '../../data/docs';
