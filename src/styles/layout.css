@@ -1,0 +1,336 @@
+/* ABOUTME: Darkroom layout primitives and site chrome (spec 2026-11-12-darkroom.md §5, §7.1-§7.4, §7.8):
+   ABOUTME: page, grid, section, register, label; nav, footer, tested mark and line, page head. */
+
+/* ── §5 Primitives ─────────────────────────────────────────────────────── */
+.dn-page {
+  width: 100%;
+  max-width: var(--dn-page-max);
+  margin-inline: auto;
+  padding-inline: var(--dn-gut);
+}
+
+/* C's two-column grid: column 1 a section's h2 and one-line intro (or marginalia), column 2 content. */
+.dn-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--dn-sp-6);
+}
+
+.dn-grid__label,
+.dn-grid__body {
+  min-width: 0;
+}
+
+@media (min-width: 760px) {
+  .dn-grid {
+    grid-template-columns: var(--dn-col-label) minmax(0, 1fr);
+  }
+
+  .dn-grid__label {
+    grid-column: 1;
+    padding-right: var(--dn-sp-7);
+  }
+
+  .dn-grid__body {
+    grid-column: 2;
+  }
+}
+
+/* A section starts with a hairline across both columns and the §5 space above it. */
+.dn-section {
+  margin-top: var(--dn-section-space);
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--dn-rule);
+}
+
+.dn-measure {
+  max-width: var(--dn-measure);
+}
+
+/* Label role (§4.4): condensed, 600, label colour. Caps only through .dn-label--caps, on ≤ 3 words. */
+.dn-label {
+  font-size: var(--dn-t-label);
+  font-stretch: var(--dn-wdth-label);
+  font-weight: 600;
+  line-height: var(--dn-lh-label);
+  color: var(--dn-text-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.dn-label--caps {
+  font-stretch: var(--dn-wdth-label);
+  text-transform: uppercase;
+  letter-spacing: var(--dn-ls-label);
+}
+
+.dn-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* §7.3 A printed register, not cards: each row a top hairline and its padding. */
+.dn-register {
+  border-bottom: 1px solid var(--dn-rule);
+}
+
+.dn-register__row {
+  border-top: 1px solid var(--dn-rule);
+  padding: 1.6rem 0 1.8rem;
+}
+
+.dn-register__title {
+  font-size: var(--dn-t-title);
+  font-stretch: var(--dn-wdth-head);
+  font-weight: 600;
+  line-height: var(--dn-lh-title);
+}
+
+.dn-register__title a {
+  text-decoration-line: none;
+}
+
+.dn-register__title a:hover,
+.dn-register__title a:focus-visible {
+  text-decoration-line: underline;
+}
+
+.dn-register__summary {
+  max-width: var(--dn-measure);
+  margin-top: var(--dn-sp-2);
+  color: var(--dn-text-2);
+}
+
+/* ── §7.4 Tested mark and tested line ────────────────────────────────── */
+/* A miniature of the stamp: a ring with a centre dot. aria-hidden; the sentence carries the meaning. */
+.tested-mark {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.6rem;
+  border: 1.5px solid var(--dn-tested);
+  border-radius: 50%;
+  vertical-align: -0.1em;
+}
+
+.tested-mark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: 50%;
+  background: var(--dn-tested);
+}
+
+/* Hanging indent: a wrapped sentence lines up with its first word, not with the mark. */
+.tested-line {
+  padding-left: 1.35rem;
+  text-indent: -1.35rem;
+  font-size: var(--dn-t-meta);
+  line-height: var(--dn-lh-meta);
+  color: var(--dn-text);
+}
+
+/* ── §7.8 Page head ──────────────────────────────────────────────────── */
+.page-head {
+  padding-top: var(--dn-sp-10);
+}
+
+.page-head__lede {
+  max-width: var(--dn-measure);
+  margin-top: var(--dn-sp-6);
+  font-size: var(--dn-t-lede);
+  line-height: var(--dn-lh-lede);
+  color: var(--dn-text-2);
+  text-wrap: pretty;
+}
+
+@media (min-width: 760px) {
+  .page-head {
+    padding-top: var(--dn-sp-11);
+  }
+
+  .page-head__lede {
+    margin-top: var(--dn-sp-7);
+  }
+}
+
+/* Running prose under a page head. */
+.dn-prose {
+  max-width: var(--dn-measure);
+}
+
+.dn-prose > * + * {
+  margin-top: var(--dn-sp-4);
+}
+
+/* ── §7.1 Nav ────────────────────────────────────────────────────────── */
+/* < 700 px: brand row, then the four links in a row beneath; not sticky, nothing hidden, no JS. */
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--dn-sp-7);
+  padding: var(--dn-sp-2) var(--dn-gut) 0;
+  background: var(--dn-bg);
+  border-bottom: 1px solid var(--dn-rule);
+}
+
+.site-nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  margin-right: auto;
+  color: var(--dn-text);
+  text-decoration-line: none;
+}
+
+.site-nav__brand svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: none;
+}
+
+.site-nav__word {
+  font-size: var(--dn-t-brand);
+  font-stretch: var(--dn-wdth-ui);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--dn-ls-brand);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.site-nav__links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--dn-sp-5);
+  width: 100%;
+}
+
+.site-nav__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--dn-t-nav);
+  font-stretch: var(--dn-wdth-ui);
+  font-weight: 500;
+  line-height: var(--dn-lh-nav);
+  color: var(--dn-text-2);
+  text-decoration-line: none;
+  white-space: nowrap;
+}
+
+.site-nav__links a:hover,
+.site-nav__links a[aria-current='page'] {
+  color: var(--dn-text);
+  text-decoration-line: underline;
+}
+
+.site-nav__ext {
+  margin-left: 0.15em;
+}
+
+/* ≥ 700 px: one sticky row, exactly --dn-nav-h tall, so the reader bar can sit right under it. */
+@media (min-width: 700px) {
+  .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    flex-wrap: nowrap;
+    height: var(--dn-nav-h);
+    padding-block: 0;
+  }
+
+  .site-nav__brand {
+    min-height: 0;
+  }
+
+  .site-nav__links {
+    width: auto;
+    column-gap: var(--dn-sp-6);
+  }
+
+  .site-nav__links a {
+    min-height: 0;
+    padding-block: var(--dn-sp-1);
+  }
+}
+
+/* ── §7.2 Footer ─────────────────────────────────────────────────────── */
+.site-footer {
+  margin-top: var(--dn-section-space);
+  padding-bottom: var(--dn-sp-9);
+}
+
+.site-footer__grid {
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--dn-rule);
+}
+
+.site-footer__founder {
+  color: var(--dn-text-2);
+}
+
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dn-sp-2) var(--dn-sp-10);
+}
+
+.site-footer__links a {
+  display: inline-block;
+  padding-block: var(--dn-sp-1);
+  text-decoration-line: none;
+}
+
+.site-footer__links a:hover {
+  text-decoration-line: underline;
+}
+
+/* The brand as C's closing wordmark: the mark above two lines on a phone, one line from 760 px. */
+.site-footer__wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.18em;
+  margin-top: var(--dn-sp-10);
+  font-size: var(--dn-t-wordmark);
+  font-stretch: var(--dn-wdth-display);
+  font-weight: 800;
+  line-height: var(--dn-lh-wordmark);
+  letter-spacing: var(--dn-ls-wordmark);
+  color: var(--dn-text);
+}
+
+.site-footer__wordmark svg {
+  flex: none;
+  width: 0.78em;
+  height: 0.78em;
+  margin-top: 0.02em;
+}
+
+.site-footer__copy {
+  margin-top: var(--dn-sp-7);
+}
+
+@media (min-width: 760px) {
+  .site-footer__wordmark {
+    flex-direction: row;
+    margin-top: var(--dn-sp-11);
+    white-space: nowrap;
+  }
+}
+
+/* ── 404 ─────────────────────────────────────────────────────────────── */
+.not-found__body {
+  margin-top: var(--dn-sp-7);
+}

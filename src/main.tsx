@@ -1,13 +1,9 @@
-// ABOUTME: Browser entry point — mounts the React app onto #root.
-// ABOUTME: StrictMode is intentionally omitted; its dev double-invoke would
-// ABOUTME: fire the one-shot signature motions (nav reveal, CTA blink) twice.
+// ABOUTME: Browser entry point: loads the global stylesheets and mounts the React app onto #root.
 import { createRoot } from 'react-dom/client';
 import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/base.css';
-import './styles/components.css';
-import './styles/site.css';
-import './styles/artifacts.css';
+import './styles/layout.css';
 import { App } from './App';
 
 const root = document.getElementById('root');

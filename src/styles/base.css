@@ -1,138 +1,158 @@
-/* Dinnaga Visual System — Base Styles
-   Spec: docs/superpowers/specs/2026-10-18-visual-system.md §6, §7, §15 */
+/* ABOUTME: Darkroom base styles (spec 2026-11-12-darkroom.md §4.3-§4.5, §10): the proportional root,
+   ABOUTME: body, headings, links, selection, the skip link, focus, the reduced-motion guard. */
 
-/* ── Global box model ───────────────────────────────────────────────── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-/* ── HTML and body defaults ────────────────────────────────────────── */
+/* §4.3: one proportional comp. 16 px at 1440 px wide, 15 px floor, 22 px ceiling; rem bounds keep
+   the user's font-size preference. Media queries stay in px. */
 html {
-  scroll-behavior: smooth;
+  font-size: clamp(0.9375rem, 0.125rem + 0.9722vw, 1.375rem);
   background: var(--dn-bg);
+  color: var(--dn-text);
   color-scheme: dark;
   font-synthesis: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   background: var(--dn-bg);
   color: var(--dn-text);
-  font-family: var(--dn-font-body);
+  font-family: var(--dn-font-site);
   font-size: var(--dn-t-body);
+  font-stretch: var(--dn-wdth-text);
+  font-weight: 400;
   line-height: var(--dn-lh-body);
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
-/* ── Headings (§6) ────────────────────────────────────────────────── */
-h1, .h1 {
-  font-family: var(--dn-font-display);
+h1,
+h2,
+h3,
+h4,
+p,
+ol,
+ul,
+dl,
+dd,
+figure,
+blockquote {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+/* Headings default to their roles (§4.4); sentence case, never transformed. */
+h1 {
   font-size: var(--dn-t-display);
+  font-stretch: var(--dn-wdth-display);
   font-weight: 800;
   line-height: var(--dn-lh-display);
   letter-spacing: var(--dn-ls-display);
-  text-transform: none;
   text-wrap: balance;
-  margin: 0;
-  color: var(--dn-text);
 }
 
-h2, .h2 {
-  font-family: var(--dn-font-display);
+h2 {
   font-size: var(--dn-t-h2);
-  font-weight: 800;
-  line-height: var(--dn-lh-heading);
-  letter-spacing: var(--dn-ls-tight);
-  text-transform: none;
-  margin: 0;
-  color: var(--dn-text);
-}
-
-h3, .h3 {
-  font-family: var(--dn-font-display);
-  font-size: var(--dn-t-h3);
-  font-weight: 800;
-  line-height: var(--dn-lh-heading);
-  letter-spacing: var(--dn-ls-tight);
-  text-transform: none;
-  margin: 0;
-  color: var(--dn-text);
-}
-
-/* ── Paragraph and text elements ────────────────────────────────────── */
-p, .body {
-  font-family: var(--dn-font-body);
-  font-size: var(--dn-t-body);
-  line-height: var(--dn-lh-body);
-  margin: 0;
-}
-
-strong, b {
+  font-stretch: var(--dn-wdth-head);
   font-weight: 500;
+  line-height: var(--dn-lh-h2);
+  letter-spacing: var(--dn-ls-h2);
+  text-wrap: balance;
 }
 
-/* ── Code and monospace ────────────────────────────────────────────── */
-code, kbd, samp, pre {
-  font-family: var(--dn-font-mono);
+h3 {
+  font-size: var(--dn-t-title);
+  font-stretch: var(--dn-wdth-head);
+  font-weight: 600;
+  line-height: var(--dn-lh-title);
+}
+
+strong,
+b {
+  font-weight: 600;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--doc-font-mono);
   font-size: 0.9em;
 }
 
-/* ── Links (§7 rule 8) ────────────────────────────────────────────── */
+/* §4.5 rule 5: paper links, a 1px label-coloured underline that turns paper on hover. Never red. */
 a {
   color: var(--dn-text);
-  text-decoration: underline;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
   text-decoration-color: var(--dn-text-label);
-  text-underline-offset: 3px;
-  transition: color var(--dn-dur-fast) var(--dn-ease-out);
+  cursor: pointer;
+  transition:
+    color var(--dn-dur-1) var(--dn-ease),
+    text-decoration-color var(--dn-dur-1) var(--dn-ease);
 }
 
 a:hover {
-  color: var(--dn-text);
+  text-decoration-color: var(--dn-text);
 }
 
-a:focus-visible {
-  outline: 2px solid var(--dn-focus);
-  outline-offset: 3px;
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
 }
 
-/* ── Selection (§6, §15) ───────────────────────────────────────────── */
 ::selection {
   background: var(--dn-selection-bg);
   color: var(--dn-selection-text);
 }
 
-/* ── Accessibility — Skip link (§15) ───────────────────────────────– */
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  top: auto;
-  font-family: var(--dn-font-mono);
-  font-size: var(--dn-t-label);
-  line-height: var(--dn-lh-label);
-  letter-spacing: var(--dn-ls-label);
-  text-transform: none;
-  background: var(--dn-text);
-  color: var(--dn-bg);
-  padding: 8px 14px;
-  text-decoration: none;
-  z-index: 1000;
-}
-
-.skip-link:focus {
-  left: 1rem;
-  top: 1rem;
-}
-
-/* ── Accessibility — Focus visible (§15) ──────────────────────────── */
+/* §3.3, §10: a paper ring on every focusable thing. */
 :focus-visible {
   outline: 2px solid var(--dn-focus);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
-/* ── Accessibility — Reduced motion (§15) ─────────────────────────── */
+/* §10: the skip link is the first focusable element; paper ground, ground text. */
+.skip-link {
+  position: absolute;
+  left: var(--dn-gut);
+  top: 0.6rem;
+  z-index: 100;
+  padding: 0.5rem 0.8rem;
+  background: var(--dn-text);
+  color: var(--dn-bg);
+  font-size: var(--dn-t-meta);
+  font-weight: 600;
+  line-height: var(--dn-lh-meta);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: none;
+}
+
+/* §6: motion only for those who have not asked for less. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
@@ -140,9 +160,17 @@ a:focus-visible {
   }
 }
 
-/* ── Forced colours (§15) ──────────────────────────────────────────── */
+/* §7.4, §10: in forced colours the tested mark and the stamp keep showing, in CanvasText. */
 @media (forced-colors: active) {
-  .tested-mark {
+  .tested-mark,
+  .tested-mark::after,
+  .stamp {
+    forced-color-adjust: none;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+
+  .tested-mark::after {
     background: CanvasText;
   }
 }

@@ -1,0 +1,108 @@
+/* ABOUTME: The doc reader frame (sticky Doc bar, edge-to-edge viewer host, About this doc colophon),
+   ABOUTME: moved from the old artifacts.css with the tokens renamed; spec §7.7 restyles it later. */
+
+/* --doc-bar-h feeds the bar's height and the scroll-padding-top DocViewer sets on the root. Registered
+   and written in em on :root (= 2.6rem) for WebKit's root-rem bug; see --dn-nav-h in tokens.css. */
+@property --doc-bar-h {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+:root {
+  --doc-bar-h: 2.6em;
+}
+
+.doc-reader {
+  display: block;
+}
+
+.doc-bar {
+  position: sticky;
+  top: var(--dn-nav-h);
+  z-index: 40;
+  height: var(--doc-bar-h);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--dn-sp-4);
+  padding: 0 var(--dn-gut);
+  background: var(--dn-bg);
+  border-bottom: 1px solid var(--dn-rule-strong);
+  font-family: var(--dn-font-site);
+  font-size: var(--dn-t-nav);
+  line-height: 1.4;
+  color: var(--dn-text-2);
+  white-space: nowrap;
+}
+
+.doc-bar a {
+  flex: none;
+  color: var(--dn-text);
+  text-decoration-line: none;
+  white-space: nowrap;
+}
+
+.doc-bar a:hover {
+  text-decoration-line: underline;
+}
+
+.doc-bar-kind {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.doc-host {
+  display: block;
+  width: 100%;
+  border: 0;
+}
+
+.doc-colophon {
+  padding: var(--dn-sp-8) var(--dn-gut);
+  border-top: 1px solid var(--dn-rule-strong);
+  font-size: var(--dn-t-meta);
+  line-height: var(--dn-lh-meta);
+  color: var(--dn-text-2);
+  display: grid;
+  gap: var(--dn-sp-2);
+}
+
+.doc-colophon-head {
+  font-size: var(--dn-t-label);
+  font-weight: 500;
+  line-height: var(--dn-lh-label);
+  color: var(--dn-text-label);
+}
+
+.doc-colophon-line {
+  max-width: var(--dn-measure);
+}
+
+.doc-colophon-line strong {
+  color: var(--dn-text);
+  font-weight: 600;
+}
+
+/* Print: on viewer routes only, the Doc and its colophon, not the site chrome. */
+@media print {
+  html[data-doc-reader] .site-nav,
+  html[data-doc-reader] .site-footer,
+  html[data-doc-reader] .skip-link,
+  html[data-doc-reader] .doc-bar {
+    display: none;
+  }
+
+  html[data-doc-reader] .doc-colophon {
+    border-top: 1px solid #000;
+    color: #000;
+  }
+
+  html[data-doc-reader] .doc-colophon-head,
+  html[data-doc-reader] .doc-colophon-line strong {
+    color: #000;
+  }
+}
