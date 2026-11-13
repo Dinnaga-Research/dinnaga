@@ -1,4 +1,4 @@
-// ABOUTME: E2E — the dev-only /dev/doc harness route must be absent from a production build.
+// ABOUTME: E2E — the dev-only /dev/doc and /dev/frames harness routes must be absent from a production build.
 // ABOUTME: Builds into a temp dir and serves it with vite preview on PREVIEW_PORT (default 4243). Chromium only.
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
@@ -48,4 +48,11 @@ test('the harness path returns the 404 page in a production build', async ({ pag
   await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
   await expect(page.locator('[data-doc-host]')).toHaveCount(0);
   await expect(page.getByText('Living document', { exact: true })).toHaveCount(0);
+
+  // The frame-sequence harness is DEV-only too.
+  await page.goto(`${ORIGIN}/dev/frames`);
+  await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
+  await expect(page.locator('canvas')).toHaveCount(0);
+  await expect(page.locator('[data-dev-frames]')).toHaveCount(0);
+  expect(bundle).not.toContain('data-dev-frames');
 });

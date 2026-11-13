@@ -1,0 +1,538 @@
+/* ABOUTME: The frame-sequence surface (spec §6, §7.5, §7.6, §8.2): the run's sticky stage, its overlay, hero
+   ABOUTME: slot, rail, captions and counter; the stamp; reduced motion's contact strip and the stills. */
+
+/* ── The run ───────────────────────────────────────────────────────────── */
+.run {
+  position: relative;
+  /* Written per frame by the engine on the stage and the h1; these are the values at rest. */
+  --dn-run-p: 0;
+  --dn-rail-a: 0;
+  --dn-hero-w: 125;
+  --dn-run-len: 5;
+  /* Space kept under the captions and the art box (C's 104 px switcher clearance is gone). */
+  --dn-run-clear: 1.5rem;
+}
+
+@media (min-width: 760px) {
+  .run {
+    --dn-run-len: 6;
+    --dn-run-clear: 4.5rem;
+  }
+}
+
+.run--live .stage {
+  position: relative;
+  height: calc(100svh - var(--dn-nav-h));
+  overflow: hidden;
+}
+
+/* Motion is checked in JS (useReducedMotion) and here: the run only scrubs with no-preference. */
+@media (prefers-reduced-motion: no-preference) {
+  .run--live {
+    height: calc(var(--dn-run-len) * 100svh);
+  }
+
+  .run--live .stage {
+    position: sticky;
+    top: var(--dn-nav-h);
+  }
+}
+
+.run--live .plate {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--dn-bg);
+}
+
+/* Where the art goes. The engine reads this box; it is never painted. Phone: the rail above, captions below. */
+.run__art {
+  position: absolute;
+  left: var(--dn-gut);
+  right: var(--dn-gut);
+  top: 4.7rem;
+  bottom: calc(var(--dn-run-clear) + 11.2rem);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (min-width: 760px) {
+  /* C's 27rem: the label column (24.5rem) plus the gutter; rail and captions live left of it. */
+  .run__art {
+    left: calc(var(--dn-gut) + 24.5rem);
+    top: 2.6rem;
+    bottom: var(--dn-run-clear);
+  }
+}
+
+.run__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.run__source {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  font-size: var(--dn-t-label);
+  font-stretch: var(--dn-wdth-label);
+  font-weight: 600;
+  line-height: var(--dn-lh-label);
+  letter-spacing: var(--dn-ls-label);
+  text-transform: uppercase;
+  color: var(--dn-text-label);
+  opacity: 0;
+}
+
+.run__overlay .stamp {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  transform-origin: 50% 50%;
+}
+
+/* ── Hero slot ─────────────────────────────────────────────────────────── */
+.run--live .run__hero {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 12svh;
+  z-index: 2;
+  padding-inline: var(--dn-gut);
+  will-change: opacity, transform;
+}
+
+@media (min-width: 760px) {
+  .run--live .run__hero {
+    top: 21svh;
+  }
+}
+
+/* The hero h1 condenses 125 to 62 in the run; its line breaks are frozen first, each line a .ln. */
+.run__hero h1 {
+  font-size: var(--dn-t-hero);
+  font-stretch: calc(var(--dn-hero-w, 125) * 1%);
+  font-weight: 800;
+  line-height: var(--dn-lh-hero);
+  letter-spacing: var(--dn-ls-hero);
+  text-wrap: balance;
+}
+
+.run__hero h1 .ln {
+  display: block;
+  white-space: nowrap;
+}
+
+/* A focused hero link stays fully visible, wherever the run is. */
+.run--live .run__hero:focus-within {
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: auto !important;
+}
+
+/* While a rail button has focus, the hero copy steps back. */
+.run--live .stage:has(.rail :focus-visible) .run__hero {
+  opacity: 0.06 !important;
+}
+
+.run__cue {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 2.6rem;
+  font-size: var(--dn-t-label);
+  font-stretch: var(--dn-wdth-label);
+  font-weight: 600;
+  line-height: var(--dn-lh-label);
+  letter-spacing: var(--dn-ls-label);
+  text-transform: uppercase;
+  color: var(--dn-text-label);
+}
+
+.run__cue::before {
+  content: "";
+  flex: none;
+  width: 2.4rem;
+  height: 1px;
+  background: var(--dn-text-label);
+}
+
+@media (max-width: 759px) {
+  .run__cue {
+    margin-top: 1.6rem;
+  }
+}
+
+/* ── Skip link: visible on focus ───────────────────────────────────────── */
+.run__skip {
+  position: absolute;
+  left: var(--dn-gut);
+  top: 0.6rem;
+  z-index: 5;
+  padding: 0.5rem 0.8rem;
+  background: var(--dn-text);
+  color: var(--dn-bg);
+  font-size: var(--dn-t-meta);
+  font-weight: 600;
+  line-height: var(--dn-lh-meta);
+  text-decoration: none;
+  transform: translateY(-300%);
+}
+
+.run__skip:focus,
+.run__skip:focus-visible {
+  transform: none;
+}
+
+/* ── Chapter rail (§7.6) ───────────────────────────────────────────────── */
+.run--live .rail {
+  position: absolute;
+  left: var(--dn-gut);
+  top: 3.9rem;
+  bottom: calc(var(--dn-run-clear) + 15rem);
+  z-index: 3;
+  width: 12rem;
+  opacity: var(--dn-rail-a, 0);
+  transition: opacity 400ms linear;
+}
+
+.run--live .rail:focus-within {
+  opacity: 1;
+}
+
+.rail ol {
+  position: absolute;
+  inset: 0;
+}
+
+.rail__track,
+.rail__fill {
+  position: absolute;
+  left: 0.22rem;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--dn-rule);
+}
+
+.rail__fill {
+  background: var(--dn-text);
+  transform-origin: 0 0;
+  transform: scaleY(var(--dn-run-p, 0));
+}
+
+.rail li {
+  --at: 0; /* each stage's mark, set inline */
+  position: absolute;
+  left: 0;
+  top: calc(var(--at) * 100%);
+  transform: translateY(-50%);
+}
+
+.rail button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.2rem;
+  padding: 0 0.4rem 0 0;
+  color: var(--dn-text-label);
+  transition: color var(--dn-dur-1) var(--dn-ease);
+}
+
+.rail button:hover,
+.rail button.is-on {
+  color: var(--dn-text);
+}
+
+.rail button.is-past {
+  color: var(--dn-text-2);
+}
+
+.rail__tick {
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
+  border: 1px solid currentColor;
+  background: var(--dn-bg);
+}
+
+.rail button.is-on .rail__tick {
+  background: var(--dn-text);
+  border-color: var(--dn-text);
+}
+
+.rail__n {
+  font-size: var(--dn-t-label);
+  font-stretch: var(--dn-wdth-label);
+  font-weight: 600;
+  letter-spacing: var(--dn-ls-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.rail__name {
+  font-size: 0.95rem;
+  font-stretch: var(--dn-wdth-label);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--dn-ls-label);
+  text-transform: uppercase;
+}
+
+.rail button.is-on .rail__name {
+  font-stretch: var(--dn-wdth-ui);
+}
+
+@media (max-width: 759px) {
+  .run--live .rail {
+    left: var(--dn-gut);
+    right: var(--dn-gut);
+    top: 0.9rem;
+    bottom: auto;
+    width: auto;
+    height: 2.7rem;
+  }
+
+  .rail__track,
+  .rail__fill {
+    left: 0;
+    right: 0;
+    top: 0.22rem;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+  }
+
+  .rail__fill {
+    transform: scaleX(var(--dn-run-p, 0));
+  }
+
+  .rail li {
+    top: 0;
+    left: calc(var(--at) * 100%);
+    transform: translateX(-0.22rem);
+  }
+
+  .rail button {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    min-height: 2.7rem;
+  }
+
+  .rail__n {
+    display: none;
+  }
+
+  .rail__name {
+    font-size: 0.8rem;
+  }
+
+  /* Five names share a phone's width: the current one keeps its width (colour and tick mark it). */
+  .rail button.is-on .rail__name {
+    font-stretch: var(--dn-wdth-label);
+  }
+}
+
+/* ── Stage captions: no headings in the run; one shown at a time ────────── */
+.run--live .run__captions {
+  position: absolute;
+  left: var(--dn-gut);
+  right: var(--dn-gut);
+  bottom: var(--dn-run-clear);
+  z-index: 2;
+  pointer-events: none;
+}
+
+@media (min-width: 760px) {
+  .run--live .run__captions {
+    right: auto;
+    width: 23rem;
+  }
+}
+
+.run__captions li {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(1.2rem);
+  transition:
+    opacity var(--dn-dur-2) var(--dn-ease),
+    transform var(--dn-dur-2) var(--dn-ease);
+}
+
+.run__captions li.is-on {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dn-dur-3) var(--dn-ease) 120ms,
+    transform var(--dn-dur-3) var(--dn-ease) 120ms;
+}
+
+.run__step {
+  font-size: var(--dn-t-label);
+  font-stretch: var(--dn-wdth-label);
+  font-weight: 600;
+  line-height: var(--dn-lh-label);
+  color: var(--dn-text-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.run__stage-name {
+  margin: 0.35rem 0 0.7rem;
+  font-size: var(--dn-t-stage);
+  font-stretch: var(--dn-wdth-label);
+  font-weight: 800;
+  line-height: var(--dn-lh-stage);
+  letter-spacing: var(--dn-ls-stage);
+}
+
+.run__detail {
+  max-width: 22rem;
+  font-size: var(--dn-t-body);
+  line-height: 1.45;
+  color: var(--dn-text-2);
+  text-wrap: pretty;
+}
+
+.run__die {
+  color: var(--dn-text);
+}
+
+/* ── Frame counter: derived, labelled, desktop only ────────────────────── */
+.run__counter {
+  display: none;
+}
+
+@media (min-width: 760px) {
+  .run--live .run__counter {
+    position: absolute;
+    right: var(--dn-gut);
+    bottom: 1.7rem;
+    display: block;
+    font-size: var(--dn-t-label);
+    font-stretch: var(--dn-wdth-label);
+    font-weight: 600;
+    line-height: var(--dn-lh-label);
+    letter-spacing: var(--dn-ls-label);
+    text-transform: uppercase;
+    color: var(--dn-text-label);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ── Stamp (§7.5): the one colour event, red only because it means tested ─ */
+.stamp {
+  color: var(--dn-tested);
+  mix-blend-mode: multiply;
+  overflow: visible;
+}
+
+/* type-lint: art */
+.stamp text {
+  font-family: var(--dn-font-site);
+  text-transform: none;
+}
+
+/* type-lint: art */
+.stamp .stamp__ring {
+  font-size: 14.5px;
+  font-weight: 700;
+  font-stretch: 80%;
+}
+
+/* type-lint: art */
+.stamp .stamp__big {
+  font-size: 27px;
+  font-weight: 800;
+  font-stretch: 88%;
+  letter-spacing: 0.02em;
+}
+
+/* type-lint: art */
+.stamp .stamp__small {
+  font-size: 12px;
+  font-weight: 700;
+  font-stretch: 80%;
+  letter-spacing: 0.3em;
+}
+
+@media (forced-colors: active) {
+  .stamp {
+    color: CanvasText;
+    mix-blend-mode: normal;
+  }
+}
+
+/* ── Reduced motion: the hero, then a contact strip of five stills ──────── */
+.run--still {
+  width: 100%;
+  max-width: var(--dn-page-max);
+  margin-inline: auto;
+  padding-inline: var(--dn-gut);
+}
+
+.contact {
+  margin-top: var(--dn-sp-9);
+}
+
+.contact__row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--dn-sp-5);
+}
+
+.contact__still figcaption {
+  margin-top: 0.6rem;
+}
+
+@media (max-width: 759px) {
+  .contact {
+    margin-inline: calc(-1 * var(--dn-gut));
+    padding-inline: var(--dn-gut);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--dn-gut);
+    overscroll-behavior-x: contain;
+  }
+
+  .contact__row {
+    display: flex;
+    gap: var(--dn-sp-4);
+  }
+
+  .contact__row > li {
+    flex: 0 0 70vw;
+    scroll-snap-align: start;
+  }
+}
+
+/* ── A still: one canvas, its height set from its width (C's aspect) ─────── */
+.still__box {
+  position: relative;
+  border: 1px solid var(--dn-rule);
+  overflow: hidden; /* the rotated stamp's empty corners must not widen the page */
+  background: var(--dn-bg);
+}
+
+.still canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1.2;
+}
+
+.still[data-aspect="wide"] canvas {
+  aspect-ratio: 1 / 0.62;
+}
+
+.still__box .stamp {
+  position: absolute;
+  transform: rotate(-8deg);
+}
