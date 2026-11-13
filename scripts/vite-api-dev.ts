@@ -56,7 +56,7 @@ export function apiDev(): Plugin {
         if (!match) return next();
         const fixtures = process.env.API_FIXTURES;
         if (fixtures) {
-          await send(res, await fixtureResponse(fixtures, match[1]));
+          await send(res, await fixtureResponse(fixtures, match[1]!));
           return;
         }
         try {
