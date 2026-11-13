@@ -142,7 +142,7 @@ test('reduced motion: a style change starts no transition anywhere', async ({ pa
     const root = document.documentElement;
     root.style.fontSize = '20px';
     root.style.color = 'rgb(1, 2, 3)';
-    getComputedStyle(document.body).fontSize; // flush style
+    document.body.getBoundingClientRect(); // flush style
     const n = document.getAnimations().length;
     root.style.fontSize = '';
     root.style.color = '';
