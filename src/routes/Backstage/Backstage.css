@@ -1,0 +1,29 @@
+/* ABOUTME: Behind the scenes pages (#64): small additions to the Darkroom register primitives,
+   ABOUTME: shared by /backstage and /backstage/weekly. No new visual language. */
+
+/* The section rule already closes the head; the register's own first rule would double it. */
+.backstage .dn-grid__body > .dn-register:first-child > .dn-register__row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* Project and date above a doc's title: the register's phone line (§7.3) at every width. */
+.backstage__meta {
+  margin-bottom: var(--dn-sp-2);
+}
+
+.backstage__none {
+  margin-bottom: var(--dn-sp-7);
+  max-width: var(--dn-measure);
+  color: var(--dn-text-2);
+}
+
+/* The archive's status line sits straight under its lede, before the section rule. */
+.backstage__status {
+  margin-top: var(--dn-sp-3);
+}
+
+.backstage__status > p {
+  max-width: var(--dn-measure);
+  color: var(--dn-text-2);
+}
