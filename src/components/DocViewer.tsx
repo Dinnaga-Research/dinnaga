@@ -1,6 +1,6 @@
 // ABOUTME: Shadow-DOM doc viewer — mounts static HTML docs in open shadow roots with
 // ABOUTME: adapted CSS (selectors, media, fonts). React renders an empty host div with no JSX children.
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { adaptDoc, type AdaptOptions } from '../lib/docViewer/adapter';
 import { classifyLink } from '../lib/docViewer/links';
@@ -239,9 +239,17 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
       className="doc-host"
       data-doc-host=""
       aria-busy={isLoading}
+      style={HOST_STYLE}
     />
   );
 }
+
+/**
+ * Docs size in rem against the user's default font size, but the site's root scales with the
+ * viewport. The adapter rewrites doc rem to var(--dn-doc-rem); the host sets it to 1em of
+ * `medium`, which the registered length (tokens.css) computes once here and inherits inward.
+ */
+const HOST_STYLE = { fontSize: 'medium', '--dn-doc-rem': '1em' } as CSSProperties;
 
 function decodeURIComponentSafe(id: string): string {
   try {

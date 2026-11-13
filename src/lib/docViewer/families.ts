@@ -163,22 +163,19 @@ export function detectFamily(rules: CSSRuleList, isQuartz: boolean): DocFamily |
 
 // ---------- fonts ----------
 
+/** Generic and system monospace names; any other face counts as mono when "Mono" or "Code" is a word in its name. */
 const MONO_FIRST = new Set([
   'ui-monospace',
+  'monospace',
   'sfmono-regular',
   'sf mono',
   'menlo',
   'consolas',
-  'monospace',
   'monaco',
   'courier',
   'courier new',
-  'jetbrains mono',
-  'ibm plex mono',
-  'fira code',
-  'source code pro',
-  'roboto mono',
 ]);
+const MONO_WORD = /\b(mono|code)\b/;
 const KEYWORDS = /^(inherit|initial|unset|revert|revert-layer)$/i;
 
 function firstFamily(stack: string): string {
@@ -196,7 +193,7 @@ export function mapFontStack(stack: string): string | null {
   if (!s || KEYWORDS.test(s) || s.includes('var(')) return null;
   const first = firstFamily(s);
   if (first.startsWith('katex')) return null;
-  return MONO_FIRST.has(first) ? 'var(--doc-font-mono)' : 'var(--doc-font-body)';
+  return MONO_FIRST.has(first) || MONO_WORD.test(first) ? 'var(--doc-font-mono)' : 'var(--doc-font-body)';
 }
 
 /** The family list of a `font` shorthand: everything after the size (and optional /line-height). */
@@ -239,16 +236,18 @@ export function hasOwnSelection(rules: CSSRuleList): boolean {
 /**
  * The one rule appended to a mapped doc's sheet: on screen only, the family's variables point at
  * the --doc-* tokens with !important (which wins over the doc's forced-dark :host rules inside a
- * shadow tree), h1 takes the display face, and docs without their own selection colour get the
- * neutral one. Print never matches, so docs keep their light defaults there.
+ * shadow tree), h1 takes the display face at the display stretch (Darkroom §9.2), and docs without
+ * their own selection colour get the paper one (--dn-text at 22%). Print never matches, so docs
+ * keep their light defaults there.
  */
 export function themeRule(family: DocFamily, opts: { selection: boolean }): string {
   const decls = Object.entries(THEME_MAPS[family])
     .map(([v, value]) => `${v}: ${value} !important;`)
     .join(' ');
-  const selection = opts.selection ? ' ::selection { background: rgba(232, 232, 232, 0.22); }' : '';
+  const selection = opts.selection ? ' ::selection { background: rgba(236, 228, 211, 0.22); }' : '';
   return (
     `@media screen { :host { ${decls} font-synthesis: none; }` +
-    ` h1 { font-family: var(--doc-font-display) !important; }${selection} }`
+    ` h1 { font-family: var(--doc-font-display) !important; font-stretch: var(--doc-display-stretch) !important; }` +
+    `${selection} }`
   );
 }

@@ -23,6 +23,7 @@ const TEXT = 'rgb(236, 228, 211)';
 const MUTED = 'rgb(189, 181, 166)';
 const BODY_FACE = '"Atkinson Hyperlegible Next"';
 const DISPLAY_FACE = /^"?Archivo"?,/;
+const MONO_FACE = /^"?Chivo Mono"?,/;
 
 const VIEWPORTS = [
   { name: '1280', width: 1280, height: 800 },
@@ -149,24 +150,42 @@ async function checkContrast(page: Page, family: ThemeFamily) {
   }
 }
 
-async function checkFonts(page: Page) {
+async function checkFonts(page: Page, family: ThemeFamily) {
   const info = await hostLocator(page).evaluate(async (host) => {
-    const body = host.shadowRoot!.querySelector('doc-body')!;
-    const h1 = host.shadowRoot!.querySelector('h1')!;
+    const sr = host.shadowRoot!;
+    const body = sr.querySelector('doc-body')!;
+    const h1 = sr.querySelector('h1')!;
     await document.fonts.load('16px "Atkinson Hyperlegible Next"');
     await document.fonts.load('800 32px Archivo');
+    await document.fonts.load('16px "Chivo Mono"');
+    // every rendered element whose face is a monospace one: the doc's code, labels and figures
+    const faces = [...sr.querySelectorAll('doc-body *')]
+      .filter((el) => el.getClientRects().length > 0)
+      .map((el) => getComputedStyle(el).fontFamily);
+    const mono = faces.filter((f) => /mono|menlo|consolas|courier/i.test(f.split(',')[0]!));
     return {
       body: getComputedStyle(body).fontFamily,
       h1: getComputedStyle(h1).fontFamily,
+      h1Stretch: getComputedStyle(h1).fontStretch,
+      mono: [...new Set(mono)],
+      hasCode: !!sr.querySelector('code, pre, kbd, samp'),
       synthesis: getComputedStyle(host).fontSynthesis,
       bodyLoaded: document.fonts.check('16px "Atkinson Hyperlegible Next"'),
       displayLoaded: document.fonts.check('800 32px Archivo'),
+      monoLoaded: document.fonts.check('16px "Chivo Mono"'),
     };
   });
   expect(info.body.startsWith(BODY_FACE), `doc-body font-family: ${info.body}`).toBe(true);
   expect(info.h1, `h1 font-family: ${info.h1}`).toMatch(DISPLAY_FACE);
+  expect(info.h1Stretch, 'h1 font-stretch').toBe('112%');
+  // the Copilot, SLAMWICH and Weekly sheets all set some text mono; a Quartz page only when it has code
+  if (family !== 'quartz' || info.hasCode) {
+    expect(info.mono.length, 'some doc text is set in a monospace face').toBeGreaterThan(0);
+  }
+  for (const f of info.mono) expect(f, 'every monospace face is Chivo Mono').toMatch(MONO_FACE);
   expect(info.bodyLoaded).toBe(true);
   expect(info.displayLoaded).toBe(true);
+  expect(info.monoLoaded).toBe(true);
   expect(info.synthesis).toContain('none');
 }
 
@@ -189,9 +208,9 @@ for (const vp of VIEWPORTS) {
         await target.open(page, context);
         await checkContrast(page, family);
       });
-      test(`${target.label}: doc-body renders in the site body face, h1 in the display face, fonts load`, async ({ page, context }) => {
+      test(`${target.label}: doc-body in Atkinson, h1 in Archivo at 112%, code in Chivo Mono, fonts load`, async ({ page, context }) => {
         await target.open(page, context);
-        await checkFonts(page);
+        await checkFonts(page, family);
       });
       test(`${target.label}: no page overflow, no console errors`, async ({ page, context }) => {
         const errors = watchErrors(page);
@@ -210,7 +229,7 @@ for (const vp of VIEWPORTS) {
         await test.step(`ground is --doc-bg's resolved ${BG}, text is --doc-text`, () => checkGround(page, 'quartz'));
         await test.step('mapped variables resolve to the §13.2 values and none is lime', () => checkVariables(page, 'quartz'));
         await test.step('text >= 14.5:1, muted >= 9:1, accent >= 14.5:1, highlights with text >= 7:1', () => checkContrast(page, 'quartz'));
-        await test.step('doc-body renders in the site body face, h1 in the display face, fonts load', () => checkFonts(page));
+        await test.step('doc-body in Atkinson, h1 in Archivo at 112%, code in Chivo Mono, fonts load', () => checkFonts(page, 'quartz'));
         await test.step('no page overflow, no console errors', async () => {
           await page.waitForLoadState('networkidle');
           await noHorizontalOverflow(page);
@@ -221,14 +240,49 @@ for (const vp of VIEWPORTS) {
   });
 }
 
-// ---------- docs without their own ::selection get the neutral selection colour ----------
+// ---------- docs without their own ::selection get the paper selection colour (§9.2) ----------
 test('selection: a Copilot sheet has a ::selection rule in the doc sheet with the neutral colour', async ({ page }) => {
   await page.goto('/atisha/llm-best-practices-copilot-studio');
   await mounted(page);
   const css = await hostLocator(page).evaluate((host) =>
     host.shadowRoot!.adoptedStyleSheets.flatMap((s) => [...s.cssRules].map((r) => r.cssText)).join('\n'),
   );
-  expect(css).toMatch(/::selection\s*\{\s*background:\s*rgba\(232, 232, 232, 0\.22\)/);
+  expect(css).toMatch(/::selection\s*\{\s*background:\s*rgba\(236, 228, 211, 0\.22\)/);
+});
+
+// ---------- doc rem is pinned to the user's default size (§9.3) ----------
+const COPILOT = '/atisha/llm-best-practices-copilot-studio';
+const COPILOT_FILE = '/artifact-docs/llm-best-practices-copilot-studio.html';
+const BODY_TEXT = ['doc-body', '.standfirst', '.doctrine'];
+
+async function viewerSizes(page: Page) {
+  await page.goto(COPILOT);
+  await mounted(page);
+  return hostLocator(page).evaluate(
+    (host, sels) => sels.map((s) => getComputedStyle(host.shadowRoot!.querySelector(s)!).fontSize),
+    BODY_TEXT,
+  );
+}
+
+test("rem: a Copilot sheet's body text has the same size at 1440 and 1920 wide, and at 390 the standalone file's", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const at1440 = await viewerSizes(page);
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  const at1920 = await viewerSizes(page);
+  expect(at1920).toEqual(at1440);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const at390 = await viewerSizes(page);
+  await page.goto(COPILOT_FILE);
+  const standalone = await page.evaluate(
+    (sels) => sels.map((s) => getComputedStyle(document.querySelector(s === 'doc-body' ? 'body' : s)!).fontSize),
+    BODY_TEXT,
+  );
+  expect(at390).toEqual(standalone);
+  // the site root really does differ from the doc's (15px at 390, 22px at 1920), so this is not vacuous
+  expect(standalone[0]).toBe('16px');
 });
 
 // ---------- print keeps each doc's light defaults ----------

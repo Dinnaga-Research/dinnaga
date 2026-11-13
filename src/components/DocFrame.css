@@ -1,5 +1,5 @@
-/* ABOUTME: The doc reader frame (sticky Doc bar, edge-to-edge viewer host, About this doc colophon),
-   ABOUTME: moved from the old artifacts.css with the tokens renamed; spec §7.7 restyles it later. */
+/* ABOUTME: The doc reader frame (Darkroom spec §7.7): sticky Doc bar, edge-to-edge viewer host, and the
+   ABOUTME: About this doc colophon in the two-column grid. Print shows the doc and colophon, black on white. */
 
 /* --doc-bar-h feeds the bar's height and the scroll-padding-top DocViewer sets on the root. Registered
    and written in em on :root (= 2.6rem) for WebKit's root-rem bug; see --dn-nav-h in tokens.css. */
@@ -17,6 +17,8 @@
   display: block;
 }
 
+/* The bar: back link and Open standalone in the nav-link role, the kind in the label role after the
+   back link, on the page ground with a bottom hairline. One line at every width. */
 .doc-bar {
   position: sticky;
   top: var(--dn-nav-h);
@@ -25,34 +27,37 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: var(--dn-sp-4);
+  gap: var(--dn-sp-5);
   padding: 0 var(--dn-gut);
   background: var(--dn-bg);
-  border-bottom: 1px solid var(--dn-rule-strong);
-  font-family: var(--dn-font-site);
-  font-size: var(--dn-t-nav);
-  line-height: 1.4;
-  color: var(--dn-text-2);
+  border-bottom: 1px solid var(--dn-rule);
   white-space: nowrap;
 }
 
 .doc-bar a {
   flex: none;
-  color: var(--dn-text);
+  font-size: var(--dn-t-nav);
+  font-stretch: var(--dn-wdth-ui);
+  font-weight: 500;
+  line-height: var(--dn-lh-nav);
+  color: var(--dn-text-2);
   text-decoration-line: none;
-  white-space: nowrap;
 }
 
 .doc-bar a:hover {
+  color: var(--dn-text);
   text-decoration-line: underline;
 }
 
 .doc-bar-kind {
-  flex: 1 1 0;
+  flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: center;
+}
+
+.doc-bar-open {
+  margin-left: auto;
 }
 
 .doc-host {
@@ -61,30 +66,39 @@
   border: 0;
 }
 
+/* About this doc: the h2 in column 1 (item-title role), the doc's particulars in column 2. */
 .doc-colophon {
-  padding: var(--dn-sp-8) var(--dn-gut);
-  border-top: 1px solid var(--dn-rule-strong);
-  font-size: var(--dn-t-meta);
-  line-height: var(--dn-lh-meta);
-  color: var(--dn-text-2);
-  display: grid;
-  gap: var(--dn-sp-2);
+  padding-block: var(--dn-sp-9) var(--dn-sp-10);
+  border-top: 1px solid var(--dn-rule);
 }
 
 .doc-colophon-head {
-  font-size: var(--dn-t-label);
-  font-weight: 500;
-  line-height: var(--dn-lh-label);
-  color: var(--dn-text-label);
+  font-size: var(--dn-t-title);
+  font-stretch: var(--dn-wdth-head);
+  font-weight: 600;
+  line-height: var(--dn-lh-title);
+  letter-spacing: 0;
 }
 
-.doc-colophon-line {
+.doc-colophon-body {
+  display: grid;
+  gap: var(--dn-sp-2);
   max-width: var(--dn-measure);
 }
 
-.doc-colophon-line strong {
-  color: var(--dn-text);
+.doc-colophon-title {
+  margin-bottom: var(--dn-sp-1);
+  font-size: var(--dn-t-title);
+  font-stretch: var(--dn-wdth-head);
   font-weight: 600;
+  line-height: var(--dn-lh-title);
+  color: var(--dn-text);
+}
+
+.doc-colophon-line {
+  font-size: var(--dn-t-meta);
+  line-height: var(--dn-lh-meta);
+  color: var(--dn-text-2);
 }
 
 /* Print: on viewer routes only, the Doc and its colophon, not the site chrome. */
@@ -96,13 +110,21 @@
     display: none;
   }
 
+  html[data-doc-reader],
+  html[data-doc-reader] body {
+    background: #fff;
+    color: #000;
+  }
+
   html[data-doc-reader] .doc-colophon {
     border-top: 1px solid #000;
     color: #000;
   }
 
   html[data-doc-reader] .doc-colophon-head,
-  html[data-doc-reader] .doc-colophon-line strong {
+  html[data-doc-reader] .doc-colophon-title,
+  html[data-doc-reader] .doc-colophon-line,
+  html[data-doc-reader] .doc-colophon .tested-line {
     color: #000;
   }
 }

@@ -1,5 +1,5 @@
 // ABOUTME: Doc adapter — fetch, parse, rewrite CSS and HTML, extract body.
-// ABOUTME: Core recipe: fetch → parse → strip → rewrite CSS → extract body → adopt sheet.
+// ABOUTME: Core recipe: fetch → parse → strip → rewrite CSS (vw, width media, rem) → extract body → adopt sheet.
 
 import { rewriteSelector } from './selectors';
 import { rewriteColorSchemeMedia, isWidthOnlyMedia } from './media';
@@ -47,7 +47,7 @@ export interface AdaptedDoc {
 }
 
 /**
- * Adapt CSS text: rewrite vw→cqi, @media→@container, extract @font-face, absolutize URLs.
+ * Adapt CSS text: rewrite vw→cqi, @media→@container, pin rem, extract @font-face, absolutize URLs.
  *
  * Returns both the transformed CSS text and extracted font-faces.
  * Used by both jsdom (string-based) and browser (CSSStyleSheet-based) paths.
@@ -72,6 +72,9 @@ export function adaptCssText(cssText: string, sheetUrl: URL): AdaptedCss {
 
   // 3. Convert width-only @media to @container
   css = convertWidthMediaToContainer(css);
+
+  // 3b. Pin rem to the user's default size, not the site's scaling root (Darkroom §9.3)
+  css = pinRem(css);
 
   // 4. Absolutize URL values in CSS (excluding @font-face which we already handled)
   css = absolutizeUrlsInCss(css, sheetUrl);
@@ -145,6 +148,83 @@ function rewriteVwToCqi(css: string): string {
   // Match declarations: property: value; or property: value !important;
   // We need to be careful to only rewrite in values, not in selectors or comments
   return css.replace(/(\d)vw\b/g, '$1cqi');
+}
+
+/** A number followed by `rem` that is a whole token: not part of an identifier, hash or escape. */
+const REM = /(?<![\w.#\\-])([+-]?(?:\d+\.?\d*|\.\d+))rem(?![\w-])/gi;
+
+/**
+ * Pin doc `rem` to `--dn-doc-rem` (Darkroom spec §9.3). The site's root font size scales with the
+ * viewport; docs were written against the user's default size. Every `<n>rem` in a declaration
+ * becomes `calc(<n> * var(--dn-doc-rem))`. Comments, strings and `url()` are left alone. In an
+ * `@container` prelude (a converted width @media) `var()` is not allowed, so rem becomes em, which
+ * there resolves against the host's font size: the user's default, like rem in the original @media.
+ * Other at-rule preludes (@media, @supports) are left alone: rem there already means the default.
+ */
+export function pinRem(css: string): string {
+  let out = '';
+  let plain = '';
+  let prelude: string | null = null; // the at-rule prelude being read, from '@' to '{' or ';'
+
+  const flushPlain = () => {
+    if (prelude !== null) prelude += plain;
+    else out += plain.replace(REM, (_, n: string) => `calc(${n} * var(--dn-doc-rem))`);
+    plain = '';
+  };
+  const emit = (raw: string) => {
+    flushPlain();
+    if (prelude !== null) prelude += raw;
+    else out += raw;
+  };
+  const endPrelude = () => {
+    flushPlain();
+    const p = prelude!;
+    out += /^@container\b/i.test(p) ? p.replace(REM, '$1em') : p;
+    prelude = null;
+  };
+
+  let i = 0;
+  while (i < css.length) {
+    const c = css[i]!;
+    if (c === '/' && css[i + 1] === '*') {
+      const end = css.indexOf('*/', i + 2);
+      const stop = end < 0 ? css.length : end + 2;
+      emit(css.slice(i, stop));
+      i = stop;
+    } else if (c === '"' || c === "'") {
+      let j = i + 1;
+      while (j < css.length && css[j] !== c && css[j] !== '\n') j += css[j] === '\\' ? 2 : 1;
+      emit(css.slice(i, j + 1));
+      i = j + 1;
+    } else if ((c === 'u' || c === 'U') && /^url\(/i.test(css.slice(i, i + 4)) && !/[\w-]/.test(css[i - 1] ?? '')) {
+      // url( "quoted" ) is a string; an unquoted url runs to the first ')'
+      const rest = css.slice(i + 4);
+      const lead = rest.match(/^\s*/)![0].length;
+      if (rest[lead] === '"' || rest[lead] === "'") {
+        emit(css.slice(i, i + 4 + lead));
+        i += 4 + lead;
+      } else {
+        const end = css.indexOf(')', i);
+        const stop = end < 0 ? css.length : end + 1;
+        emit(css.slice(i, stop));
+        i = stop;
+      }
+    } else if (c === '@' && prelude === null) {
+      flushPlain();
+      prelude = '@';
+      i++;
+    } else if ((c === '{' || c === ';') && prelude !== null) {
+      endPrelude();
+      out += c;
+      i++;
+    } else {
+      plain += c;
+      i++;
+    }
+  }
+  if (prelude !== null) endPrelude();
+  flushPlain();
+  return out;
 }
 
 /**
@@ -495,6 +575,13 @@ export async function adaptDoc(docPath: URL, opts: AdaptOptions): Promise<Adapte
 
   // Markup URLs resolve against the doc, not the site route
   absolutizeMarkup(doc.body, base);
+
+  // Inline styles size against the user's default too (§9.3)
+  for (const el of doc.body.querySelectorAll('[style]')) {
+    const style = el.getAttribute('style')!;
+    const pinned = pinRem(style);
+    if (pinned !== style) el.setAttribute('style', pinned);
+  }
 
   // Build sheet from adapted CSS
   const sheet = new CSSStyleSheet();
