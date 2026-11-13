@@ -59,7 +59,7 @@ export function Building() {
         title="What we're building"
         lede="Recent repositories, Substack posts and public gists from Dinnaga Research, pulled from GitHub and the Substack about once an hour."
       />
-      <div className="building__cols dn-section">
+      <div className="building__cols">
         <LivingColumn
           id="building-repos"
           heading="Repositories"

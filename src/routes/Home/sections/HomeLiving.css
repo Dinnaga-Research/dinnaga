@@ -32,3 +32,10 @@
     grid-column: 1;
   }
 }
+
+/* A register that opens column 2 sits on the section's hairline: no second rule, and its first
+   title lines up with the h2. */
+.home-living .dn-grid__body > .living-rows:first-child > .living-row:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
