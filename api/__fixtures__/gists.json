@@ -1,0 +1,18 @@
+[
+  {
+    "id": "d049296faa7e3140909d8e3d8e14f829",
+    "html_url": "https://gist.github.com/weytani/d049296faa7e3140909d8e3d8e14f829",
+    "public": true,
+    "description": "GitHub Copilot + Playwright in VS Code: QA cheatsheet (settings, compaction, agents, safety rails)",
+    "created_at": "2026-10-18T05:07:12Z",
+    "updated_at": "2026-10-18T05:07:13Z",
+    "files": {
+      "copilot-playwright-qa-cheatsheet.md": {
+        "filename": "copilot-playwright-qa-cheatsheet.md",
+        "type": "text/markdown",
+        "language": "Markdown",
+        "size": 15169
+      }
+    }
+  }
+]
