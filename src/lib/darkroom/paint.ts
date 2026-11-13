@@ -3,7 +3,7 @@
 import { clamp01, ease as E, lerp, seg, smooth } from './ease';
 import { makeFilm, type Film } from './film';
 import { frameLayout } from './layout';
-import { mix, rgb, type FramePalette, type RGB } from './palette';
+import { mix, readPalette, rgb, type FramePalette, type RGB } from './palette';
 import { mulberry32 } from './rng';
 import { pixelScale } from './scale';
 import { buildScene, headAt, type Rect, type Scene } from './scene';
@@ -251,7 +251,15 @@ export interface StillResult {
 }
 
 /** Paint one still (reduced motion's contact strip, /method) into a canvas sized w x h CSS px. */
-export function paintStill(canvas: HTMLCanvasElement, w: number, h: number, p: number, index: number, pal: FramePalette, dpr: number): StillResult | null {
+export function paintStill(
+  canvas: HTMLCanvasElement,
+  w: number,
+  h: number,
+  p: number,
+  index: number,
+  dpr = 1,
+  pal: FramePalette = readPalette(canvas),
+): StillResult | null {
   const s = pixelScale(w, h, dpr);
   canvas.width = Math.max(1, Math.round(w * s));
   canvas.height = Math.max(1, Math.round(h * s));

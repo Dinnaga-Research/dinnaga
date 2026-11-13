@@ -5,6 +5,7 @@ import {
   MARKS,
   N_FRAMES,
   STILL_P,
+  countWord,
   frameAt,
   frameLabel,
   heroState,
@@ -86,5 +87,13 @@ describe('overlay and hero state', () => {
   it('the rail shows after p 0.035', () => {
     expect(railVisible(0.03)).toBe(false);
     expect(railVisible(0.04)).toBe(true);
+  });
+});
+
+describe('countWord', () => {
+  it('spells 0 to 9 and leaves larger numbers as digits', () => {
+    expect(countWord(5)).toBe('five');
+    expect(countWord(3)).toBe('three');
+    expect(countWord(12)).toBe('12');
   });
 });

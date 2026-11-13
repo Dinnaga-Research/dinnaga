@@ -302,7 +302,8 @@ export function mountSequence(opts: SequenceOptions): SequenceHandle {
       const hs = heroState(p);
       hero.style.opacity = String(hs.alpha);
       hero.style.transform = hs.y ? `translateY(${hs.y}%)` : '';
-      hero.style.visibility = hs.alpha <= 0 ? 'hidden' : '';
+      // Faded, not hidden: its links stay focusable, and CSS shows the hero again while one has focus.
+      hero.style.pointerEvents = hs.alpha < 0.05 ? 'none' : '';
       h1?.style.setProperty('--dn-hero-w', hs.w.toFixed(2));
     }
     const k = stageAt(p);

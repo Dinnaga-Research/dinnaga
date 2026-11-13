@@ -52,3 +52,7 @@ export function heroState(p: number): HeroState {
 }
 
 export const railVisible = (p: number) => p > 0.035;
+
+const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+/** A count as a word for 0..9 ("five"), digits above. */
+export const countWord = (n: number) => WORDS[n] ?? String(n);
