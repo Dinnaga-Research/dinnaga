@@ -1,4 +1,5 @@
-// ABOUTME: E2E: no horizontal overflow on every page route at phone widths, and on all 11 doc routes at 390px.
+// ABOUTME: E2E: no horizontal overflow on every page route at the spec §10 widths plus 1024 (the fixed
+// ABOUTME: 15 px root band, 760–1337 px, is where the display sizes are widest), and on all 11 doc routes at 390px.
 import { expect, test } from '@playwright/test';
 import { DOC_ROUTES } from './helpers/docViewer';
 
@@ -8,7 +9,7 @@ async function hasHorizontalOverflow(page: import('@playwright/test').Page) {
   return page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
 }
 
-for (const width of [320, 390]) {
+for (const width of [320, 390, 760, 1024, 1100, 1440, 1920]) {
   for (const path of ROUTES) {
     test(`${path} has no horizontal overflow at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 844 });

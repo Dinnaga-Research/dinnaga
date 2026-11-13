@@ -269,6 +269,7 @@
 .site-footer {
   margin-top: var(--dn-section-space);
   padding-bottom: var(--dn-sp-9);
+  container-type: inline-size; /* the wordmark sizes from the footer's content width (tokens.css) */
 }
 
 .site-footer__grid {
