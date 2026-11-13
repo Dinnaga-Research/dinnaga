@@ -131,3 +131,22 @@ test('reduced motion: animations and transitions last at most 1 ms', async ({ pa
   );
   expect(seconds).toBeLessThan(0.001);
 });
+
+test('reduced motion: a style change starts no transition anywhere', async ({ page }) => {
+  // The guard used to set every duration to 0.001ms; with transition-property's initial `all`, that
+  // made every element transition every late style change (route CSS arriving, a font swap, a hover),
+  // and WebKit lists those in getAnimations() for a frame. That was doc-viewer.spec's WebKit flake.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await open(page, '/atisha');
+  const started = await page.evaluate(() => {
+    const root = document.documentElement;
+    root.style.fontSize = '20px';
+    root.style.color = 'rgb(1, 2, 3)';
+    getComputedStyle(document.body).fontSize; // flush style
+    const n = document.getAnimations().length;
+    root.style.fontSize = '';
+    root.style.color = '';
+    return n;
+  });
+  expect(started).toBe(0);
+});

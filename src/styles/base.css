@@ -149,13 +149,15 @@ button {
 }
 
 /* §6: motion only for those who have not asked for less. */
+/* Reduced motion: no transition or animation at all. Not a 0.001ms duration: with
+   transition-property's initial `all`, any non-zero duration makes every element transition every
+   late style change (route CSS arriving, a font swap, a hover). Nothing here waits on *end events. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    animation: none !important;
+    transition: none !important;
     scroll-behavior: auto !important;
   }
 }
