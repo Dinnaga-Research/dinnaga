@@ -419,6 +419,20 @@ for (const vp of [
       expect((await targetState(page, 'c03')).marked).toBe(false);
     });
 
+    test('Back straight after a rail click still returns to #c07', async ({ page }) => {
+      // A Back that lands before React commits the #c03 push used to be batched into "no change"
+      // (the committed hash was still #c07), so the hash effect never ran: the old Chromium flake.
+      await page.goto(COPILOT_STUDIO);
+      await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
+      await hostLocator(page).locator('.rail a[href="#c07"]').click();
+      await expectInPlace(page, 'c07');
+      await hostLocator(page).locator('.rail a[href="#c03"]').click();
+      await page.goBack();
+      await expect(page).toHaveURL(/#c07$/);
+      await expectInPlace(page, 'c07');
+      expect((await targetState(page, 'c03')).marked).toBe(false);
+    });
+
     test('a hard load with #c07 lands with #c07 in place', async ({ page }) => {
       await page.goto(`${COPILOT_STUDIO}#c07`);
       await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');

@@ -201,6 +201,20 @@ export function DocViewer({ docPath, toRoute }: DocViewerProps) {
     return () => root.removeEventListener('click', handleClick);
   }, [root, docPath]);
 
+  // History moves on this page: apply the hash straight from the URL. A Back that lands before React
+  // commits the previous hash push is batched into "no change" (the committed hash is already the
+  // one Back returns to), so the location effect below would never run for it.
+  useEffect(() => {
+    if (!root) return;
+    const onPopState = () => {
+      const id = window.location.hash.slice(1);
+      if (!id || window.location.pathname !== location.pathname) return;
+      applyAnchorBehavior(root, id, new URL(docPath, window.location.href));
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [root, docPath, location.pathname]);
+
   // Hash on load and on history moves: apply without pushing a new entry.
   useEffect(() => {
     if (!root || !location.hash) return;
