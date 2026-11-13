@@ -1,0 +1,43 @@
+/* ABOUTME: /atisha's layout (#63): the bar, state line and board line as marginalia in the label column,
+   ABOUTME: the register beside them from 760 px; stacked in reading order (notes, register, board) below. */
+
+.atisha__bar {
+  max-width: var(--dn-measure);
+  color: var(--dn-text);
+  text-wrap: pretty;
+}
+
+.atisha__note {
+  max-width: var(--dn-measure);
+  margin-top: var(--dn-sp-4);
+  font-size: var(--dn-t-meta);
+  line-height: var(--dn-lh-meta);
+  color: var(--dn-text-2);
+  text-wrap: pretty;
+}
+
+/* The board line closes the page on a phone, after the register's last rule. */
+.atisha__board {
+  margin-top: var(--dn-sp-6);
+}
+
+@media (min-width: 760px) {
+  /* Row 1 holds the notes, row 2 the board line right under them; the register spans both. */
+  .atisha__body {
+    grid-template-rows: auto 1fr;
+    align-items: start;
+  }
+
+  .atisha__notes {
+    grid-row: 1;
+  }
+
+  .atisha__register {
+    grid-row: 1 / span 2;
+  }
+
+  .atisha__board {
+    grid-row: 2;
+    margin-top: var(--dn-sp-4);
+  }
+}
