@@ -1,35 +1,45 @@
-// ABOUTME: Site footer — brand block, route link columns, and bottom meta strip.
-// ABOUTME: Links route within the SPA; GitHub column points at public site source and Atisha board.
+// ABOUTME: Site footer (#70, spec §7.2): the founder line, exactly six links, the brand as the
+// ABOUTME: closing wordmark and the computed copyright. Nothing here links Behind the scenes.
 import { Link } from 'react-router-dom';
 import { BrandMark } from './BrandMark';
-import { SITE_SOURCE_URL, ATISHA_PROJECT_URL } from '../data/links';
+import { SITE_SOURCE_URL, SUBSTACK_URL } from '../data/links';
 
 export function SiteFooter() {
+  const year = new Date().getFullYear();
   return (
-    <footer className="foot" id="footer">
-      <div className="foot-inner">
-        <div className="foot-brand">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <BrandMark size={28} />
-            <span className="word">Dinnaga Research</span>
-          </div>
-          <p>Dinnaga Research is run by David Ryan.</p>
+    <footer className="site-footer dn-page" id="footer">
+      <div className="site-footer__grid dn-grid">
+        <p className="site-footer__founder dn-grid__label">Dinnaga Research is run by David Ryan.</p>
+        <div className="site-footer__links dn-grid__body">
+          <ul>
+            <li>
+              <Link to="/atisha">Atisha</Link>
+            </li>
+            <li>
+              <Link to="/building">Building</Link>
+            </li>
+            <li>
+              <Link to="/method">How we test</Link>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <Link to="/colophon">Colophon</Link>
+            </li>
+            <li>
+              <a href={SITE_SOURCE_URL}>Source on GitHub</a>
+            </li>
+            <li>
+              <a href={SUBSTACK_URL}>Substack</a>
+            </li>
+          </ul>
         </div>
-        <nav className="foot-col" aria-label="The lab">
-          <h4>The lab</h4>
-          <Link to="/method">How we work</Link>
-          <Link to="/atisha">Atisha</Link>
-          <Link to="/colophon">Colophon</Link>
-        </nav>
-        <nav className="foot-col" aria-label="On GitHub">
-          <h4>On GitHub</h4>
-          <a href={SITE_SOURCE_URL}>Site source</a>
-          <a href={ATISHA_PROJECT_URL}>Atisha board</a>
-        </nav>
       </div>
-      <div className="foot-meta">
-        <span>© 2026 Dinnaga Research</span>
-      </div>
+      <p className="site-footer__wordmark">
+        <BrandMark size={64} />
+        <span>Dinnaga Research</span>
+      </p>
+      <p className="site-footer__copy dn-label">© {year} Dinnaga Research</p>
     </footer>
   );
 }

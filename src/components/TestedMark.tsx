@@ -1,11 +1,12 @@
-// ABOUTME: TestedMark — the lime square that marks tested content (spec §9).
-// ABOUTME: Rendered inline in text, or as part of a TestedLine block.
+// ABOUTME: TestedMark: the miniature stamp (a red ring and dot) that keys tested content (spec §7.4).
+// ABOUTME: TestedLine: the mark plus the sentence saying what the doc was checked against.
+import type { ReactNode } from 'react';
 
 export function TestedMark() {
   return <span className="tested-mark" aria-hidden="true" />;
 }
 
-export function TestedLine({ children }: { children: React.ReactNode }) {
+export function TestedLine({ children }: { children: ReactNode }) {
   return (
     <p className="tested-line">
       <TestedMark />

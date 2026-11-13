@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { DocViewer } from './DocViewer';
+import { TestedLine } from './TestedMark';
+import './DocFrame.css';
 
 interface DocFrameProps {
   backHref: string;
@@ -11,6 +13,8 @@ interface DocFrameProps {
   colophonTitle: string;
   dateLine: string;
   note?: string;
+  // What an Atisha doc was checked against; rendered as a TestedLine under the title.
+  tested?: string;
   docPath: string;
   toRoute?: (slug: string, hash: string) => string;
 }
@@ -22,6 +26,7 @@ export function DocFrame({
   colophonTitle,
   dateLine,
   note,
+  tested,
   docPath,
   toRoute,
 }: DocFrameProps) {
@@ -51,6 +56,7 @@ export function DocFrame({
         <p className="doc-colophon-line">
           <strong>{colophonTitle}</strong>
         </p>
+        {tested && <TestedLine>{tested}</TestedLine>}
         <p className="doc-colophon-line">{dateLine}</p>
         {note && <p className="doc-colophon-line doc-colophon-note">{note}</p>}
       </footer>

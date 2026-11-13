@@ -1,22 +1,24 @@
-// ABOUTME: Tests for the BrandMark and CautionDivider leaf components.
-// ABOUTME: Verifies the brand SVG sizes correctly and the divider renders.
+// ABOUTME: Tests the hexagon-D brand mark: sized by prop, decorative, and drawn in currentColor only
+// ABOUTME: (the counter is cut with fill-rule evenodd, so no black literal remains).
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { BrandMark } from './BrandMark';
-import { CautionDivider } from './CautionDivider';
 
 describe('BrandMark', () => {
-  it('renders an svg at the requested size', () => {
+  it('renders an aria-hidden svg at the requested size', () => {
     const { container } = render(<BrandMark size={32} />);
-    const svg = container.querySelector('svg');
-    expect(svg).not.toBeNull();
+    const svg = container.querySelector('svg')!;
     expect(svg).toHaveAttribute('width', '32');
+    expect(svg).toHaveAttribute('aria-hidden', 'true');
   });
-});
 
-describe('CautionDivider', () => {
-  it('renders a decorative separator', () => {
-    const { container } = render(<CautionDivider />);
-    expect(container.querySelector('.caution-stripes')).not.toBeNull();
+  it('uses currentColor only, with an evenodd counter', () => {
+    const { container } = render(<BrandMark />);
+    const html = container.innerHTML;
+    expect(html).not.toMatch(/#000|black/i);
+    for (const el of Array.from(container.querySelectorAll('[fill]'))) {
+      expect(['none', 'currentColor']).toContain(el.getAttribute('fill'));
+    }
+    expect(container.querySelector('[fill-rule="evenodd"]')).not.toBeNull();
   });
 });

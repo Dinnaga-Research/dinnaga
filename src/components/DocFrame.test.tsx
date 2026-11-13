@@ -17,7 +17,7 @@ const BASE = {
   docPath: '/artifact-docs/test.html',
 };
 
-function renderFrame(extra: { note?: string } = {}) {
+function renderFrame(extra: { note?: string; tested?: string } = {}) {
   return render(
     <BrowserRouter>
       <DocFrame {...BASE} {...extra} />
@@ -56,6 +56,21 @@ describe('DocFrame', () => {
     unmount();
     const { container } = renderFrame();
     expect(container.querySelector('.doc-colophon-note')).toBeNull();
+  });
+
+  it('renders the tested line in the colophon, under the title, when given', () => {
+    renderFrame({ tested: 'Checked against the docs on 9 Sep 2026.' });
+    const colophon = screen.getByRole('heading', { level: 2, name: 'About this doc' }).closest('footer')!;
+    const line = within(colophon).getByText('Checked against the docs on 9 Sep 2026.');
+    expect(line).toHaveClass('tested-line');
+    expect(line.querySelector('.tested-mark')).toHaveAttribute('aria-hidden', 'true');
+    const title = within(colophon).getByText('Test Document');
+    expect(title.compareDocumentPosition(line) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('renders no tested line without one', () => {
+    const { container } = renderFrame();
+    expect(container.querySelector('.tested-line')).toBeNull();
   });
 
   it('renders no h1 of its own', () => {
