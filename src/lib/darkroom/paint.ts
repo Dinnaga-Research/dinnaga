@@ -25,7 +25,7 @@ export function paintFrame(c: Ctx2D, S: Scene, p: number, frameIndex: number, pa
   const GREY = rgb(pal.label);
   const PAPER = rgb(pal.text);
   const INK = rgb(pal.ink);
-  // C's red marks (scan line, Digest's underlines, note marks, strikes, the test head) are paper (§3.4).
+  // C's coloured marks (scan line, Digest's underlines, note marks, strikes, the test head) are paper (§3.4).
   const MARK = PAPER;
 
   c.globalAlpha = 1;
@@ -181,7 +181,7 @@ export function paintFrame(c: Ctx2D, S: Scene, p: number, frameIndex: number, pa
       c.fillRect(x + ln.w[0]! * w, y + h + Math.max(1, pitch * 0.12), (end - ln.w[0]!) * w, Math.max(1, pitch * 0.14));
     }
     if (!nt.surv && st.strike > 0) {
-      // Experiment: struck out. Without red, a ground cut either side keeps the strike legible on paper bars.
+      // Experiment: struck out. In monochrome, a ground cut either side keeps the strike legible on paper bars.
       const sa = a * (st.fall > 0.5 ? 0.6 : 1);
       const sw = (nt.w - 6) * st.strike;
       c.globalAlpha = sa;
