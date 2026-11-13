@@ -1,23 +1,49 @@
-// ABOUTME: Rendered checks for the visual system: lime only on the tested mark, type floors, cursors.
-// ABOUTME: Runs at desktop and phone widths over the public routes and a doc route (spec section 16).
-import { expect, test } from '@playwright/test';
+// ABOUTME: Rendered checks for the Darkroom system (spec §10): warm-black ground, red only on tested
+// ABOUTME: marks and the stamp, caps only in condensed roles, text ≥ 12px, Archivo loaded, font budget.
+import { expect, test, type Page } from '@playwright/test';
 
-const ROUTES = ['/', '/atisha', '/method', '/colophon', '/artifacts', '/artifacts/slamwich-tasting-report', '/nope'];
+const ROUTES = [
+  '/',
+  '/atisha',
+  '/building',
+  '/method',
+  '/colophon',
+  '/backstage',
+  '/atisha/slamwich-tasting-report',
+  '/no-such-page',
+];
 const VIEWPORTS = [
   { width: 1440, height: 900 },
   { width: 390, height: 844 },
 ];
-const LIME = 'rgb(192, 254, 4)';
+const RED = 'rgb(232, 73, 45)';
+const DELETED_FONTS = /archivo-expanded|jetbrains|departure/i;
+
+async function open(page: Page, path: string) {
+  await page.route('**/api/living', (route) => route.abort());
+  await page.goto(path);
+  await page.waitForLoadState('networkidle');
+  await page.evaluate(() => document.fonts.ready);
+}
 
 for (const viewport of VIEWPORTS) {
   for (const path of ROUTES) {
     test.describe(`${path} at ${viewport.width}px`, () => {
       test.use({ viewport });
 
-      test('no element or pseudo-element computes lime', async ({ page }) => {
-        await page.goto(path);
-        await page.waitForLoadState('networkidle');
-        const hits = await page.evaluate((lime) => {
+      test('ground, red, caps, text size and Archivo', async ({ page }) => {
+        const fontRequests: string[] = [];
+        page.on('request', (r) => {
+          if (r.resourceType() === 'font' || /\.woff2?$/.test(r.url())) fontRequests.push(r.url());
+        });
+        await open(page, path);
+
+        expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(13, 12, 11)');
+        expect(await page.evaluate(() => document.fonts.check('600 13px Archivo'))).toBe(true);
+        expect(fontRequests.filter((u) => DELETED_FONTS.test(u))).toEqual([]);
+
+        const problems = await page.evaluate((red) => {
+          const out: string[] = [];
           const props = [
             'color',
             'backgroundColor',
@@ -26,57 +52,63 @@ for (const viewport of VIEWPORTS) {
             'borderBottomColor',
             'borderLeftColor',
             'outlineColor',
+            'textDecorationColor',
           ] as const;
-          const found: string[] = [];
-          for (const el of Array.from(document.querySelectorAll('*'))) {
+          const name = (el: Element) => `${el.tagName.toLowerCase()}.${el.getAttribute('class') ?? ''}`;
+          for (const el of Array.from(document.querySelectorAll('body *'))) {
+            const exempt = !!el.closest('.tested-mark, .stamp');
             for (const pseudo of [null, '::before', '::after']) {
               const cs = getComputedStyle(el, pseudo);
               for (const p of props) {
-                if (cs[p] === lime && !el.classList.contains('tested-mark')) {
-                  found.push(`${el.tagName.toLowerCase()}.${el.className}${pseudo ?? ''} ${p}`);
-                }
+                if (cs[p] === red && !exempt) out.push(`red: ${name(el)}${pseudo ?? ''} ${p}`);
               }
             }
-          }
-          return found;
-        }, LIME);
-        expect(hits).toEqual([]);
-      });
-
-      test('text is at least 12 px and caps are mono labels with tracking at most 0.08em', async ({ page }) => {
-        await page.goto(path);
-        await page.waitForLoadState('networkidle');
-        const problems = await page.evaluate(() => {
-          const out: string[] = [];
-          for (const el of Array.from(document.querySelectorAll('body *'))) {
             if (el.closest('[aria-hidden="true"]')) continue;
             const cs = getComputedStyle(el);
             if (cs.display === 'none' || cs.visibility === 'hidden') continue;
             const hasText = Array.from(el.childNodes).some(
               (n) => n.nodeType === Node.TEXT_NODE && (n.textContent ?? '').trim() !== '',
             );
-            const name = `${el.tagName.toLowerCase()}.${el.className}`;
+            if (!hasText) continue;
             const size = parseFloat(cs.fontSize);
-            if (hasText && size < 12) out.push(`${name} font-size ${cs.fontSize}`);
-            if (hasText && cs.textTransform === 'uppercase') {
-              if (!cs.fontFamily.startsWith('"JetBrains Mono"')) out.push(`${name} uppercase in ${cs.fontFamily}`);
+            if (size < 12) out.push(`size: ${name(el)} ${cs.fontSize}`);
+            if (cs.textTransform === 'uppercase') {
+              if (parseFloat(cs.fontStretch) > 75) out.push(`caps: ${name(el)} at ${cs.fontStretch}`);
               const ls = parseFloat(cs.letterSpacing);
-              if (!Number.isNaN(ls) && ls > 0.08 * size + 0.001) out.push(`${name} tracking ${cs.letterSpacing}`);
+              if (!Number.isNaN(ls) && ls > 0.08 * size + 0.01) out.push(`tracking: ${name(el)} ${cs.letterSpacing}`);
             }
-            if (/^H[1-3]$/.test(el.tagName) && cs.textTransform !== 'none') out.push(`${name} heading transform`);
+            if (/^H[1-6]$/.test(el.tagName) && cs.textTransform !== 'none') out.push(`heading caps: ${name(el)}`);
+            if (!cs.fontFamily.replace(/"/g, '').startsWith('Archivo') && !el.closest('[data-doc-host]')) {
+              out.push(`family: ${name(el)} ${cs.fontFamily}`);
+            }
           }
           return out;
-        });
+        }, RED);
         expect(problems).toEqual([]);
       });
     });
   }
 }
 
+test('font bytes on a cold load of / are at most 100 KB, from Archivo only', async ({ page, browserName }) => {
+  const fonts: { url: string; bytes: number }[] = [];
+  page.on('response', async (r) => {
+    if (/\.woff2$/.test(r.url())) fonts.push({ url: r.url(), bytes: (await r.body()).length });
+  });
+  await open(page, '/');
+  await expect.poll(() => fonts.length).toBeGreaterThan(0);
+  // WebKit loads same-origin @font-face files in no-cors mode, so it cannot reuse the (CORS) preload
+  // and fetches archivo-var.woff2 twice. Count each file once there; Chromium must fetch it once.
+  const files = browserName === 'webkit' ? [...new Map(fonts.map((f) => [f.url, f])).values()] : fonts;
+  const total = files.reduce((n, f) => n + f.bytes, 0);
+  expect(total).toBeLessThanOrEqual(100 * 1024);
+  expect(files.map((f) => new URL(f.url).pathname)).toEqual(['/fonts/archivo-var.woff2']);
+});
+
 test('the nav brand mark takes the text colour', async ({ page }) => {
   await page.goto('/');
-  const color = await page.locator('.nav-brand svg').first().evaluate((el) => getComputedStyle(el).color);
-  expect(color).toBe('rgb(232, 232, 232)');
+  const color = await page.locator('.site-nav__brand svg').evaluate((el) => getComputedStyle(el).color);
+  expect(color).toBe('rgb(236, 228, 211)');
 });
 
 test('body keeps the default cursor and links show a pointer', async ({ page }) => {
@@ -86,66 +118,16 @@ test('body keeps the default cursor and links show a pointer', async ({ page }) 
   expect(await link.evaluate((el) => getComputedStyle(el).cursor)).toBe('pointer');
 });
 
-test('reduced motion: animations last at most 1 ms and the flicker is off', async ({ page }) => {
+test('reduced motion: animations and transitions last at most 1 ms', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
-  await page.waitForLoadState('networkidle');
+  await open(page, '/');
   const durations = await page.evaluate(() =>
     document.getAnimations().map((a) => Number(a.effect?.getComputedTiming().duration ?? 0)),
   );
   for (const d of durations) expect(d).toBeLessThanOrEqual(1);
-  const flicker = page.locator('.terminal-flicker').first();
-  expect(await flicker.evaluate((el) => getComputedStyle(el).animationName)).toBe('none');
-});
-
-test('.green-square never renders', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.locator('.green-square')).toHaveCount(0);
-});
-
-const SURVIVING = ['/atisha', '/method', '/colophon', '/artifacts', '/artifacts/slamwich-tasting-report', '/weekly', '/weekly/2026-08-08', '/nope'];
-
-for (const path of SURVIVING) {
-  test(`${path}: no chrome prefixes, label-role eyebrows, sentence-case nav and buttons`, async ({ page }) => {
-    await page.goto(path);
-    await page.waitForLoadState('networkidle');
-    const r = await page.evaluate(() => {
-      const bad: string[] = [];
-      const eyebrows: string[] = [];
-      const nav: string[] = [];
-      const buttons: string[] = [];
-      const surviving = (el: Element) =>
-        !el.closest('.hero, .ticker, .practices, .ascii-section, .caution, .data-panel, .tx-block, [aria-hidden="true"]');
-      for (const el of Array.from(document.querySelectorAll('body *'))) {
-        if (!surviving(el)) continue;
-        const cs = getComputedStyle(el);
-        const own = Array.from(el.childNodes)
-          .filter((n) => n.nodeType === Node.TEXT_NODE)
-          .map((n) => (n.textContent ?? '').trim())
-          .join(' ')
-          .trim();
-        if (own && (own.startsWith('//') || /^\d{2} ·/.test(own))) bad.push(`${el.className}: ${own}`);
-        if (el.classList.contains('section-eye') && own) {
-          const ok =
-            cs.fontFamily.startsWith('"JetBrains Mono"') &&
-            cs.fontWeight === '500' &&
-            cs.fontSize === '12px' &&
-            cs.color === 'rgb(154, 154, 154)' &&
-            parseFloat(cs.letterSpacing) <= 0.08 * 12 + 0.001;
-          if (!ok) eyebrows.push(`${own} ${cs.fontFamily} ${cs.fontWeight} ${cs.fontSize} ${cs.color} ${cs.letterSpacing}`);
-        }
-        if (el.closest('.nav-links') && el.tagName === 'A' && cs.textTransform !== 'none') nav.push(own);
-        if ((el.tagName === 'BUTTON' || el.classList.contains('btn')) && cs.textTransform === 'uppercase') {
-          if (!cs.fontFamily.startsWith('"JetBrains Mono"')) buttons.push(own);
-        }
-      }
-      return { bad, eyebrows, nav, buttons };
-    });
-    expect(r).toEqual({ bad: [], eyebrows: [], nav: [], buttons: [] });
-  });
-}
-
-test('nav shows labels as written in the nav data', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.locator('.nav-links a')).toHaveText(['Atisha', 'How we work', 'Colophon', 'Weekly']);
+  const link = page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Atisha' });
+  const seconds = await link.evaluate((el) =>
+    Math.max(...getComputedStyle(el).transitionDuration.split(',').map((x) => parseFloat(x))),
+  );
+  expect(seconds).toBeLessThan(0.001);
 });

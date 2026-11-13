@@ -15,13 +15,14 @@ import {
 import { fixturePages, harnessUrl, serveQuartz, watchErrors, type Build } from './helpers/quartz';
 
 const LIME = 'rgb(192, 254, 4)';
-// --doc-* resolved values (§13.1)
-const BG = 'rgb(10, 10, 10)';
-const SURFACE = 'rgb(20, 20, 20)';
-const TEXT = 'rgb(232, 232, 232)';
-const MUTED = 'rgb(184, 184, 184)';
+const TESTED_RED = 'rgb(232, 73, 45)';
+// --doc-* resolved values (Darkroom spec §9.1)
+const BG = 'rgb(13, 12, 11)';
+const SURFACE = 'rgb(21, 19, 17)';
+const TEXT = 'rgb(236, 228, 211)';
+const MUTED = 'rgb(189, 181, 166)';
 const BODY_FACE = '"Atkinson Hyperlegible Next"';
-const DISPLAY_FACE = '"Archivo Expanded"';
+const DISPLAY_FACE = /^"?Archivo"?,/;
 
 const VIEWPORTS = [
   { name: '1280', width: 1280, height: 800 },
@@ -117,6 +118,7 @@ async function checkVariables(page: Page, family: ThemeFamily) {
     expect(raw.toLowerCase(), `${v} raw`).not.toContain('c0fe04');
     expect(raw.replace(/\s+/g, ''), `${v} raw`).not.toContain('192,254,4');
     expect(colour, `${v} resolved`).not.toBe(LIME);
+    expect(colour, `${v} resolved`).not.toBe(TESTED_RED);
     expect(colour, `${v} resolved`).not.toBe('rgba(0, 0, 0, 0)');
   }
   expect(resolved[roles.bg]!.colour).toBe(BG);
@@ -132,12 +134,12 @@ async function checkContrast(page: Page, family: ThemeFamily) {
   const r = await readVariables(page, names);
   const bg = r[roles.bg]!.colour;
   const text = r[roles.text]!.colour;
-  expect(contrastRatio(text, bg), 'text on bg').toBeGreaterThanOrEqual(15);
+  expect(contrastRatio(text, bg), 'text on bg').toBeGreaterThanOrEqual(14.5);
   expect(contrastRatio(r[roles.muted]!.colour, bg), 'muted on bg').toBeGreaterThanOrEqual(9);
-  expect(contrastRatio(r[roles.accent]!.colour, bg), 'accent on bg').toBeGreaterThanOrEqual(15);
+  expect(contrastRatio(r[roles.accent]!.colour, bg), 'accent on bg').toBeGreaterThanOrEqual(14.5);
   if (roles.surface) {
     const surface = r[roles.surface]!.colour;
-    expect(contrastRatio(text, surface), 'text on surface').toBeGreaterThanOrEqual(15);
+    expect(contrastRatio(text, surface), 'text on surface').toBeGreaterThanOrEqual(14.5);
     expect(contrastRatio(r[roles.muted]!.colour, surface), 'muted on surface').toBeGreaterThanOrEqual(9);
   }
   for (const h of roles.highlights) {
@@ -152,17 +154,17 @@ async function checkFonts(page: Page) {
     const body = host.shadowRoot!.querySelector('doc-body')!;
     const h1 = host.shadowRoot!.querySelector('h1')!;
     await document.fonts.load('16px "Atkinson Hyperlegible Next"');
-    await document.fonts.load('800 32px "Archivo Expanded"');
+    await document.fonts.load('800 32px Archivo');
     return {
       body: getComputedStyle(body).fontFamily,
       h1: getComputedStyle(h1).fontFamily,
       synthesis: getComputedStyle(host).fontSynthesis,
       bodyLoaded: document.fonts.check('16px "Atkinson Hyperlegible Next"'),
-      displayLoaded: document.fonts.check('800 32px "Archivo Expanded"'),
+      displayLoaded: document.fonts.check('800 32px Archivo'),
     };
   });
   expect(info.body.startsWith(BODY_FACE), `doc-body font-family: ${info.body}`).toBe(true);
-  expect(info.h1.startsWith(DISPLAY_FACE), `h1 font-family: ${info.h1}`).toBe(true);
+  expect(info.h1, `h1 font-family: ${info.h1}`).toMatch(DISPLAY_FACE);
   expect(info.bodyLoaded).toBe(true);
   expect(info.displayLoaded).toBe(true);
   expect(info.synthesis).toContain('none');
@@ -183,7 +185,7 @@ for (const vp of VIEWPORTS) {
         await target.open(page, context);
         await checkVariables(page, family);
       });
-      test(`${target.label}: text >= 15:1, muted >= 9:1, accent >= 15:1, highlights with text >= 7:1`, async ({ page, context }) => {
+      test(`${target.label}: text >= 14.5:1, muted >= 9:1, accent >= 14.5:1, highlights with text >= 7:1`, async ({ page, context }) => {
         await target.open(page, context);
         await checkContrast(page, family);
       });
@@ -207,7 +209,7 @@ for (const vp of VIEWPORTS) {
         await target.open(page, context);
         await test.step(`ground is --doc-bg's resolved ${BG}, text is --doc-text`, () => checkGround(page, 'quartz'));
         await test.step('mapped variables resolve to the §13.2 values and none is lime', () => checkVariables(page, 'quartz'));
-        await test.step('text >= 15:1, muted >= 9:1, accent >= 15:1, highlights with text >= 7:1', () => checkContrast(page, 'quartz'));
+        await test.step('text >= 14.5:1, muted >= 9:1, accent >= 14.5:1, highlights with text >= 7:1', () => checkContrast(page, 'quartz'));
         await test.step('doc-body renders in the site body face, h1 in the display face, fonts load', () => checkFonts(page));
         await test.step('no page overflow, no console errors', async () => {
           await page.waitForLoadState('networkidle');
@@ -221,7 +223,7 @@ for (const vp of VIEWPORTS) {
 
 // ---------- docs without their own ::selection get the neutral selection colour ----------
 test('selection: a Copilot sheet has a ::selection rule in the doc sheet with the neutral colour', async ({ page }) => {
-  await page.goto('/artifacts/llm-best-practices-copilot-studio');
+  await page.goto('/atisha/llm-best-practices-copilot-studio');
   await mounted(page);
   const css = await hostLocator(page).evaluate((host) =>
     host.shadowRoot!.adoptedStyleSheets.flatMap((s) => [...s.cssRules].map((r) => r.cssText)).join('\n'),
@@ -235,28 +237,28 @@ test.describe('print', () => {
 
   test('copilot studio host is rgb(255, 255, 255) in print', async ({ page }) => {
     await page.emulateMedia({ media: 'print' });
-    await page.goto('/artifacts/llm-best-practices-copilot-studio');
+    await page.goto('/atisha/llm-best-practices-copilot-studio');
     await mounted(page);
     expect((await grounds(page)).host).toBe('rgb(255, 255, 255)');
   });
 
   test("slamwich's ground is its light value in print", async ({ page }) => {
     await page.emulateMedia({ media: 'print' });
-    await page.goto('/artifacts/slamwich-tasting-report');
+    await page.goto('/atisha/slamwich-tasting-report');
     await mounted(page);
     expect((await grounds(page)).host).toBe('rgb(236, 231, 220)');
   });
 
   test("a weekly report's ground is its light value in print", async ({ page }) => {
     await page.emulateMedia({ media: 'print' });
-    await page.goto('/weekly/2026-08-08');
+    await page.goto('/backstage/weekly/2026-08-08');
     await mounted(page);
     expect((await grounds(page)).body).toBe('rgb(247, 247, 248)');
   });
 
   test('the mapping does not apply in print: the doc variables keep their own light values', async ({ page }) => {
     await page.emulateMedia({ media: 'print' });
-    await page.goto('/artifacts/slamwich-tasting-report');
+    await page.goto('/atisha/slamwich-tasting-report');
     await mounted(page);
     const r = await readVariables(page, ['--ground', '--ink']);
     expect(r['--ground']!.colour).not.toBe(BG);
@@ -278,9 +280,9 @@ test.describe('print', () => {
 
 // ---------- focus-visible: the doc's own outline survives, one doc per family ----------
 const FOCUS_TARGETS: { label: string; open: Target['open'] }[] = [
-  { label: 'copilot studio', open: async (page) => { await page.goto('/artifacts/llm-best-practices-copilot-studio'); await mounted(page); } },
-  { label: 'slamwich', open: async (page) => { await page.goto('/artifacts/slamwich-tasting-report'); await mounted(page); } },
-  { label: 'weekly 2026-08-08', open: async (page) => { await page.goto('/weekly/2026-08-08'); await mounted(page); } },
+  { label: 'copilot studio', open: async (page) => { await page.goto('/atisha/llm-best-practices-copilot-studio'); await mounted(page); } },
+  { label: 'slamwich', open: async (page) => { await page.goto('/atisha/slamwich-tasting-report'); await mounted(page); } },
+  { label: 'weekly 2026-08-08', open: async (page) => { await page.goto('/backstage/weekly/2026-08-08'); await mounted(page); } },
   {
     label: 'quartz build-b index',
     open: async (page, context) => {

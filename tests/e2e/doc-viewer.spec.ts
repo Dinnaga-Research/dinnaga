@@ -6,11 +6,11 @@ import { expect, test, type Page } from '@playwright/test';
 import { DOC_ROUTES, hostLocator, noHorizontalOverflow } from './helpers/docViewer';
 
 // Expected forced-dark colors (ticket #46)
-// Updated by #52/#53: every family's ground is --doc-bg's resolved value on screen
+// Updated by #52/#53: every family's ground is --doc-bg's resolved value on screen (Darkroom §9.1)
 const FORCED_DARK_COLORS: Record<string, string> = {
-  'slamwich-tasting-report': 'rgb(10, 10, 10)',
-  'llm-best-practices-copilot-studio': 'rgb(10, 10, 10)',
-  '2026-08-08': 'rgb(10, 10, 10)',
+  'slamwich-tasting-report': 'rgb(13, 12, 11)',
+  'llm-best-practices-copilot-studio': 'rgb(13, 12, 11)',
+  '2026-08-08': 'rgb(13, 12, 11)',
 };
 
 // Test each of the 11 routes at desktop and mobile viewports
@@ -59,7 +59,7 @@ for (const route of DOC_ROUTES) {
 // Forced-dark color tests (sample routes)
 test('slamwich @ light OS: forced-dark background', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
-  await page.goto('/artifacts/slamwich-tasting-report');
+  await page.goto('/atisha/slamwich-tasting-report');
 
   const host = hostLocator(page);
   await expect(host).toHaveAttribute('aria-busy', 'false');
@@ -72,7 +72,7 @@ test('slamwich @ light OS: forced-dark background', async ({ page }) => {
 
 test('copilot-studio @ light OS: forced-dark background', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
-  await page.goto('/artifacts/llm-best-practices-copilot-studio');
+  await page.goto('/atisha/llm-best-practices-copilot-studio');
 
   const host = hostLocator(page);
   await expect(host).toHaveAttribute('aria-busy', 'false');
@@ -85,12 +85,12 @@ test('copilot-studio @ light OS: forced-dark background', async ({ page }) => {
 
 test('weekly 2026-08-08 @ light OS: forced-dark background', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
-  await page.goto('/weekly/2026-08-08');
+  await page.goto('/backstage/weekly/2026-08-08');
 
   const host = hostLocator(page);
   await expect(host).toHaveAttribute('aria-busy', 'false');
   // The weekly sheets put their ground on `body` (-> doc-body), not on `html`, and doc-body
-  // fills the host. Its colour is --doc-bg's rgb(10, 10, 10).
+  // fills the host. Its colour is --doc-bg's rgb(13, 12, 11).
   const bgColor = await host.evaluate((el) => {
     const body = el.shadowRoot?.querySelector('doc-body');
     return body ? window.getComputedStyle(body).backgroundColor : null;
@@ -101,7 +101,7 @@ test('weekly 2026-08-08 @ light OS: forced-dark background', async ({ page }) =>
 
 test('copilot-studio @ print: light background', async ({ page }) => {
   await page.emulateMedia({ media: 'print' });
-  await page.goto('/artifacts/llm-best-practices-copilot-studio');
+  await page.goto('/atisha/llm-best-practices-copilot-studio');
 
   const host = hostLocator(page);
   await expect(host).toHaveAttribute('aria-busy', 'false');
@@ -113,7 +113,7 @@ test('copilot-studio @ print: light background', async ({ page }) => {
 });
 
 test('copilot-studio: .principle border re-serialization canary', async ({ page }) => {
-  await page.goto('/artifacts/llm-best-practices-copilot-studio');
+  await page.goto('/atisha/llm-best-practices-copilot-studio');
 
   const host = hostLocator(page);
   await expect(host).toHaveAttribute('aria-busy', 'false');
@@ -135,7 +135,7 @@ test('missing doc: shows error message and link', async ({ page }) => {
     route.fulfill({ status: 200, contentType: 'text/html', body: shell }),
   );
 
-  await page.goto('/artifacts/slamwich-tasting-report');
+  await page.goto('/atisha/slamwich-tasting-report');
 
   await expect(page.getByText("This doc didn't load.")).toBeVisible();
 
@@ -156,7 +156,7 @@ test('missing doc: shows error message and link', async ({ page }) => {
 
 test('reduced motion: no animations', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/artifacts/slamwich-tasting-report');
+  await page.goto('/atisha/slamwich-tasting-report');
 
   const host = hostLocator(page);
   await expect(host).toHaveAttribute('aria-busy', 'false');
@@ -181,7 +181,7 @@ for (const vp of [
     // macOS WebKit only tabs to links with Option held (Safari default)
     const TAB = browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab';
     await page.setViewportSize({ width: vp.width, height: vp.height });
-    await page.goto('/artifacts/slamwich-tasting-report');
+    await page.goto('/atisha/slamwich-tasting-report');
     await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
 
     const stop = () =>
@@ -214,7 +214,7 @@ for (const vp of [
     expect(stops[0]!.text).toBe('Skip to content');
     const back = stops.findIndex((o) => o.cls.includes('doc-bar-back'));
     expect(back, 'reached the back link').toBeGreaterThan(0);
-    expect(stops[back]!.text).toBe('\u2190 Behind the scenes');
+    expect(stops[back]!.text).toBe('\u2190 Atisha');
     expect(stops[back + 1]!.cls).toContain('doc-bar-open');
     expect(stops[back + 1]!.text).toBe('Open standalone');
     // Firefox makes a horizontally scrollable element a Tab stop. At 390px the host scrolls
@@ -236,8 +236,8 @@ for (const vp of [
 // The following tests verify the behavior works as expected.
 
 // cqi proof test (UNIT-002)
-test('cqi: on /artifacts/llm-best-practices-copilot-studio at 1280px, h1 font-size reduces when host width set to 500px', async ({ page }) => {
-  await page.goto('/artifacts/llm-best-practices-copilot-studio');
+test('cqi: on /atisha/llm-best-practices-copilot-studio at 1280px, h1 font-size reduces when host width set to 500px', async ({ page }) => {
+  await page.goto('/atisha/llm-best-practices-copilot-studio');
   const host = hostLocator(page);
   await expect(host).toHaveAttribute('aria-busy', 'false');
 
@@ -286,10 +286,10 @@ const grid2Tops = (page: Page) =>
     return [...grid.children].slice(0, 2).map((c) => Math.round(c.getBoundingClientRect().top));
   });
 
-test('container proof: /weekly/2026-08-08 .grid2 is two columns at 1280, stacks at host width 500px', async ({
+test('container proof: /backstage/weekly/2026-08-08 .grid2 is two columns at 1280, stacks at host width 500px', async ({
   page,
 }) => {
-  await page.goto('/weekly/2026-08-08');
+  await page.goto('/backstage/weekly/2026-08-08');
   await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
 
   const wide = await grid2Tops(page);
@@ -305,9 +305,9 @@ test('container proof: /weekly/2026-08-08 .grid2 is two columns at 1280, stacks 
   }).toBe(true);
 });
 
-test('container proof: /weekly/2026-08-08 .grid2 stacks at a 390px viewport', async ({ page }) => {
+test('container proof: /backstage/weekly/2026-08-08 .grid2 stacks at a 390px viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 812 });
-  await page.goto('/weekly/2026-08-08');
+  await page.goto('/backstage/weekly/2026-08-08');
   await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
   const tops = await grid2Tops(page);
   expect(tops).toHaveLength(2);
@@ -325,7 +325,7 @@ test('@font-face is hoisted once to document.adoptedStyleSheets with an absolute
   await page.route('**/artifact-docs/slamwich-tasting-report.html', (route) =>
     route.fulfill({ status: 200, contentType: 'text/html', body: html }),
   );
-  await page.goto('/artifacts/slamwich-tasting-report');
+  await page.goto('/atisha/slamwich-tasting-report');
   await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
 
   const result = await hostLocator(page).evaluate((el) => {
@@ -337,15 +337,15 @@ test('@font-face is hoisted once to document.adoptedStyleSheets with an absolute
   });
   expect(result.inDoc).toBe(0);
   expect(result.inPage).toHaveLength(1);
-  expect(result.inPage[0]).toContain('http://localhost:4242/artifact-docs/fonts/probe.woff2');
+  expect(result.inPage[0]).toContain(`${new URL(page.url()).origin}/artifact-docs/fonts/probe.woff2`);
 });
 
 // ---------------------------------------------------------------------------
 // UNIT-003 (#48): anchors and SPA links
 // ---------------------------------------------------------------------------
 
-const COPILOT_STUDIO = '/artifacts/llm-best-practices-copilot-studio';
-const GITHUB_COPILOT = '/artifacts/llm-best-practices-github-copilot';
+const COPILOT_STUDIO = '/atisha/llm-best-practices-copilot-studio';
+const GITHUB_COPILOT = '/atisha/llm-best-practices-github-copilot';
 
 /** `--dn-nav-h` in px, measured through a probe element so it works at any breakpoint. */
 const navHeight = (page: Page) =>
@@ -466,8 +466,9 @@ test('SPA: scroll-padding-top is set while a doc is mounted and removed when lea
     await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)),
   ).toBeCloseTo(bar, 0);
   expect(bar).toBeGreaterThan(nav);
+  // The doc's own link still says /artifacts; it redirects to /backstage.
   await hostLocator(page).locator('a[href$="/artifacts"]').last().click();
-  await expect(page).toHaveURL(/\/artifacts$/);
+  await expect(page).toHaveURL(/\/backstage$/);
   await expect(page.locator('[data-doc-host]')).toHaveCount(0);
   expect(await padding()).toBe('');
 });
@@ -634,25 +635,25 @@ for (const vp of VIEWPORTS) {
 }
 
 test('reader frame: the old strip is gone; bar and colophon carry the exact copy', async ({ page }) => {
-  await page.goto('/artifacts/slamwich-tasting-report');
+  await page.goto('/atisha/slamwich-tasting-report');
   await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
   const bar = page.getByRole('navigation', { name: 'Doc' });
-  await expect(bar.getByRole('link', { name: '\u2190 Behind the scenes' })).toHaveAttribute('href', '/artifacts');
-  await expect(bar).toContainText('Doc \u00b7 Slamwich');
+  await expect(bar.getByRole('link', { name: '\u2190 Atisha' })).toHaveAttribute('href', '/atisha');
+  await expect(bar).toContainText('Report');
   await expect(bar.getByRole('link', { name: 'Open standalone' })).toHaveAttribute(
     'href',
     '/artifact-docs/slamwich-tasting-report.html',
   );
   const colophon = page.locator('footer', { has: page.getByRole('heading', { level: 2, name: 'About this doc' }) });
-  await expect(colophon).toContainText('SLAMWICH Tasting Report');
-  await expect(colophon).toContainText('Published 2026-08-08');
+  await expect(colophon).toContainText('SLAMWICH tasting report');
+  await expect(colophon).toContainText('Published 8 Aug 2026');
   await expect(colophon).toContainText('localhost:9021');
   await expect(page.locator('.artifact-strip')).toHaveCount(0);
 
-  await page.goto('/weekly/2026-08-08');
+  await page.goto('/backstage/weekly/2026-08-08');
   await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
   const wbar = page.getByRole('navigation', { name: 'Doc' });
-  await expect(wbar.getByRole('link', { name: '\u2190 Weekly reports' })).toHaveAttribute('href', '/weekly');
+  await expect(wbar.getByRole('link', { name: '\u2190 Weekly reports' })).toHaveAttribute('href', '/backstage/weekly');
   await expect(wbar).toContainText('Weekly report');
   const wcol = page.locator('footer', { has: page.getByRole('heading', { level: 2, name: 'About this doc' }) });
   await expect(wcol).toContainText('Weekly report');
@@ -661,7 +662,7 @@ test('reader frame: the old strip is gone; bar and colophon carry the exact copy
 
 test('print: the site nav, reader bar and site footer are hidden; the colophon is visible', async ({ page }) => {
   await page.emulateMedia({ media: 'print' });
-  await page.goto('/artifacts/slamwich-tasting-report');
+  await page.goto('/atisha/slamwich-tasting-report');
   await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
   await expect(page.getByRole('navigation', { name: 'Primary' })).toBeHidden();
   await expect(page.getByRole('navigation', { name: 'Doc' })).toBeHidden();
@@ -672,14 +673,14 @@ test('print: the site nav, reader bar and site footer are hidden; the colophon i
 
 test('print rules do not hide the site nav and footer on non-viewer routes', async ({ page }) => {
   await page.emulateMedia({ media: 'print' });
-  await page.goto('/artifacts');
+  await page.goto('/backstage');
   await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible();
   await expect(page.locator('footer#footer')).toBeVisible();
 });
 
 test('reduced motion: the bar links and colophon have no transitions or animations', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/artifacts/slamwich-tasting-report');
+  await page.goto('/atisha/slamwich-tasting-report');
   await expect(hostLocator(page)).toHaveAttribute('aria-busy', 'false');
   const bar = page.getByRole('navigation', { name: 'Doc' });
   const links = bar.getByRole('link');
