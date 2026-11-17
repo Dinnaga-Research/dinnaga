@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { metaFor } from './routeMeta';
 
 const LEDE =
-  'Dinnaga Research reads the papers, podcasts and vendor docs, tests what they claim, and publishes what holds up.';
+  'Dinnaga Research finds the best conversations and knowledge people are producing, tests what they claim, and keeps what holds up, for readers now and for the machines that infer from it.';
 const NOT_FOUND = {
   title: 'Page not found · Dinnaga Research',
   description: "There's nothing at this address.",

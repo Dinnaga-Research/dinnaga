@@ -13,9 +13,9 @@ const rt = vi.hoisted(() => {
 vi.mock('../../../lib/darkroom', () => ({ mountSequence: rt.mountSequence }));
 vi.mock('../../../lib/darkroom/paint', () => ({ paintStill: vi.fn(() => null) }));
 
-const H1 = 'Living documents for engineers who code with AI';
+const H1 = 'Living documents for research and education';
 const LEDE =
-  'Dinnaga Research reads the papers, podcasts and vendor docs, tests what they claim, and publishes what holds up.';
+  'Dinnaga Research finds the best conversations and knowledge people are producing, tests what they claim, and keeps what holds up, for readers now and for the machines that infer from it.';
 const FOUNDER = 'Dinnaga Research is run by David Ryan.';
 const flush = () => act(() => new Promise((r) => setTimeout(r, 0)));
 

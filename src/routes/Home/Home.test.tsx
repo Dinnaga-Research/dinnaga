@@ -20,11 +20,11 @@ describe('Home', () => {
     );
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      'Living documents for engineers who code with AI',
+      'Living documents for research and education',
     );
     expect(
       screen.getByText(
-        'Dinnaga Research reads the papers, podcasts and vendor docs, tests what they claim, and publishes what holds up.',
+        'Dinnaga Research finds the best conversations and knowledge people are producing, tests what they claim, and keeps what holds up, for readers now and for the machines that infer from it.',
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'David Ryan' }).parentElement!.textContent).toBe(

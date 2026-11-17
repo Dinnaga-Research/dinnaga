@@ -3,7 +3,7 @@
 
 # Dinnaga Research · dinnaga.ai
 
-The website of Dinnaga Research, run by David Ryan: **[dinnaga.ai](https://dinnaga.ai)**. Living documents for engineers who code with AI.
+The website of Dinnaga Research, run by David Ryan: **[dinnaga.ai](https://dinnaga.ai)**. Living documents for research and education.
 
 React 19 · Vite · TypeScript (strict) · react-router 7 · plain CSS tokens · Bun. Hosted on Vercel. **Merging to `main` deploys production** (Vercel Git integration); every PR gets a protected preview. `.github/workflows/ci.yml` runs lint → unit tests → build → e2e tests as a PR/push quality gate. SPA deep links ride the `vercel.json` rewrite of everything except `/api/` to `/index.html`. Production answers `curl` and headless Chromium, so an HTTPS probe verifies a deploy; preview URLs need a Vercel sign-in.
 

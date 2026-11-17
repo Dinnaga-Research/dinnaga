@@ -45,7 +45,7 @@ describe('Method', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/^How we test$/);
     expect(screen.getByText(LEDE)).toBeInTheDocument();
     expect(LEDE).toBe(
-      'Dinnaga Research reads the papers, podcasts and vendor docs, tests what they claim, and publishes what holds up.',
+      'Dinnaga Research finds the best conversations and knowledge people are producing, tests what they claim, and keeps what holds up, for readers now and for the machines that infer from it.',
     );
     expect(
       screen.getByText(
