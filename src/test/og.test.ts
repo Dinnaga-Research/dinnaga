@@ -51,7 +51,7 @@ describe('generated images', () => {
 
 describe('card template', () => {
   it('carries the headline and the domain', () => {
-    expect(TEMPLATE()).toContain('Living documents for engineers who code with AI');
+    expect(TEMPLATE()).toContain('The conversations worth keeping');
     expect(TEMPLATE()).toContain('dinnaga.ai');
     expect(TEMPLATE()).toContain('Dinnaga Research');
   });
@@ -122,7 +122,7 @@ describe('index.html share and icon tags', () => {
     expect(one('property', 'og:title')).toBe('Dinnaga Research');
     expect(one('property', 'og:site_name')).toBe('Dinnaga Research');
     expect(one('property', 'og:image')).toBe('https://dinnaga.ai/og.png');
-    expect(one('property', 'og:image:alt')).toBe('Dinnaga Research: Living documents for engineers who code with AI');
+    expect(one('property', 'og:image:alt')).toBe('Dinnaga Research: The conversations worth keeping');
     expect(one('name', 'twitter:image')).toBe('https://dinnaga.ai/og.png');
     expect(one('property', 'og:image:width')).toBe('1200');
     expect(one('property', 'og:image:height')).toBe('630');

@@ -3,7 +3,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const LEDE =
-  'Dinnaga Research reads the papers, podcasts and vendor docs, tests what they claim, and publishes what holds up.';
+  'Dinnaga Research finds the best conversations and knowledge people are producing, tests what they claim, and keeps what holds up, for readers now and for the machines that infer from it.';
 
 // One sample per row of #70's table.
 const META: { path: string; title: string; description: string; noindex: boolean }[] = [

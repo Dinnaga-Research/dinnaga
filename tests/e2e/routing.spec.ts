@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 const fullFixture: unknown = JSON.parse(readFileSync('tests/fixtures/living/full.json', 'utf8'));
 
 const PAGES: { path: string; heading: string | RegExp }[] = [
-  { path: '/', heading: 'Living documents for engineers who code with AI' },
+  { path: '/', heading: 'The conversations worth keeping' },
   { path: '/atisha', heading: 'Atisha' },
   { path: '/building', heading: "What we're building" },
   { path: '/method', heading: 'How we test' },
