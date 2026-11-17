@@ -50,7 +50,7 @@ function build() {
   const art = document.createElement('div');
   const hero = document.createElement('div');
   const h1 = document.createElement('h1');
-  h1.textContent = 'The conversations worth keeping';
+  h1.textContent = 'Living documents for research and education';
   hero.append(h1);
   const counter = document.createElement('p');
   const stamp = document.createElement('div');
@@ -158,11 +158,11 @@ describe('mountSequence', () => {
     roCallbacks[0]!([], {} as ResizeObserver);
     await settle();
     expect(els.h1.querySelectorAll('.ln').length).toBeGreaterThan(0);
-    expect(els.h1.textContent!.replace(/\s+/g, ' ')).toBe('The conversations worth keeping');
+    expect(els.h1.textContent!.replace(/\s+/g, ' ')).toBe('Living documents for research and education');
     handle.destroy();
     handle = null;
     expect(els.h1.children).toHaveLength(0);
-    expect(els.h1.textContent).toBe('The conversations worth keeping');
+    expect(els.h1.textContent).toBe('Living documents for research and education');
   });
 
   it('reports the stage on scroll and writes progress to the stage', async () => {

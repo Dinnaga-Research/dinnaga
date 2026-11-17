@@ -60,7 +60,7 @@ test.describe('the homepage', () => {
     await living(page);
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('The conversations worth keeping');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Living documents for research and education');
     await expect(page.locator('main')).toHaveCount(1);
   });
 

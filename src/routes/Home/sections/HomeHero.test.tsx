@@ -13,7 +13,7 @@ const rt = vi.hoisted(() => {
 vi.mock('../../../lib/darkroom', () => ({ mountSequence: rt.mountSequence }));
 vi.mock('../../../lib/darkroom/paint', () => ({ paintStill: vi.fn(() => null) }));
 
-const H1 = 'The conversations worth keeping';
+const H1 = 'Living documents for research and education';
 const LEDE =
   'Dinnaga Research finds the best conversations and knowledge people are producing, tests what they claim, and keeps what holds up, for readers now and for the machines that infer from it.';
 const FOUNDER = 'Dinnaga Research is run by David Ryan.';

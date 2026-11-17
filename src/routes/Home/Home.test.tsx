@@ -20,7 +20,7 @@ describe('Home', () => {
     );
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      'The conversations worth keeping',
+      'Living documents for research and education',
     );
     expect(
       screen.getByText(
